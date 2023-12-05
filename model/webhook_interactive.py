@@ -1,6 +1,8 @@
 from typing import List
+from dataclasses import dataclass
 
 
+@dataclass
 class Profile:
     name: str
 
@@ -8,6 +10,7 @@ class Profile:
         self.name = name
 
 
+@dataclass
 class Contact:
     profile: Profile
     wa_id: str
@@ -17,6 +20,7 @@ class Contact:
         self.wa_id = wa_id
 
 
+@dataclass
 class ListReply:
     id: str
     title: str
@@ -28,30 +32,34 @@ class ListReply:
         self.description = description
 
 
+@dataclass
 class Interactive:
     list_reply: ListReply
     type: str
 
-    def __init__(self, list_reply: ListReply, _type: str) -> None:
+    def __init__(self, list_reply: ListReply, type: str) -> None:
         self.list_reply = list_reply
-        self.type = _type
+        self.type = type
 
 
+@dataclass
 class Message:
-    message_from: str
+    message_from: int
     id: str
     timestamp: str
     interactive: Interactive
     type: str
 
-    def __init__(self, message_from: str, _id: str, timestamp: str, interactive: Interactive, type: str) -> None:
+    def __init__(self, message_from: int, id: str, timestamp: str,
+                 interactive: Interactive, type: str) -> None:
         self.message_from = message_from
-        self.id = _id
+        self.id = id
         self.timestamp = timestamp
         self.interactive = interactive
         self.type = type
 
 
+@dataclass
 class Metadata:
     display_phone_number: str
     phone_number_id: str
@@ -61,19 +69,22 @@ class Metadata:
         self.phone_number_id = phone_number_id
 
 
+@dataclass
 class Value:
     messaging_product: str
     metadata: Metadata
     contacts: List[Contact]
     messages: List[Message]
 
-    def __init__(self, messaging_product: str, metadata: Metadata, contacts: List[Contact], messages: List[Message]) -> None:
+    def __init__(self, messaging_product: str, metadata: Metadata,
+                 contacts: List[Contact], messages: List[Message]) -> None:
         self.messaging_product = messaging_product
         self.metadata = metadata
         self.contacts = contacts
         self.messages = messages
 
 
+@dataclass
 class Change:
     value: Value
     field: str
@@ -83,19 +94,24 @@ class Change:
         self.field = field
 
 
+@dataclass
 class Entry:
     id: str
     changes: List[Change]
 
-    def __init__(self, _id: str, changes: List[Change]) -> None:
-        self.id = _id
+    def __init__(self, id: str, changes: List[Change]) -> None:
+        self.id = id
         self.changes = changes
 
 
-class Model:
+@dataclass
+class WebhookInteractive:
     object: str
     entry: List[Entry]
 
-    def __init__(self, _object: str, entry: List[Entry]) -> None:
-        self.object = _object
+    def __init__(self, object: str, entry: List[Entry]) -> None:
+        self.object = object
         self.entry = entry
+
+    def __str__(self) -> str:
+        return super().__str__()

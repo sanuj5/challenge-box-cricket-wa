@@ -1,12 +1,100 @@
-from flask import Flask
+import logging
+from types import SimpleNamespace
 
-app = Flask(__name__)
+from flask import Flask, request, abort
+from service import BoxService
+from model.webhook_interactive import Message as InteractiveMessage, Interactive
+from model.webook_text import Message as TextMessage, Text
 
 
-@app.route("/webhook")
-def webhook():
-    return ""
+class BoxBooking:
 
+    def __init__(self):
+        self.app = Flask(__name__)
+        self._setup_routes()
+        self.service = BoxService()
+
+    def _setup_routes(self):
+        self.app.add_url_rule(
+            rule="/webhook",
+            view_func=self.webhook,
+            endpoint="get",
+            methods=["GET"],
+        )
+        self.app.add_url_rule(
+            rule="/webhook",
+            view_func=self.process_request,
+            endpoint="post",
+            methods=["POST"],
+        )
+        self.app.add_url_rule(
+            rule="/flow",
+            view_func=self.health_check,
+            endpoint="get",
+            methods=["GET"],
+        )
+        self.app.add_url_rule(
+            rule="/flow",
+            view_func=self.process_flow_request,
+            endpoint="post",
+            methods=["POST"],
+        )
+
+    def health_check(self):
+        return ""
+
+    def process_flow_request(self):
+        return ""
+
+    def webhook(self):
+        hub_mode = request.args.get("hub.mode")
+        hub_challenge = request.args.get("hub.challenge")
+        hub_verify_token = request.args.get("hub.verify_token")
+
+        if hub_mode == "subscribe" and hub_verify_token == "dc6bf63a-2b58-40b6-87b8-096b5e4e8479":
+            return hub_challenge
+        else:
+            abort(403)
+
+    def process_request(self):
+        logging.info(request.json)
+        request_body = SimpleNamespace(**request.json)
+        message_type = \
+            request_body.entry[0].get("changes")[0].get("value").get("messages")[0].get(
+                "type")
+        message = self.parse_message(
+            request_body.entry[0].get("changes")[0].get("value").get("messages")[0],
+            message_type)
+        if message_type == "text":
+            self.service.process_text_message("918390903001",message)
+        elif message_type == "interactive":
+            self.service.process_interactive_message("918390903001",message)
+        else:
+            return "Message type not supported", 505
+        return "", 200
+
+    @staticmethod
+    def parse_message(param, message_type):
+        if message_type == "text":
+            return TextMessage(
+                id=param.get("id"),
+                message_from=param.get("from"),
+                timestamp=param.get("timestamp"),
+                text=Text(**param.get("text")),
+                type=param.get(type)
+            )
+        if message_type == "interactive":
+            return InteractiveMessage(
+                id=param.get("id"),
+                message_from=param.get("from"),
+                timestamp=param.get("timestamp"),
+                interactive=Interactive(**param.get("interactive")),
+                type=param.get(type)
+            )
+
+
+service = BoxBooking()
+app = service.app
 
 if __name__ == "__main__":
     # This is used when running locally only. When deploying to Google App
@@ -16,4 +104,4 @@ if __name__ == "__main__":
     # the "static" directory. See:
     # http://flask.pocoo.org/docs/1.0/quickstart/#static-files. Once deployed,
     # App Engine itself will serve those files as configured in app.yaml.
-    app.run(host="127.0.0.1", port=8080, debug=True)
+    app.run()

@@ -1,1 +1,4 @@
-Flask
+Flask~=2.2.5
+gunicorn
+requests~=2.31.0
+cryptography~=38.0.3
