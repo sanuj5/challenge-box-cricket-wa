@@ -206,14 +206,14 @@ class BoxService:
         if not date_selected:
             response['error_message'] = "Please select date"
             return response, Screen.DATE_SELECTION.value
-        date = datetime.datetime.fromtimestamp(date_selected // 1000.0, tz=datetime.timezone.utc)
+        date = datetime.datetime.fromtimestamp(float(date_selected) / 1000,
+                                               tz=datetime.timezone.utc)
         print(date)
         #  TODO check available slots
         slots = [{'id': 'slot5', 'title': '5 AM - 6 AM'},
                  {'id': 'slot6', 'title': '6 AM - 7 AM'}]
         response['slots'] = slots
         return response, Screen.SLOT_SELECTION.value
-
 
 
 if __name__ == '__main__':
