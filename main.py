@@ -54,7 +54,7 @@ class BoxBooking:
             encrypted_flow_data_b64,
             encrypted_aes_key_b64, initial_vector_b64)
         print(decrypted_data, key, iv)
-        return ""
+        return self.encryption_service.encrypt_data("{}", key, iv)
 
     def webhook(self):
         hub_mode = request.args.get("hub.mode")
