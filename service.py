@@ -208,7 +208,7 @@ class BoxService:
             return response, Screen.DATE_SELECTION.value
         date = datetime.datetime.fromtimestamp(float(date_selected) / 1000,
                                                tz=datetime.timezone.utc)
-        response['selected_date'] = date.strftime("%d %b %Y")
+        response['selected_date'] = f'{date.strftime("%d %b %Y")}'
         print(date)
         #  TODO check available slots
         slots = [{'id': '5', 'title': '5 AM - 6 AM'},
@@ -235,8 +235,7 @@ class BoxService:
 
     def process_slot_screen_data(self, flow_request):
         date_selected = flow_request.data.get("selected_date")
-        date = datetime.datetime.fromtimestamp(float(date_selected) / 1000,
-                                               tz=datetime.timezone.utc)
+        date = datetime.datetime.strptime(date_selected, "%d %b %Y")
         slots_selected = flow_request.data.get("slots")
         print(date)
         print(slots_selected)
