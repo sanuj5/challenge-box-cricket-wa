@@ -208,7 +208,7 @@ class BoxService:
             return response, Screen.DATE_SELECTION.value
         date = datetime.datetime.fromtimestamp(float(date_selected) / 1000,
                                                tz=datetime.timezone.utc)
-        response['selected_date'] = f'{date.strftime("%d %b %Y")}'
+        response['selected_date'] = f'Date: {date.strftime("%d %b %Y")}'
         print(date)
         #  TODO check available slots
         slots = [{'id': '5', 'title': '5 AM - 6 AM'},
