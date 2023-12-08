@@ -3,6 +3,7 @@ from datetime import datetime
 
 from model.booking import Booking
 from model.enums import InteractiveRequestType, Slot, Month
+from model.flow import FlowResponse
 from model.interactive_message import InteractiveMessage, Interactive, Header, Body, \
     Action, Section, Row
 from model.text_message import TextMessage, Text
@@ -183,6 +184,9 @@ class BoxService:
         text_message.type = "text"
         text_message.text = text
         return text_message
+
+    def process_flow_request(self, input_data):
+        return FlowResponse(screen="SLOT_SELECTION", data="")
 
 
 if __name__ == '__main__':
