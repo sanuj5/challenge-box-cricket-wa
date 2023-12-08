@@ -188,7 +188,6 @@ class BoxService:
 
     def process_flow_request(self, input_data):
         flow_request = FlowRequest(**json.loads(input_data))
-        print(flow_request)
         current_screen = Screen(flow_request.screen)
         response_data = None
         next_screen = None
@@ -207,11 +206,13 @@ class BoxService:
         slots = [{'id': 'slot5', 'title': '5 AM - 6 AM'},
                  {'id': 'slot6', 'title': '6 AM - 7 AM'}]
         response['slots'] = slots
-        return response, Screen.SLOT_SELECTION
+        return response, Screen.SLOT_SELECTION.value
 
 
 
 if __name__ == '__main__':
     service = BoxService()
     data = '{"version":"3.0","action":"data_exchange","screen":"DATE_SELECTION","data":{"selected_date":"1702425600000","form_name":"form"},"flow_token":"flows-builder-2a5dd546"}'
-    service.process_flow_request(data)
+    response_data = service.process_flow_request(data)
+    response = json.dumps(response_data, indent=4, default=lambda o: o.__dict__)
+    print(response)
