@@ -44,9 +44,8 @@ class Encryption:
         for byte in iv:
             flipped_byte = byte ^ 0xFF
             flipped_bytes.append(flipped_byte)
-
         response = json.dumps(data)
-        cipher_respond = Cipher(algorithms.AES(key), modes.GCM(iv))
+        cipher_respond = Cipher(algorithms.AES(key), modes.GCM(bytes(flipped_bytes)))
         encryptor = cipher_respond.encryptor()
         encrypted = (
                 encryptor.update(response.encode("utf-8")) +\
