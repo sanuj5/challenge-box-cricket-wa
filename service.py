@@ -208,10 +208,28 @@ class BoxService:
             return response, Screen.DATE_SELECTION.value
         date = datetime.datetime.fromtimestamp(float(date_selected) / 1000,
                                                tz=datetime.timezone.utc)
+        response['selected_date'] = date.strftime("%d %b %Y")
         print(date)
         #  TODO check available slots
-        slots = [{'id': 'slot5', 'title': '5 AM - 6 AM'},
-                 {'id': 'slot6', 'title': '6 AM - 7 AM'}]
+        slots = [{'id': '5', 'title': '5 AM - 6 AM'},
+                 {'id': '6', 'title': '6 AM - 7 AM'},
+                 {'id': '7', 'title': '7 AM - 8 AM'},
+                 {'id': '8', 'title': '8 AM - 9 AM'},
+                 {'id': '9', 'title': '9 AM - 10 AM'},
+                 {'id': '10', 'title': '10 AM - 11 AM'},
+                 {'id': '11', 'title': '11 AM - 12 PM'},
+                 {'id': '12', 'title': '12 PM - 1 PM'},
+                 {'id': '13', 'title': '1 PM - 2 PM'},
+                 {'id': '14', 'title': '2 PM - 3 PM'},
+                 {'id': '15', 'title': '3 PM - 4 PM'},
+                 {'id': '16', 'title': '4 PM - 5 PM'},
+                 {'id': '17', 'title': '5 PM - 6 PM'},
+                 {'id': '18', 'title': '6 PM - 7 PM'},
+                 {'id': '19', 'title': '7 PM - 8 PM'},
+                 {'id': '20', 'title': '8 PM - 9 PM'},
+                 {'id': '21', 'title': '9 PM - 10 PM'},
+                 {'id': '22', 'title': '10 PM - 11 PM'},
+                 {'id': '23', 'title': '11 PM - 12 PM'}]
         response['slots'] = slots
         return response, Screen.SLOT_SELECTION.value
 
