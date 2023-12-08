@@ -240,7 +240,7 @@ class BoxService:
         print(date)
         print(slots_selected)
         response = dict()
-        response['selected_date'] = f"date_selected"
+        response['selected_date'] = f"{date_selected}"
         response['slots'] = f"{','.join(slots_selected)}"
         return response, Screen.BOOKING_CONFIRMATION.value
 
