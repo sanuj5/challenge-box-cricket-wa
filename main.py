@@ -1,3 +1,4 @@
+import json
 import logging
 from types import SimpleNamespace
 
@@ -55,7 +56,9 @@ class BoxBooking:
             encrypted_aes_key_b64, initial_vector_b64)
         print(decrypted_data, key, iv)
         response_data = self.service.process_flow_request(decrypted_data)
-        return self.encryption_service.encrypt_data(response_data, key, iv)
+        response = json.dumps(response_data, indent=4, default=lambda o: o.__dict__)
+        print(response)
+        return self.encryption_service.encrypt_data(response, key, iv)
 
     def webhook(self):
         hub_mode = request.args.get("hub.mode")

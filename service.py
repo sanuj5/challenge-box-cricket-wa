@@ -186,7 +186,9 @@ class BoxService:
         return text_message
 
     def process_flow_request(self, input_data):
-        return FlowResponse(screen="SLOT_SELECTION", data="")
+        data = dict()
+        data['date'] = "12-Dec-2023"
+        return FlowResponse(screen="SLOT_SELECTION", data=data)
 
 
 if __name__ == '__main__':
