@@ -225,6 +225,7 @@ class BoxService:
         if not slots_selected or len(slots_selected) == 0:
             response['error_message'] = "Please select at least 1 slot"
             return response, Screen.SLOT_SELECTION.value
+        slots_title = [self.slots.get(slot) for slot in slots_selected]
         response['selected_date'] = f"{date_selected}"
         response['slots'] = f"{','.join(slots_selected)}"
         return response, Screen.BOOKING_CONFIRMATION.value
@@ -249,3 +250,6 @@ if __name__ == '__main__':
     response1['slots'] = [{"id": str(key), "title": value} for key, value in
                           service.slots.items()]
     print(response1)
+    slots_selected = [6,7]
+    slots_title = [service.slots.get(slot) for slot in slots_selected]
+    print(slots_title)

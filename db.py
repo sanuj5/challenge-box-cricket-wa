@@ -1,5 +1,5 @@
 import firebase_admin
-from firebase_admin import firestore
+from firebase_admin import firestore, credentials
 
 
 class DBService:
@@ -12,7 +12,7 @@ class DBService:
         self.app = firebase_admin.initialize_app()
         self.db = firestore.client()
 
-    def get_all_slots(self) -> (dict,dict):
+    def get_all_slots(self) -> (dict, dict):
         slots_ref = self.db.collection("slots")
         docs = slots_ref.order_by("id").stream()
         slots = dict()
