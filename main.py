@@ -55,7 +55,7 @@ class BoxBooking:
             encrypted_flow_data_b64,
             encrypted_aes_key_b64, initial_vector_b64)
         print(decrypted_data, key, iv)
-        response_data = self.service.process_flow_request(decrypted_data)
+        response_data = self.service.process_flow_request(**json.loads(decrypted_data))
         response = json.dumps(response_data, indent=4, default=lambda o: o.__dict__)
         print(response)
         return self.encryption_service.encrypt_data(response, key, iv)

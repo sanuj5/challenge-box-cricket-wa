@@ -1,4 +1,5 @@
 import calendar
+import json
 from datetime import datetime
 
 from model.booking import Booking
@@ -186,7 +187,7 @@ class BoxService:
         return text_message
 
     def process_flow_request(self, input_data):
-        flow_request = FlowRequest(**input_data)
+        flow_request = FlowRequest(input_data)
         print(flow_request)
         current_screen = Screen(flow_request.screen)
         response_data = None
@@ -212,4 +213,5 @@ class BoxService:
 
 if __name__ == '__main__':
     service = BoxService()
-    service.process_text_message("918390903001", None)
+    data = '{"version":"3.0","action":"data_exchange","screen":"DATE_SELECTION","data":{"selected_date":"1702425600000","form_name":"form"},"flow_token":"flows-builder-2a5dd546"}'
+    service.process_flow_request(data)
