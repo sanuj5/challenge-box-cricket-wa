@@ -15,7 +15,7 @@ class Encryption:
         encrypted_aes_key = b64decode(encrypted_aes_key_b64)
         private_key = serialization.load_pem_private_key(
             self.private_key.encode("utf-8"),
-            password=None,
+            password=str.encode("ec051078"),
         )
         aes_key = private_key.decrypt(
             encrypted_aes_key,
