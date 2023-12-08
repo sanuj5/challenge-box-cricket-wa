@@ -213,7 +213,8 @@ class BoxService:
                                                tz=datetime.timezone.utc)
         response['selected_date'] = f'{date.strftime("%d %b %Y")}'
         #  TODO check available slots
-        response['slots'] = self.slots
+        response['slots'] = [{"id": key, "title": value} for key, value in
+                             self.slots.items()]
         return response, Screen.SLOT_SELECTION.value
 
     def process_slot_screen_data(self, flow_request):

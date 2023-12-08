@@ -15,5 +15,5 @@ class DBService:
 
         for doc in docs:
             slots[doc.to_dict().get('id')] = doc.to_dict().get('title')
-            slots[doc.to_dict().get('title')] = doc.to_dict().get('id')
+            reverse_mapping[doc.to_dict().get('title')] = doc.to_dict().get('id')
         return slots, reverse_mapping
