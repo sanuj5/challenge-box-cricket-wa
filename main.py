@@ -2,6 +2,8 @@ import logging
 from types import SimpleNamespace
 
 from flask import Flask, request, abort
+
+from encryption_service import Encryption
 from service import BoxService
 from model.webhook_interactive import Message as InteractiveMessage, Interactive
 from model.webook_text import Message as TextMessage, Text
@@ -13,30 +15,31 @@ class BoxBooking:
         self.app = Flask(__name__)
         self._setup_routes()
         self.service = BoxService()
+        self.encryption_service = Encryption()
 
     def _setup_routes(self):
         self.app.add_url_rule(
             rule="/webhook",
             view_func=self.webhook,
-            endpoint="get",
+            endpoint="webhook",
             methods=["GET"],
         )
         self.app.add_url_rule(
             rule="/webhook",
             view_func=self.process_request,
-            endpoint="post",
+            endpoint="process_request",
             methods=["POST"],
         )
         self.app.add_url_rule(
             rule="/flow",
             view_func=self.health_check,
-            endpoint="get",
+            endpoint="heal_check",
             methods=["GET"],
         )
         self.app.add_url_rule(
             rule="/flow",
             view_func=self.process_flow_request,
-            endpoint="post",
+            endpoint="process_flow_request",
             methods=["POST"],
         )
 
@@ -44,6 +47,13 @@ class BoxBooking:
         return ""
 
     def process_flow_request(self):
+        encrypted_flow_data_b64 = request.json.get("encrypted_flow_data")
+        encrypted_aes_key_b64 = request.json.get("encrypted_aes_key")
+        initial_vector_b64 = request.json.get("initial_vector")
+        decrypted_data, key, iv = self.encryption_service.decrypt_data(
+            encrypted_flow_data_b64,
+            encrypted_aes_key_b64, initial_vector_b64)
+        print(decrypted_data, key, iv)
         return ""
 
     def webhook(self):
@@ -66,9 +76,9 @@ class BoxBooking:
             request_body.entry[0].get("changes")[0].get("value").get("messages")[0],
             message_type)
         if message_type == "text":
-            self.service.process_text_message("918390903001",message)
+            self.service.process_text_message("918390903001", message)
         elif message_type == "interactive":
-            self.service.process_interactive_message("918390903001",message)
+            self.service.process_interactive_message("918390903001", message)
         else:
             return "Message type not supported", 505
         return "", 200
