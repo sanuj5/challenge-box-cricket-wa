@@ -233,6 +233,17 @@ class BoxService:
         response['slots'] = slots
         return response, Screen.SLOT_SELECTION.value
 
+    def process_slot_screen_data(self, flow_request):
+        date_selected = flow_request.data.get("selected_date")
+        date = datetime.datetime.fromtimestamp(float(date_selected) / 1000,
+                                               tz=datetime.timezone.utc)
+        slots_selected = flow_request.data.get("slots")
+        print(date)
+        print(slots_selected)
+        response = dict()
+        response['selected_date'] = f"Date: {date}"
+        return response, Screen.BOOKING_CONFIRMATION.value
+
 
 if __name__ == '__main__':
     service = BoxService()
