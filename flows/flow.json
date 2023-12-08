@@ -1,0 +1,189 @@
+{
+  "version": "2.1",
+  "data_api_version": "3.0",
+  "data_channel_uri": "https://quixotic-booth-407213.el.r.appspot.com/flow",
+  "routing_model": {
+    "DATE_SELECTION": [
+      "SLOT_SELECTION"
+    ],
+    "SLOT_SELECTION": [
+      "BOOKING_CONFIRMATION"
+    ],
+    "BOOKING_CONFIRMATION": [
+      "TERMS_AND_CONDITIONS"
+    ]
+  },
+  "screens": [
+    {
+      "id": "DATE_SELECTION",
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "Form",
+            "name": "form",
+            "children": [
+              {
+                "type": "TextHeading",
+                "text": "Select date"
+              },
+              {
+                "type": "DatePicker",
+                "name": "date",
+                "label": "Date",
+                "required": true
+              },
+              {
+                "type": "Footer",
+                "label": "Continue",
+                "on-click-action": {
+                  "name": "data_exchange",
+                  "payload": {
+                    "selected_date": "${form.date}"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "title": "CBC Booking",
+      "terminal": true,
+      "data": {}
+    },
+    {
+      "id": "SLOT_SELECTION",
+      "title": "CBC Booking",
+      "data": {
+        "slots": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              }
+            }
+          },
+          "__example__": [
+            {
+              "id": "slot5",
+              "title": "5 AM - 6 AM"
+            }
+          ]
+        }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "Form",
+            "name": "form",
+            "children": [
+              {
+                "type": "TextHeading",
+                "text": "Select one or more slots."
+              },
+              {
+                "type": "CheckboxGroup",
+                "required": true,
+                "name": "slot",
+                "data-source": "${data.slots}"
+              },
+              {
+                "type": "Footer",
+                "label": "Continue",
+                "on-click-action": {
+                  "name": "data_exchange",
+                  "payload": {
+                    "slot": "${form.slot}"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "BOOKING_CONFIRMATION",
+      "title": "Booking confirmation",
+      "terminal": true,
+      "data": {
+        "slot": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "__example__": []
+        }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "Form",
+            "name": "confirmation_form",
+            "children": [
+              {
+                "type": "OptIn",
+                "name": "privacy_policy",
+                "label": "Accept our Privacy Policy",
+                "required": true,
+                "on-click-action": {
+                  "name": "navigate",
+                  "next": {
+                    "type": "screen",
+                    "name": "TERMS_AND_CONDITIONS"
+                  },
+                  "payload": {}
+                }
+              },
+              {
+                "type": "Footer",
+                "label": "Confirm booking",
+                "on-click-action": {
+                  "name": "complete",
+                  "payload": {}
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "TERMS_AND_CONDITIONS",
+      "title": "Terms and conditions",
+      "data": {},
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "TextHeading",
+            "text": "Our Terms"
+          },
+          {
+            "type": "TextSubheading",
+            "text": "Data usage"
+          },
+          {
+            "type": "TextBody",
+            "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae odio dui. Praesent ut nulla tincidunt, scelerisque augue malesuada, volutpat lorem. Aliquam iaculis ex at diam posuere mollis. Suspendisse eget purus ac tellus interdum pharetra. In quis dolor turpis. Fusce in porttitor enim, vitae efficitur nunc. Fusce dapibus finibus volutpat. Fusce velit mi, ullamcorper ac gravida vitae, blandit quis ex. Fusce ultrices diam et justo blandit, quis consequat nisl euismod. Vestibulum pretium est sem, vitae convallis justo sollicitudin non. Morbi bibendum purus mattis quam condimentum, a scelerisque erat bibendum. Nullam sit amet bibendum lectus."
+          },
+          {
+            "type": "TextSubheading",
+            "text": "Privacy policy"
+          },
+          {
+            "type": "TextBody",
+            "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae odio dui. Praesent ut nulla tincidunt, scelerisque augue malesuada, volutpat lorem. Aliquam iaculis ex at diam posuere mollis. Suspendisse eget purus ac tellus interdum pharetra. In quis dolor turpis. Fusce in porttitor enim, vitae efficitur nunc. Fusce dapibus finibus volutpat. Fusce velit mi, ullamcorper ac gravida vitae, blandit quis ex. Fusce ultrices diam et justo blandit, quis consequat nisl euismod. Vestibulum pretium est sem, vitae convallis justo sollicitudin non. Morbi bibendum purus mattis quam condimentum, a scelerisque erat bibendum. Nullam sit amet bibendum lectus."
+          }
+        ]
+      }
+    }
+  ]
+}
