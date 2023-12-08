@@ -1,6 +1,6 @@
 import calendar
 import json
-from datetime import datetime
+import datetime
 
 from model.booking import Booking
 from model.enums import InteractiveRequestType, Slot, Month, Screen
@@ -201,7 +201,13 @@ class BoxService:
         return FlowResponse(screen=next_screen, data=response_data)
 
     def process_date_screen_data(self, flow_request) -> (dict, str):
+        date_selected = flow_request.data.get("selected_date")
         response = dict()
+        if not date_selected:
+            response['error_message'] = "Please select date"
+            return response, Screen.DATE_SELECTION.value
+        date = datetime.datetime.fromtimestamp(date_selected // 1000.0, tz=datetime.timezone.utc)
+        print(date)
         #  TODO check available slots
         slots = [{'id': 'slot5', 'title': '5 AM - 6 AM'},
                  {'id': 'slot6', 'title': '6 AM - 7 AM'}]
