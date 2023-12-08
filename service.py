@@ -187,6 +187,7 @@ class BoxService:
 
     def process_flow_request(self, input_data):
         flow_request = FlowRequest(**input_data)
+        print(flow_request)
         current_screen = Screen(flow_request.screen)
         response_data = None
         next_screen = None
