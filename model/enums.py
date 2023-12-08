@@ -56,3 +56,10 @@ class Slot(enum.Enum):
     S22 = "10 PM - 11 PM"
     S23 = "11 PM - 12 PM"
     S24 = "12 PM - 1 AM"
+
+
+class Screen(enum.Enum):
+    DATE_SELECTION = "DATE_SELECTION"
+    SLOT_SELECTION = "SLOT_SELECTION"
+    BOOKING_CONFIRMATION = "BOOKING_CONFIRMATION"
+    SUCCESS = "SUCCESS"

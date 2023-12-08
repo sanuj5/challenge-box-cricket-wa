@@ -2,8 +2,8 @@ import calendar
 from datetime import datetime
 
 from model.booking import Booking
-from model.enums import InteractiveRequestType, Slot, Month
-from model.flow import FlowResponse
+from model.enums import InteractiveRequestType, Slot, Month, Screen
+from model.flow import FlowResponse, FlowRequest
 from model.interactive_message import InteractiveMessage, Interactive, Header, Body, \
     Action, Section, Row
 from model.text_message import TextMessage, Text
@@ -186,9 +186,27 @@ class BoxService:
         return text_message
 
     def process_flow_request(self, input_data):
-        data = dict()
-        data['date'] = "12-Dec-2023"
-        return FlowResponse(screen="SLOT_SELECTION", data=data)
+        flow_request = FlowRequest(**input_data)
+        current_screen = Screen(flow_request.screen)
+        response_data = None
+        next_screen = None
+        if current_screen == Screen.DATE_SELECTION:
+            response_data, next_screen = self.process_date_screen_data(flow_request)
+        elif current_screen == Screen.SLOT_SELECTION:
+            response_data, next_screen = self.process_slot_screen_data(flow_request)
+        elif current_screen == Screen.BOOKING_CONFIRMATION:
+            response_data, next_screen = self.process_booking_confirmation_screen_data(
+                flow_request)
+        return FlowResponse(screen=next_screen, data=response_data)
+
+    def process_date_screen_data(self, flow_request) -> (dict, str):
+        response = dict()
+        #  TODO check available slots
+        slots = [{'id': 'slot5', 'title': '5 AM - 6 AM'},
+                 {'id': 'slot6', 'title': '6 AM - 7 AM'}]
+        response['slots'] = slots
+        return response, Screen.SLOT_SELECTION
+
 
 
 if __name__ == '__main__':
