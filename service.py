@@ -187,7 +187,7 @@ class BoxService:
         return text_message
 
     def process_flow_request(self, input_data):
-        flow_request = FlowRequest(input_data)
+        flow_request = FlowRequest(**json.loads(input_data))
         print(flow_request)
         current_screen = Screen(flow_request.screen)
         response_data = None
