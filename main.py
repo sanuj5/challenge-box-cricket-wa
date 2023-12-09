@@ -57,7 +57,7 @@ class BoxBooking:
         print(decrypted_data, key, iv)
         response_data = self.service.process_flow_request(decrypted_data)
         response = json.dumps(response_data, indent=4, default=lambda o: o.__dict__)
-        print(response)
+        print(json.dumps(response_data, indent=None, default=lambda o: o.__dict__))
         return self.encryption_service.encrypt_data(response, key, iv)
 
     def webhook(self):
@@ -73,6 +73,7 @@ class BoxBooking:
     def process_request(self):
         logging.info(request.json)
         request_body = SimpleNamespace(**request.json)
+        print(request_body)
         message_type = \
             request_body.entry[0].get("changes")[0].get("value").get("messages")[0].get(
                 "type")

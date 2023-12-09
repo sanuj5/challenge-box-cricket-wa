@@ -227,13 +227,12 @@ class BoxService:
             return response, Screen.SLOT_SELECTION.value
         slots_title = [self.slots.get(int(slot)) for slot in slots_selected]
         response['selected_date'] = f"{date_selected}"
-        response['slots'] = f"{','.join(slots_title)}"
+        response['slots'] = f"{',  '.join(slots_title)}"
         return response, Screen.BOOKING_CONFIRMATION.value
 
     def process_booking_confirmation_screen_data(self, flow_request):
         date_selected = flow_request.data.get("selected_date")
         slots = flow_request.data.get("slots").split(",")
-        print(date_selected, slots)
         response = dict()
         response['selected_date'] = f"{date_selected}"
         response['slots'] = f"{','.join(slots)}"
