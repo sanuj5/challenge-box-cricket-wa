@@ -22,3 +22,7 @@ class DBService:
             slots[doc.to_dict().get('id')] = doc.to_dict().get('title')
             reverse_mapping[doc.to_dict().get('title')] = doc.to_dict().get('id')
         return slots, reverse_mapping
+
+    def get_all_secrets(self) -> dict:
+        slots_ref = self.db.collection("secrets")
+        return slots_ref.stream().to_dict()

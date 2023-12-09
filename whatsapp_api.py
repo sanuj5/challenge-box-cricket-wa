@@ -3,14 +3,15 @@ import json
 
 
 class WhatsappApi:
-    def __init__(self):
-        self.url = "https://graph.facebook.com/v17.0/135439162996517/messages"
+    def __init__(self, wa_api_token, mobile_id):
+        self.url = f"https://graph.facebook.com/v18.0/{mobile_id}/messages"
         self.headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer EAAEnDVjByU4BO3pP7lCHlwGWZCXKZAcLs8oYifLX3UYlTs5i6yQFN8xJ67ZBSZClzsGFianAZCGoZCQAqCEjEojmrno95ZC4QUFROeGLsWg2flAmqpZB46kuPzBc3SqTqXHffqGFZB2uFG1q2xl55zyE9GheOctDV9KJ0iOkjdxC5xKMF2bkH5cCBbALayjGH5So5MpjWyyDOLWgeULD6vXJUl2GZC0wZDZD"
+            "Authorization": f"Bearer {wa_api_token}"
         }
 
     def send_post_request(self, data):
+        print(data)
         json_data = json.dumps(data, indent=4,
                                default=lambda o: o.__dict__)
         print(json_data)
