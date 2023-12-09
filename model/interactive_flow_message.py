@@ -73,16 +73,19 @@ class Interactive:
 
 @dataclass
 class InteractiveFlowMessage:
+    recipient_type: str
     messaging_product: str
     to: str
     type: str
     interactive: Interactive
 
     def __init__(self,
+                 recipient_type: str = "individual",
                  messaging_product: str = "whatsapp",
                  to: str = None,
                  type: str = "interactive",
                  interactive: Interactive = None) -> None:
+        self.recipient_type = recipient_type
         self.messaging_product = messaging_product
         self.to = to
         self.type = type

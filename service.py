@@ -140,7 +140,7 @@ class BoxService:
         body.text = message_body
 
         interactive = ifm.Interactive()
-        interactive.type = "list"
+        interactive.type = "flow"
         interactive.header = header
         interactive.body = body
         interactive.action = action
