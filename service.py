@@ -220,15 +220,12 @@ class BoxService:
     def process_slot_screen_data(self, flow_request):
         date_selected = flow_request.data.get("selected_date")
         date = datetime.datetime.strptime(date_selected, "%d %b %Y")
-        slots_selected = flow_request.data.get("slots")
-        print(slots_selected)
+        slots_selected = flow_request.data.get("slots")  # '8', '8 AM - 9 AM'
         response = dict()
         if not slots_selected or len(slots_selected) == 0:
             response['error_message'] = "Please select at least 1 slot"
             return response, Screen.SLOT_SELECTION.value
-        slots_title = [self.slots.get(slot) for slot in slots_selected]
-        print(self.slots)
-        print(slots_title)
+        slots_title = [self.slots.get(int(slot)) for slot in slots_selected]
         response['selected_date'] = f"{date_selected}"
         response['slots'] = f"{','.join(slots_title)}"
         return response, Screen.BOOKING_CONFIRMATION.value
