@@ -27,6 +27,6 @@ class DBService:
         slots_ref = self.db.collection("secrets")
         docs = slots_ref.stream()
         for doc in docs:
-            if doc.id == 1:
+            if doc.id == "all":
                 return doc.to_dict()
         return dict()
