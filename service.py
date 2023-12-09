@@ -1,11 +1,13 @@
 import calendar
 import json
 import datetime
+import uuid
 
 from db import DBService
 from model.booking import Booking
 from model.enums import InteractiveRequestType, Slot, Month, Screen
 from model.flow import FlowResponse, FlowRequest
+import model.interactive_flow_message as ifm
 from model.interactive_message import InteractiveMessage, Interactive, Header, Body, \
     Action, Section, Row
 from model.text_message import TextMessage, Text
@@ -76,10 +78,11 @@ class BoxService:
             return InteractiveRequestType.SLOT_SELECTED, list_id, booking
 
     def process_text_message(self, mobile, request_body: TextWebhookMessage):
-        return_message = self.get_interactive_message(mobile, "Booking",
-                                                      "Select Month",
-                                                      self.get_months()
-                                                      )
+        return_message = self.get_interactive_flow_message(
+            mobile,
+            "Click below to start booking",
+            self.get_initial_screen_param()
+        )
         self.api_service.send_post_request(return_message)
 
     @staticmethod
@@ -112,6 +115,35 @@ class BoxService:
         interactive.action = action
 
         message = InteractiveMessage()
+        message.to = mobile
+        message.type = "interactive"
+        message.messaging_product = "whatsapp"
+        message.interactive = interactive
+        return message
+
+    @staticmethod
+    def get_interactive_flow_message(mobile: str,
+                                     message_body: str,
+                                     parameters: ifm.Parameter) -> ifm.InteractiveFlowMessage:
+
+        action = ifm.Action()
+        action.name = "flow"
+        action.parameters = parameters
+
+        header = ifm.Header()
+        header.type = "text"
+        header.text = "CBC"
+
+        body = ifm.Body()
+        body.text = message_body
+
+        interactive = ifm.Interactive()
+        interactive.type = "list"
+        interactive.header = header
+        interactive.body = body
+        interactive.action = action
+
+        message = ifm.InteractiveFlowMessage()
         message.to = mobile
         message.type = "interactive"
         message.messaging_product = "whatsapp"
@@ -238,6 +270,16 @@ class BoxService:
         response['slots'] = f"{','.join(slots)}"
         return response, Screen.SUCCESS.value
 
+    def get_initial_screen_param(self):
+        parameter = ifm.Parameter()
+        parameter.mode = "draft"  # TODO change to publish when ready
+        parameter.flow_message_version = "3"
+        parameter.flow_token = uuid.uuid4()
+        parameter.flow_cta = "Book Slot"
+        parameter.flow_action = "navigate"
+        parameter.flow_action_payload = {"screen": Screen.DATE_SELECTION.value}
+        return parameter
+
 
 if __name__ == '__main__':
     service = BoxService()
@@ -249,6 +291,6 @@ if __name__ == '__main__':
     response1['slots'] = [{"id": str(key), "title": value} for key, value in
                           service.slots.items()]
     print(response1)
-    slots_selected = [6,7]
+    slots_selected = [6, 7]
     slots_title = [service.slots.get(slot) for slot in slots_selected]
     print(slots_title)

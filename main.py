@@ -1,5 +1,4 @@
 import json
-import logging
 from types import SimpleNamespace
 
 from flask import Flask, request, abort
@@ -71,7 +70,6 @@ class BoxBooking:
             abort(403)
 
     def process_request(self):
-        logging.info(request.json)
         request_body = SimpleNamespace(**request.json)
         print(request_body)
         message_type = \
