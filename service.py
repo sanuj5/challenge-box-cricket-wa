@@ -21,7 +21,8 @@ class BoxService:
         self.db_service = DBService()
         self.slots, self.revers_slots_mapping = self.db_service.get_all_slots()
         secrets = self.db_service.get_all_secrets()
-        self.api_service = WhatsappApi(secrets.get("WA_API_TOKEN"), secrets.get("MOBILE_ID"))
+        self.api_service = WhatsappApi(secrets.get("WA_API_TOKEN"),
+                                       secrets.get("MOBILE_ID"))
 
     def process_interactive_message(self, mobile: str,
                                     message: InteractiveWebhookMessage):
