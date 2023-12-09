@@ -278,7 +278,7 @@ class BoxService:
         parameter = ifm.Parameter()
         parameter.mode = "draft"  # TODO change to publish when ready
         parameter.flow_message_version = "3"
-        parameter.flow_token = uuid.uuid4()
+        parameter.flow_token = str(uuid.uuid4())
         parameter.flow_cta = "Book Slot"
         parameter.flow_action = "navigate"
         parameter.flow_action_payload = payload
