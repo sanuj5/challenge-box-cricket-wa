@@ -280,6 +280,7 @@ class BoxService:
         parameter.flow_message_version = "3"
         parameter.flow_token = str(uuid.uuid4())
         parameter.flow_cta = "Book Slot"
+        parameter.flow_id = "7294690660565710"
         parameter.flow_action = "navigate"
         parameter.flow_action_payload = payload
         return parameter
