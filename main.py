@@ -4,6 +4,7 @@ from types import SimpleNamespace
 from flask import Flask, request, abort
 
 from encryption_service import Encryption
+from model.interactive_flow_message_reply import InteractiveFlowMessageReply
 from service import BoxService
 from model.webhook_interactive import Message as InteractiveMessage, Interactive
 from model.webook_text import Message as TextMessage, Text
@@ -72,16 +73,34 @@ class BoxBooking:
     def process_request(self):
         request_body = SimpleNamespace(**request.json)
         print(request_body)
-        message_type = \
-            request_body.entry[0].get("changes")[0].get("value").get("messages")[0].get(
-                "type")
-        message = self.parse_message(
-            request_body.entry[0].get("changes")[0].get("value").get("messages")[0],
-            message_type)
+        message_type = ""
+        message = ""
+        if (request_body.entry and
+                request_body.entry[0] and
+                request_body.entry[0].get("changes") and
+                request_body.entry[0].get("changes")[0].get("value") and
+                request_body.entry[0].get("changes")[0].get("value").get("messages")):
+            messages = (
+                request_body.entry[0]
+                .get("changes")[0]
+                .get("value")
+                .get("messages")[0]
+            )
+            message_type = messages.get("type")
+            message = self.parse_message(messages, message_type)
+        elif (
+            request_body.get("messages") and
+            request_body.get("messages")[0].get("interactive") and
+            request_body.get("messages")[0].get("interactive").get("nfm_reply")
+        ):
+            message_type = "nfm_reply"
+            message = self.parse_message(request.json, message_type)
         if message_type == "text":
             self.service.process_text_message("918390903001", message)
         elif message_type == "interactive":
             self.service.process_interactive_message("918390903001", message)
+        elif message_type == "nfm_reply":
+            self.service.process_nfm_reply_message("918390903001", message)
         else:
             return "Message type not supported", 505
         return "", 200
@@ -104,7 +123,8 @@ class BoxBooking:
                 interactive=Interactive(**param.get("interactive")),
                 type=param.get(type)
             )
-
+        if message_type == "nfm_reply":
+            return InteractiveFlowMessageReply(**json.loads(param))
 
 service = BoxBooking()
 app = service.app

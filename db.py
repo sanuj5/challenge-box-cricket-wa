@@ -4,12 +4,12 @@ from firebase_admin import firestore, credentials
 
 class DBService:
     def __init__(self):
-        # cred = credentials.ApplicationDefault()
-        #
-        # firebase_admin.initialize_app(credential=cred, options={
-        #     "projectId": "quixotic-booth-407213"
-        # })
-        self.app = firebase_admin.initialize_app()
+        cred = credentials.ApplicationDefault()
+
+        firebase_admin.initialize_app(credential=cred, options={
+            "projectId": "quixotic-booth-407213"
+        })
+        # self.app = firebase_admin.initialize_app()
         self.db = firestore.client()
 
     def get_all_slots(self) -> (dict, dict):

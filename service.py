@@ -8,6 +8,7 @@ from model.booking import Booking
 from model.enums import InteractiveRequestType, Slot, Month, Screen
 from model.flow import FlowResponse, FlowRequest
 import model.interactive_flow_message as ifm
+from model.interactive_flow_message_reply import InteractiveFlowMessageReply
 from model.interactive_message import InteractiveMessage, Interactive, Header, Body, \
     Action, Section, Row
 from model.text_message import TextMessage, Text
@@ -59,7 +60,12 @@ class BoxService:
                                                               _id, booking)
                                                           )
         elif request_type == InteractiveRequestType.CONFIRMED:
-            return_message = self.get_final_text_message(mobile, _id, booking)
+            return_message = self.get_final_text_message(
+                mobile,
+                _id,
+                "Your booking if confirmed. Please send hi again to start new booking.",
+                booking
+            )
         self.api_service.send_post_request(return_message)
 
     def get_request_type(self, message: InteractiveWebhookMessage):
@@ -211,10 +217,10 @@ class BoxService:
         return rows
 
     @staticmethod
-    def get_final_text_message(mobile, _id, booking):
+    def get_final_text_message(mobile, _id, body, booking):
         # TODO read data from booking
         text = Text()
-        text.body = "Your booking if confirmed. Please send hi again to start new booking."
+        text.body = body
         text_message = TextMessage()
         text_message.messaging_product = "whatsapp"
         text_message.recipient_type = "individual"
@@ -284,6 +290,23 @@ class BoxService:
         parameter.flow_action = "navigate"
         parameter.flow_action_payload = payload
         return parameter
+
+    def process_nfm_reply_message(self, mobile, message):
+        nfm_message: InteractiveFlowMessageReply = message
+        print(nfm_message)
+        response = nfm_message.messages[0].interactive.nfm_reply.response_json
+        print(response)
+        selected_date = response.get("selected_date")
+        selected_slots = response.get("slots")
+        slots = '\n'.join(selected_slots.split(",  "))
+        return_message = self.get_final_text_message(
+            mobile,
+            "",
+            f"Your booking is confirmed for date {selected_date} \n and slots {slots}",
+            None
+        )
+        self.api_service.send_post_request(return_message)
+        pass
 
 
 if __name__ == '__main__':
