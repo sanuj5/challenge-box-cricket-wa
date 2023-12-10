@@ -23,7 +23,7 @@ class NfmReply:
 
 
 @dataclass
-class Interactive:
+class InteractiveFlowReply:
     type: str
     nfm_reply: NfmReply
 
@@ -33,12 +33,12 @@ class Interactive:
 
 
 @dataclass
-class Message:
+class InteractiveFlowMessageReply:
     context: Context
     message_from: str
     id: str
     type: str
-    interactive: Interactive
+    interactive: InteractiveFlowReply
     timestamp: str
 
     def __init__(self, context: Context, message_from: str, id: str, type: str, interactive: Interactive, timestamp: str) -> None:
@@ -49,10 +49,3 @@ class Message:
         self.interactive = interactive
         self.timestamp = timestamp
 
-
-@dataclass
-class InteractiveFlowMessageReply:
-    messages: List[Message]
-
-    def __init__(self, messages: List[Message]) -> None:
-        self.messages = messages
