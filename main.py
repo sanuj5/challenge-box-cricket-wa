@@ -71,17 +71,17 @@ class BoxBooking:
             abort(403)
 
     def process_request(self):
-        request_body = SimpleNamespace(**request.json)
+        request_body = request.json
         print(request_body)
         message_type = ""
         message = ""
-        if (request_body.entry and
-                request_body.entry[0] and
-                request_body.entry[0].get("changes") and
-                request_body.entry[0].get("changes")[0].get("value") and
-                request_body.entry[0].get("changes")[0].get("value").get("messages")):
+        if (request_body.get("entry") and
+                request_body.get("entry")[0] and
+                request_body.get("entry")[0].get("changes") and
+                request_body.get("entry")[0].get("changes")[0].get("value") and
+                request_body.get("entry")[0].get("changes")[0].get("value").get("messages")):
             messages = (
-                request_body.entry[0]
+                request_body.get("entry")[0]
                 .get("changes")[0]
                 .get("value")
                 .get("messages")[0]
