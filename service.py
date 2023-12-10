@@ -302,8 +302,13 @@ class BoxService:
             mobile,
             "",
             f"""
-            Your booking is confirmed.\n*Date:* \n{selected_date} \n*Slots:*\n{slots}
-            \n\n_Enjoy your game._
+            Your booking is confirmed.
+            
+            *Date:* {selected_date}
+            *Slots:* 
+            {slots}
+            
+            _Enjoy your game._
             """,
             None
         )
