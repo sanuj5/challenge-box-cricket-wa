@@ -301,7 +301,10 @@ class BoxService:
         return_message = self.get_final_text_message(
             mobile,
             "",
-            f"Your booking is confirmed for \nDate: {selected_date} \nSlots:\n{slots}",
+            f"""
+            Your booking is confirmed.\n*Date:* \n{selected_date} \n*Slots:*\n{slots}
+            \n\n_Enjoy your game._
+            """,
             None
         )
         self.api_service.send_post_request(return_message)
