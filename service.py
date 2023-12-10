@@ -302,14 +302,14 @@ class BoxService:
             mobile,
             "",
             f"""
-            Your booking is confirmed.
-            
-            *Date:* {selected_date}
-            *Slots:* 
-            {slots}
-            
-            _Enjoy your game._
-            """,
+Your booking is confirmed.
+
+*Date:* {selected_date}
+*Slots:* 
+{slots}
+
+_Enjoy the game!_
+""",
             None
         )
         self.api_service.send_post_request(return_message)
