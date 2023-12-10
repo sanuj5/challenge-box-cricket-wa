@@ -291,10 +291,9 @@ class BoxService:
         parameter.flow_action_payload = payload
         return parameter
 
-    def process_nfm_reply_message(self, mobile, message):
-        nfm_message: InteractiveFlowMessageReply = message
+    def process_nfm_reply_message(self, mobile, nfm_message: InteractiveFlowMessageReply):
         print(nfm_message)
-        response = nfm_message.messages[0].interactive.nfm_reply.response_json
+        response = nfm_message.interactive.nfm_reply.response_json
         print(response)
         selected_date = response.get("selected_date")
         selected_slots = response.get("slots")
