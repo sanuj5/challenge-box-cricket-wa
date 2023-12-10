@@ -4,7 +4,8 @@ from types import SimpleNamespace
 from flask import Flask, request, abort
 
 from encryption_service import Encryption
-from model.interactive_flow_message_reply import InteractiveFlowMessageReply
+from model.interactive_flow_message_reply import InteractiveFlowMessageReply, \
+    InteractiveFlowReply
 from service import BoxService
 from model.webhook_interactive import Message as InteractiveMessage, Interactive
 from model.webook_text import Message as TextMessage, Text
@@ -132,7 +133,7 @@ class BoxBooking:
                 id=param.get("id"),
                 message_from=param.get("from"),
                 timestamp=param.get("timestamp"),
-                interactive=Interactive(**param.get("interactive")),
+                interactive=InteractiveFlowReply(**param.get("interactive")),
                 type=param.get(type)
             )
 
