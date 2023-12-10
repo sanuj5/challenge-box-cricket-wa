@@ -117,7 +117,7 @@ class BoxBooking:
                 message_from=param.get("from"),
                 timestamp=param.get("timestamp"),
                 text=Text(**param.get("text")),
-                type=param.get(type)
+                type=param.get("type")
             )
         if message_type == "interactive":
             return InteractiveMessage(
@@ -125,7 +125,7 @@ class BoxBooking:
                 message_from=param.get("from"),
                 timestamp=param.get("timestamp"),
                 interactive=Interactive(**param.get("interactive")),
-                type=param.get(type)
+                type=param.get("type")
             )
         if message_type == "nfm_reply":
             return InteractiveFlowMessageReply(
@@ -134,7 +134,7 @@ class BoxBooking:
                 message_from=param.get("from"),
                 timestamp=param.get("timestamp"),
                 interactive=InteractiveFlowReply(**param.get("interactive")),
-                type=param.get(type)
+                type=param.get("type")
             )
 
 
