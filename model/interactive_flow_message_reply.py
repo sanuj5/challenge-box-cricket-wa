@@ -41,11 +41,11 @@ class InteractiveFlowMessageReply:
     interactive: InteractiveFlowReply
     timestamp: str
 
-    def __init__(self, context: Context, message_from: str, id: str, type: str, interactive: Interactive, timestamp: str) -> None:
+    def __init__(self, context: Context, message_from: str, id: str, type: str,
+                 interactive: InteractiveFlowReply, timestamp: str) -> None:
         self.context = context
         self.message_from = message_from
         self.id = id
         self.type = type
         self.interactive = interactive
         self.timestamp = timestamp
-
