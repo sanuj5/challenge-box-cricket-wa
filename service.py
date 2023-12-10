@@ -293,7 +293,7 @@ class BoxService:
 
     def process_nfm_reply_message(self, mobile, nfm_message: InteractiveFlowMessageReply):
         print(nfm_message)
-        response = nfm_message.interactive.nfm_reply.get("response_json")
+        response = json.loads(nfm_message.interactive.nfm_reply.get("response_json"))
         print(response)
         selected_date = response.get("selected_date")
         selected_slots = response.get("slots")
