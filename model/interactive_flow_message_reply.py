@@ -12,22 +12,13 @@ class Context:
         self.id = id
 
 
-@dataclass
-class NfmReply:
-    name: str
-    response_json: dict
-
-    def __init__(self, name: str, response_json: dict) -> None:
-        self.name = name
-        self.response_json = response_json
-
 
 @dataclass
 class InteractiveFlowReply:
     type: str
-    nfm_reply: NfmReply
+    nfm_reply: dict
 
-    def __init__(self, type: str, nfm_reply: NfmReply) -> None:
+    def __init__(self, type: str, nfm_reply: dict) -> None:
         self.type = type
         self.nfm_reply = nfm_reply
 
