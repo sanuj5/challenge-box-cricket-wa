@@ -145,7 +145,6 @@ class BoxService:
             response['selected_date'] = date_selected
             response['slots'] = flow_request.data.get("slots")
             response['amount'] = amount
-            response['vpa'] = vpa
             response['error_message'] = {"vpa": "Invalid UPI ID"}
             return response, Screen.BOOKING_CONFIRMATION.value
         response['selected_date'] = f"{date_selected}"
