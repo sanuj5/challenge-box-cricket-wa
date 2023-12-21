@@ -143,7 +143,7 @@ class BoxService:
         response = dict()
         if not self.payment_service.is_valid_vpa(vpa=vpa):
             response['selected_date'] = date_selected
-            response['slots'] = slots
+            response['slots'] = flow_request.data.get("slots")
             response['amount'] = amount
             response['vpa'] = vpa
             response['error_message'] = {"vpa": "Invalid UPI ID"}
