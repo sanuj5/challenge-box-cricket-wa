@@ -137,7 +137,16 @@ class BoxService:
     def process_booking_confirmation_screen_data(self, flow_request):
         date_selected = flow_request.data.get("selected_date")
         slots = flow_request.data.get("slots").split(",")
+        amount = flow_request.data.get("amount")
+        vpa = flow_request.data.get("vpa")
         response = dict()
+        if not self.payment_service.is_valid_vpa(vpa=vpa):
+            response['selected_date'] = date_selected
+            response['slots'] = slots
+            response['amount'] = amount
+            response['vpa'] = vpa
+            response['error_message'] = {"vpa": "Invalid UPI ID"}
+            return response, Screen.BOOKING_CONFIRMATION.value
         response['selected_date'] = f"{date_selected}"
         response['slots'] = f"{','.join(slots)}"
         return response, Screen.SUCCESS.value

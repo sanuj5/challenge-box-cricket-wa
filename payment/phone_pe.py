@@ -1,6 +1,7 @@
 import base64
 import json
 
+from phonepe.sdk.pg.common.exceptions import ExpectationFailed
 from phonepe.sdk.pg.payments.v1.models.request.pg_pay_request import PgPayRequest
 from phonepe.sdk.pg.payments.v1.payment_client import PhonePePaymentClient
 from phonepe.sdk.pg.env import Env
@@ -38,4 +39,11 @@ class PaymentGateway:
         if not is_valid:
             return "Invalid request"
         return base64.b64decode(json.loads(response).get("response")).decode("utf-8")
+
+    def is_valid_vpa(self, vpa) -> bool:
+        try:
+            pay_page_response = self.phonepe_client.validate_vpa(vpa)
+        except ExpectationFailed:
+            return False
+        return pay_page_response.success
 
