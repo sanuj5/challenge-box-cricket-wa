@@ -4,6 +4,7 @@ from types import SimpleNamespace
 from flask import Flask, request, abort
 
 from encryption_service import Encryption
+from model.enums import MessageType
 from model.interactive_flow_message_reply import InteractiveFlowMessageReply, \
     InteractiveFlowReply
 from service import BoxService
@@ -44,6 +45,12 @@ class BoxBooking:
             endpoint="process_flow_request",
             methods=["POST"],
         )
+        self.app.add_url_rule(
+            rule="/payment",
+            view_func=self.process_payment_response,
+            endpoint="process_payment_response",
+            methods=["POST"],
+        )
 
     def health_check(self):
         return ""
@@ -74,8 +81,8 @@ class BoxBooking:
     def process_request(self):
         request_body = request.json
         print(request_body)
-        message_type = ""
-        messages = dict()
+        message_type: MessageType = MessageType.TEXT
+        parsed_message = None
         if (request_body.get("entry") and
                 request_body.get("entry")[0] and
                 request_body.get("entry")[0].get("changes") and
@@ -88,30 +95,32 @@ class BoxBooking:
                 .get("value")
                 .get("messages")[0]
             )
-            message_type = messages.get("type")
-        if message_type == "text":
-            self.service.process_text_message(
-                "918390903001", self.parse_message(messages, "text")
-            )
-        elif message_type == "interactive":
-            interactive_type = messages.get("interactive").get("type")
-            if interactive_type == "interactive":
-                self.service.process_interactive_message(
-                    "918390903001",
-                    self.parse_message(messages, "interactive")
-                )
-            elif interactive_type == "nfm_reply":
-                self.service.process_nfm_reply_message(
-                    "918390903001",
-                    self.parse_message(messages,"nfm_reply")
-                )
+            message_type = MessageType(messages.get("type"))
+            if (message_type == MessageType.INTERACTIVE
+                    and messages.get("interactive").get("type")
+                    == MessageType.NFM_REPLY.value):
+                message_type = MessageType.NFM_REPLY
+            parsed_message = self.parse_message(messages, message_type)
+        if message_type == MessageType.TEXT:
+            self.service.process_text_message(parsed_message)
+        elif message_type == MessageType.INTERACTIVE:
+            self.service.process_interactive_message(parsed_message)
+        elif message_type == MessageType.NFM_REPLY:
+            self.service.process_nfm_reply_message(parsed_message)
         else:
             return "Message type not supported", 505
         return "", 200
 
+    def process_payment_response(self):
+        header = request.headers.get("X-VERIFY")
+        response = request.json
+        print(f"{header}, \n {response}")
+        self.service.validate_payment_response(header, response)
+        return "", 200
+
     @staticmethod
     def parse_message(param, message_type):
-        if message_type == "text":
+        if message_type == MessageType.TEXT:
             return TextMessage(
                 id=param.get("id"),
                 message_from=param.get("from"),
@@ -119,7 +128,7 @@ class BoxBooking:
                 text=Text(**param.get("text")),
                 type=param.get("type")
             )
-        if message_type == "interactive":
+        if message_type == MessageType.INTERACTIVE:
             return InteractiveMessage(
                 id=param.get("id"),
                 message_from=param.get("from"),
@@ -127,7 +136,7 @@ class BoxBooking:
                 interactive=Interactive(**param.get("interactive")),
                 type=param.get("type")
             )
-        if message_type == "nfm_reply":
+        if message_type == MessageType.NFM_REPLY:
             return InteractiveFlowMessageReply(
                 context=param.get("context"),
                 id=param.get("id"),

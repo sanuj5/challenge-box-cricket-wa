@@ -63,3 +63,8 @@ class Screen(enum.Enum):
     SLOT_SELECTION = "SLOT_SELECTION"
     BOOKING_CONFIRMATION = "BOOKING_CONFIRMATION"
     SUCCESS = "SUCCESS"
+
+class MessageType(enum.Enum):
+    INTERACTIVE = "interactive"
+    TEXT = "text"
+    NFM_REPLY = "nfm_reply"

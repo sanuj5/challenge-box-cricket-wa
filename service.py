@@ -1,19 +1,18 @@
-import calendar
-import json
 import datetime
+import datetime
+import json
 import uuid
 
+from phonepe.sdk.pg.env import Env
+
 from db import DBService
-from model.booking import Booking
-from model.enums import InteractiveRequestType, Slot, Month, Screen
+from message_builder_service import MessageBuilderService
+from model.enums import InteractiveRequestType, Screen
 from model.flow import FlowResponse, FlowRequest
-import model.interactive_flow_message as ifm
 from model.interactive_flow_message_reply import InteractiveFlowMessageReply
-from model.interactive_message import InteractiveMessage, Interactive, Header, Body, \
-    Action, Section, Row
-from model.text_message import TextMessage, Text
 from model.webhook_interactive import Message as InteractiveWebhookMessage
 from model.webook_text import Message as TextWebhookMessage
+from payment.phone_pe import PaymentGateway
 from whatsapp_api import WhatsappApi
 
 
@@ -24,210 +23,73 @@ class BoxService:
         secrets = self.db_service.get_all_secrets()
         self.api_service = WhatsappApi(secrets.get("WA_API_TOKEN"),
                                        secrets.get("MOBILE_ID"))
+        self.flow_id = secrets.get("FLOW_ID")
+        self.mbs = MessageBuilderService()
+        self.payment_service = PaymentGateway(merchant_id=secrets.get("MERCHANT_ID"),
+                                              salt_key=secrets.get("PROD_SALT_KEY"),
+                                              salt_index=secrets.get("SALT_INDEX"),
+                                              env=Env.PROD)
 
-    def process_interactive_message(self, mobile: str,
-                                    message: InteractiveWebhookMessage):
-        request_type, _id, booking = self.get_request_type(message)
-        print(booking.day, booking.month, booking.slot)
+    def process_interactive_message(self, message: InteractiveWebhookMessage):
+        mobile = message.message_from
+        request_type = InteractiveRequestType.GOTO_MAIN
         return_message = None
         if request_type == InteractiveRequestType.GOTO_MAIN:
-            return_message = self.get_interactive_message(mobile, "Booking",
-                                                          "Select Month",
-                                                          self.get_months()
-                                                          )
-        elif request_type == InteractiveRequestType.MONTH_SELECTED:
-            return_message = self.get_interactive_message(mobile, "Booking",
-                                                          "Select Date",
-                                                          self.get_dates_data(
-                                                              _id, booking)
-                                                          )
-        elif request_type == InteractiveRequestType.DATE_SELECTED:
-            return_message = self.get_interactive_message(mobile, "Booking",
-                                                          "Select Slot",
-                                                          self.get_slot_data(
-                                                              _id, booking)
-                                                          )
-        elif request_type == InteractiveRequestType.SLOT_SELECTED:
-            return_message = self.get_interactive_message(mobile, "Booking",
-                                                          "Select Date",
-                                                          self.get_confirmation_data(
-                                                              _id, booking)
-                                                          )
-        elif request_type == InteractiveRequestType.ADDITIONAL_SLOT:
-            return_message = self.get_interactive_message(mobile, "Booking",
-                                                          "Select Date",
-                                                          self.get_slot_data(
-                                                              _id, booking)
-                                                          )
+            return_message = self.mbs.get_interactive_message(
+                mobile, "Booking",
+                "Select Month",
+                list()
+            )
         elif request_type == InteractiveRequestType.CONFIRMED:
-            return_message = self.get_final_text_message(
+            return_message = self.mbs.get_final_text_message(
                 mobile,
-                _id,
-                "Your booking if confirmed. Please send hi again to start new booking.",
-                booking
+                "",
+                "Your booking is confirmed. Please send hi again to start new booking."
             )
         self.api_service.send_post_request(return_message)
 
-    def get_request_type(self, message: InteractiveWebhookMessage):
-        list_id = message.interactive.list_reply.get("id")
-        if list_id == "main":
-            return InteractiveRequestType.GOTO_MAIN, list_id
-        other_id = list_id.split("_")
-        booking = Booking.create_booking(list_id)
-        if len(other_id) == 1:
-            return InteractiveRequestType.MONTH_SELECTED, list_id, booking
-        elif len(other_id) == 2:
-            return InteractiveRequestType.DATE_SELECTED, list_id, booking
-        elif other_id[-1] == 'cs':
-            return InteractiveRequestType.CONFIRMED, list_id, booking
-        elif other_id[-1] == 'as':
-            return InteractiveRequestType.ADDITIONAL_SLOT, list_id, booking
-        else:
-            return InteractiveRequestType.SLOT_SELECTED, list_id, booking
-
-    def process_text_message(self, mobile, request_body: TextWebhookMessage):
-        return_message = self.get_interactive_flow_message(
+    def process_text_message(self, request_body: TextWebhookMessage):
+        #  TODO add view booking option
+        mobile = request_body.message_from
+        flow_token = str(uuid.uuid4())
+        self.db_service.save_flow_token(mobile, flow_token)
+        return_message = self.mbs.get_interactive_flow_message(
             mobile,
             "Click below to start booking",
-            self.get_initial_screen_param()
+            self.mbs.get_initial_screen_param(
+                self.flow_id, flow_token
+            )
         )
         self.api_service.send_post_request(return_message)
 
-    @staticmethod
-    def get_interactive_message(mobile: str,
-                                message_body: str,
-                                button_text: str,
-                                data: list[Row]) -> InteractiveMessage:
 
-        sections = list()
-        section = Section()
-        section.title = ""
-        section.rows = data
-        sections.append(section)
 
-        action = Action()
-        action.button = button_text
-        action.sections = sections
-
-        header = Header()
-        header.type = "text"
-        header.text = "CBC"
-
-        body = Body()
-        body.text = message_body
-
-        interactive = Interactive()
-        interactive.type = "list"
-        interactive.header = header
-        interactive.body = body
-        interactive.action = action
-
-        message = InteractiveMessage()
-        message.to = mobile
-        message.type = "interactive"
-        message.messaging_product = "whatsapp"
-        message.interactive = interactive
-        return message
-
-    @staticmethod
-    def get_interactive_flow_message(mobile: str,
-                                     message_body: str,
-                                     parameters: ifm.Parameter) -> ifm.InteractiveFlowMessage:
-
-        action = ifm.Action()
-        action.name = "flow"
-        action.parameters = parameters
-
-        header = ifm.Header()
-        header.type = "text"
-        header.text = "CBC"
-
-        body = ifm.Body()
-        body.text = message_body
-
-        interactive = ifm.Interactive()
-        interactive.type = "flow"
-        interactive.header = header
-        interactive.body = body
-        interactive.action = action
-
-        message = ifm.InteractiveFlowMessage()
-        message.to = mobile
-        message.type = "interactive"
-        message.messaging_product = "whatsapp"
-        message.interactive = interactive
-        return message
-
-    @staticmethod
-    def get_dates_data(_id, booking) -> list[Row]:
-        month = int(booking.month)
-        now = datetime.now()
-        days_in_month = calendar.monthrange(now.year, month)[1]
-        remaining_days = range(now.day, days_in_month)
-        rows = list()
-        for day in remaining_days:
-            row = Row()
-            row.id = f"{_id}_{day}"
-            row.title = day
-            rows.append(row)
-        return rows
-
-    @staticmethod
-    def get_slot_data(_id, booking) -> list[Row]:
-        # TODO show only remaining slots of today
-        rows = list()
-        for slot in list(Slot):
-            row = Row()
-            row.id = f"{_id}_{slot.name}"
-            row.title = slot.value
-            rows.append(row)
-        return rows
-
-    @staticmethod
-    def get_confirmation_data(_id, booking) -> list[Row]:
-        # TODO show only remaining slots of today
-        rows = list()
-        row1 = Row()
-        row1.id = f"{_id}_as"
-        row1.title = "Book Additional Slot"
-        rows.append(row1)
-        row2 = Row()
-        row2.id = f"{_id}_cs"
-        row2.title = "Confirm you booking"
-        rows.append(row2)
-        return rows
-
-    @staticmethod
-    def get_months() -> list[Row]:
-        now = datetime.now()
-        current_month = now.month
-        next_month = current_month + 1
-        if current_month == 12:
-            next_month = 1
-
-        rows = list()
-        row1 = Row()
-        row1.id = str(current_month)
-        row1.title = Month(current_month).name
-        rows.append(row1)
-        row2 = Row()
-        row2.id = str(next_month)
-        row2.title = Month(next_month).name
-        rows.append(row2)
-        return rows
-
-    @staticmethod
-    def get_final_text_message(mobile, _id, body, booking):
-        # TODO read data from booking
-        text = Text()
-        text.body = body
-        text_message = TextMessage()
-        text_message.messaging_product = "whatsapp"
-        text_message.recipient_type = "individual"
-        text_message.to = mobile
-        text_message.type = "text"
-        text_message.text = text
-        return text_message
+    def process_nfm_reply_message(self, nfm_message: InteractiveFlowMessageReply):
+        mobile = nfm_message.message_from
+        response = json.loads(nfm_message.interactive.nfm_reply.get("response_json"))
+        selected_date = response.get("selected_date")
+        selected_slots = response.get("slots")
+        slots = selected_slots.split(",  ")
+        # slots = '\n'.join(selected_slots.split(",  "))
+        # return_message = self.mbs.get_final_text_message(
+        #     mobile,
+        #     "",
+        #     self.mbs.final_confirmation_message.format(
+        #         selected_date=selected_date,
+        #         slots=slots
+        #     )
+        # )
+        return_message = self.mbs.get_interactive_payment_message(
+            mobile=mobile,
+            message_body="Please pay amount by clicking below to confirm your booking.",
+            payment_amount=1,
+            payment_uri=self.payment_service.generate_payment_link(
+                amount=100,
+                unique_transaction_id=str(uuid.uuid4())[:-2]
+            ),
+            slots=slots
+        )
+        self.api_service.send_post_request(return_message)
 
     def process_flow_request(self, input_data):
         flow_request = FlowRequest(**json.loads(input_data))
@@ -243,6 +105,8 @@ class BoxService:
                 flow_request)
         return FlowResponse(screen=next_screen, data=response_data)
 
+
+
     def process_date_screen_data(self, flow_request) -> (dict, str):
         date_selected = flow_request.data.get("selected_date")
         response = dict()
@@ -251,7 +115,7 @@ class BoxService:
             return response, Screen.DATE_SELECTION.value
         date = datetime.datetime.fromtimestamp(float(date_selected) / 1000,
                                                tz=datetime.timezone.utc)
-        response['selected_date'] = f'{date.strftime("%d %b %Y")}'
+        response['selected_date'] = f'{date.strftime(self.mbs.date_format)}'
         #  TODO check available slots
         response['slots'] = [{"id": str(key), "title": value} for key, value in
                              self.slots.items()]
@@ -259,7 +123,7 @@ class BoxService:
 
     def process_slot_screen_data(self, flow_request):
         date_selected = flow_request.data.get("selected_date")
-        date = datetime.datetime.strptime(date_selected, "%d %b %Y")
+        date = datetime.datetime.strptime(date_selected, self.mbs.date_format)
         slots_selected = flow_request.data.get("slots")  # '8', '8 AM - 9 AM'
         response = dict()
         if not slots_selected or len(slots_selected) == 0:
@@ -278,54 +142,13 @@ class BoxService:
         response['slots'] = f"{','.join(slots)}"
         return response, Screen.SUCCESS.value
 
-    def get_initial_screen_param(self):
-        payload = dict()
-        payload["screen"] = Screen.DATE_SELECTION.value
-        parameter = ifm.Parameter()
-        parameter.mode = "draft"  # TODO change to publish when ready
-        parameter.flow_message_version = "3"
-        parameter.flow_token = str(uuid.uuid4())
-        parameter.flow_cta = "Book Slot"
-        parameter.flow_id = "7294690660565710"
-        parameter.flow_action = "navigate"
-        parameter.flow_action_payload = payload
-        return parameter
-
-    def process_nfm_reply_message(self, mobile, nfm_message: InteractiveFlowMessageReply):
-        print(nfm_message)
-        response = json.loads(nfm_message.interactive.nfm_reply.get("response_json"))
-        print(response)
-        selected_date = response.get("selected_date")
-        selected_slots = response.get("slots")
-        slots = '\n'.join(selected_slots.split(",  "))
-        return_message = self.get_final_text_message(
-            mobile,
+    def validate_payment_response(self, header, response):
+        # TODO get mobile number from response transaction ID
+        validated_response = self.payment_service.validate_response(header, response)
+        print(validated_response)
+        return_message = self.mbs.get_final_text_message(
+            "918390903001",
             "",
-            f"""
-Your booking is confirmed.
-
-*Date:* {selected_date}
-*Slots:* 
-{slots}
-
-_Enjoy the game!_
-""",
-            None
+            "Congrats! Your booking is confirmed"
         )
         self.api_service.send_post_request(return_message)
-        pass
-
-
-if __name__ == '__main__':
-    service = BoxService()
-    data = '{"version":"3.0","action":"data_exchange","screen":"DATE_SELECTION","data":{"selected_date":"1702425600000","form_name":"form"},"flow_token":"flows-builder-2a5dd546"}'
-    response_data = service.process_flow_request(data)
-    response = json.dumps(response_data, indent=4, default=lambda o: o.__dict__)
-    print(response)
-    response1 = dict()
-    response1['slots'] = [{"id": str(key), "title": value} for key, value in
-                          service.slots.items()]
-    print(response1)
-    slots_selected = [6, 7]
-    slots_title = [service.slots.get(slot) for slot in slots_selected]
-    print(slots_title)

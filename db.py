@@ -30,3 +30,7 @@ class DBService:
             if doc.id == "all":
                 return doc.to_dict()
         return dict()
+
+    def save_flow_token(self, mobile, flow_token):
+
+        pass

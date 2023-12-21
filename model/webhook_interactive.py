@@ -44,13 +44,13 @@ class Interactive:
 
 @dataclass
 class Message:
-    message_from: int
+    message_from: str
     id: str
     timestamp: str
     interactive: Interactive
     type: str
 
-    def __init__(self, message_from: int, id: str, timestamp: str,
+    def __init__(self, message_from: str, id: str, timestamp: str,
                  interactive: Interactive, type: str) -> None:
         self.message_from = message_from
         self.id = id
