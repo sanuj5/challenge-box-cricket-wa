@@ -41,8 +41,10 @@ class PaymentGateway:
         return base64.b64decode(json.loads(response).get("response")).decode("utf-8")
 
     def is_valid_vpa(self, vpa) -> bool:
+        print(f"Validating vpa {vpa}")
         try:
             pay_page_response = self.phonepe_client.validate_vpa(vpa)
+            print(f"Status {pay_page_response.success}")
         except ExpectationFailed:
             return False
         return pay_page_response.success
