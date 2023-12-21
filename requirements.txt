@@ -3,3 +3,5 @@ gunicorn
 requests~=2.31.0
 cryptography~=38.0.3
 firebase_admin
+-i https://phonepe.mycloudrepo.io/public/repositories/phonepe-pg-sdk-python
+phonepe_sdk
