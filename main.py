@@ -95,6 +95,8 @@ class BoxBooking:
                 .get("value")
                 .get("messages")[0]
             )
+            if not messages.get("type"):
+                return "Message Not Supported", 200
             message_type = MessageType(messages.get("type"))
             if (message_type == MessageType.INTERACTIVE
                     and messages.get("interactive").get("type")
