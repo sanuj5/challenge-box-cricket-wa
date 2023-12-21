@@ -126,13 +126,14 @@ _Enjoy the game!_
         order = ipm.Order()
         order.subtotal = total_amount
         order.tax = tax_discount
+        order.items = [item]
 
         parameters = ipm.Parameters()
         parameters.total_amount = total_amount
         parameters.order = order
-        parameters.payment_settings = ipm.PaymentSetting(
-            payment_link=ipm.PaymentLink(payment_uri)
-        )
+        parameters.payment_settings = [
+            ipm.PaymentSetting(payment_link=ipm.PaymentLink(payment_uri))
+        ]
 
         action = ipm.Action(name="review_and_pay", parameters=parameters)
         header = ipm.Header("text", None)
