@@ -81,7 +81,7 @@ class BoxBooking:
     def process_request(self):
         request_body = request.json
         print(request_body)
-        message_type: MessageType = MessageType.TEXT
+        message_type: MessageType = None
         parsed_message = None
         if (request_body.get("entry") and
                 request_body.get("entry")[0] and
@@ -95,8 +95,6 @@ class BoxBooking:
                 .get("value")
                 .get("messages")[0]
             )
-            if not messages.get("type"):
-                return "Message Not Supported", 200
             message_type = MessageType(messages.get("type"))
             if (message_type == MessageType.INTERACTIVE
                     and messages.get("interactive").get("type")
@@ -110,7 +108,7 @@ class BoxBooking:
         elif message_type == MessageType.NFM_REPLY:
             self.service.process_nfm_reply_message(parsed_message)
         else:
-            return "Message type not supported", 505
+            return "Message type not supported", 200
         return "", 200
 
     def process_payment_response(self):
