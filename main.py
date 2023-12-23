@@ -115,7 +115,7 @@ class BoxBooking:
         header = request.headers.get("X-VERIFY")
         response = request.json
         print(f"{header}, \n {response}")
-        self.service.validate_payment_response(header, response)
+        self.service.validate_payment_response(header, request)
         return "", 200
 
     @staticmethod
