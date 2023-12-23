@@ -62,14 +62,12 @@ class BoxService:
         )
         self.api_service.send_post_request(return_message)
 
-
-
     def process_nfm_reply_message(self, nfm_message: InteractiveFlowMessageReply):
         mobile = nfm_message.message_from
         response = json.loads(nfm_message.interactive.nfm_reply.get("response_json"))
-        selected_date = response.get("selected_date")
-        selected_slots = response.get("slots")
-        slots = selected_slots.split(",  ")
+        amount = response.get("amount")
+        vpa = response.get("vpa")
+        print(f"Closed for {vpa} and {amount}")
         # slots = '\n'.join(selected_slots.split(",  "))
         # return_message = self.mbs.get_final_text_message(
         #     mobile,
@@ -79,17 +77,17 @@ class BoxService:
         #         slots=slots
         #     )
         # )
-        return_message = self.mbs.get_interactive_payment_message(
-            mobile=mobile,
-            message_body="Please pay amount by clicking below to confirm your booking.",
-            payment_amount=1,
-            payment_uri=self.payment_service.generate_payment_link(
-                amount=100,
-                unique_transaction_id=str(uuid.uuid4())[:-2]
-            ),
-            slots=slots
-        )
-        self.api_service.send_post_request(return_message)
+        # return_message = self.mbs.get_interactive_payment_message(
+        #     mobile=mobile,
+        #     message_body="Please pay amount by clicking below to confirm your booking.",
+        #     payment_amount=1,
+        #     payment_uri=self.payment_service.generate_payment_link(
+        #         amount=100,
+        #         unique_transaction_id=str(uuid.uuid4())[:-2]
+        #     ),
+        #     slots=slots
+        # )
+        # self.api_service.send_post_request(return_message)
 
     def process_flow_request(self, input_data):
         flow_request = FlowRequest(**json.loads(input_data))
@@ -148,9 +146,12 @@ class BoxService:
             response['amount'] = amount
             response['error_messages'] = {"vpa": "Invalid UPI ID"}
             return response, Screen.BOOKING_CONFIRMATION.value
-        response['selected_date'] = f"{date_selected}"
-        response['slots'] = f"{','.join(slots)}"
-        return response, Screen.SUCCESS.value
+        self.payment_service.send_payment_collection_request(
+            vpa, amount, str(uuid.uuid4())[:-2]
+        )
+        response['amount'] = amount
+        response['vpa'] = vpa
+        return response, Screen.PAYMENT_CONFIRMATION.value
 
     def validate_payment_response(self, header, response):
         # TODO get mobile number from response transaction ID

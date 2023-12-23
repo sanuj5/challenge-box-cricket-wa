@@ -17,6 +17,7 @@ class PaymentGateway:
         self.phonepe_client = PhonePePaymentClient(
             merchant_id, salt_key, salt_index, env, should_publish_events
         )
+        self.s2s_callback_url = "https://quixotic-booth-407213.el.r.appspot.com/payment"
 
     def generate_payment_link(self, amount: int, unique_transaction_id) -> str:
         # ui_redirect_url = "http://localhost:8080/success" =
@@ -45,6 +46,21 @@ class PaymentGateway:
         try:
             pay_page_response = self.phonepe_client.validate_vpa(vpa)
             print(f"Status {pay_page_response.success}")
+        except ExpectationFailed:
+            return False
+        return pay_page_response.success
+
+    def send_payment_collection_request(self, vpa, amount, unique_transaction_id) -> bool:
+        print(f"Sending request to vpa {vpa} for amount {amount}")
+        upi_collect_request_data = PgPayRequest.upi_collect_pay_request_builder(
+            merchant_transaction_id=unique_transaction_id,
+            amount=int(amount),
+            vpa=vpa,
+            callback_url=self.s2s_callback_url,
+            callback_mode="POST")
+        try:
+            pay_page_response = self.phonepe_client.pay(upi_collect_request_data)
+            print(f"Status {pay_page_response}")
         except ExpectationFailed:
             return False
         return pay_page_response.success
