@@ -1,5 +1,6 @@
 import base64
 import json
+import uuid
 
 from phonepe.sdk.pg.common.exceptions import ExpectationFailed
 from phonepe.sdk.pg.payments.v1.models.request.pg_pay_request import PgPayRequest
@@ -28,18 +29,20 @@ class PaymentGateway:
             merchant_transaction_id=unique_transaction_id,
             amount=amount,
             merchant_user_id=id_assigned_to_user_by_merchant,
-            callback_url=s2s_callback_url)
+            callback_url=s2s_callback_url,
+            redirect_mode="POST")
         pay_page_response = self.phonepe_client.pay(pay_page_request)
         pay_page_url = pay_page_response.data.instrument_response.redirect_info.url
         print(pay_page_url)
         return pay_page_url
 
     def validate_response(self, header, response) -> str:
-        is_valid = self.phonepe_client.verify_response(x_verify=header, response=response)
+        is_valid = self.phonepe_client.verify_response(x_verify=header,
+                                                       response=response)
         print(f"Payment Request is {is_valid}.")
         if not is_valid:
             return "Invalid request"
-        return base64.b64decode(json.loads(response).get("response")).decode("utf-8")
+        return base64.b64decode(response.get("response")).decode("utf-8")
 
     def is_valid_vpa(self, vpa) -> bool:
         print(f"Validating vpa {vpa}")
@@ -50,14 +53,19 @@ class PaymentGateway:
             return False
         return pay_page_response.success
 
-    def send_payment_collection_request(self, vpa, amount, unique_transaction_id) -> bool:
+    def send_payment_collection_request(self, vpa, amount,
+                                        unique_transaction_id) -> bool:
         print(f"Sending request to vpa {vpa} for amount {amount}")
         upi_collect_request_data = PgPayRequest.upi_collect_pay_request_builder(
             merchant_transaction_id=unique_transaction_id,
+            merchant_order_id=unique_transaction_id,
+            merchant_user_id=unique_transaction_id,
             amount=int(amount),
             vpa=vpa,
             callback_url=self.s2s_callback_url,
-            callback_mode="POST")
+            device_os="IOS",
+            callback_mode="POST",
+            auto_failure_timeout=300)
         try:
             pay_page_response = self.phonepe_client.pay(upi_collect_request_data)
             print(f"Status {pay_page_response}")
@@ -65,3 +73,17 @@ class PaymentGateway:
             return False
         return pay_page_response.success
 
+
+if __name__ == '__main__':
+    pg = PaymentGateway(merchant_id="CHALLENGECRONLINE",
+                        salt_index=1,
+                        salt_key="58414416-e374-4f71-be36-e21d70db8f79",
+                        env=Env.PROD)
+    # vpa = "1.sanuj-1@okhdfcbank"
+    # if pg.is_valid_vpa(vpa):
+    #     pay_page_response = pg.send_payment_collection_request(
+    #         amount=100, vpa=vpa, unique_transaction_id=str(uuid.uuid4())[:-2]
+    #     )
+    #     print(f"Status {pay_page_response}")
+
+    pg.generate_payment_link(200, str(uuid.uuid4())[:-2])
