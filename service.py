@@ -111,7 +111,7 @@ class BoxService:
         date_selected = flow_request.data.get("selected_date")
         response = dict()
         if not date_selected:
-            response['error_message'] = "Please select date"
+            response['error_messages'] = "Please select date"
             return response, Screen.DATE_SELECTION.value
         date = datetime.datetime.fromtimestamp(float(date_selected) / 1000,
                                                tz=datetime.timezone.utc)
@@ -127,13 +127,13 @@ class BoxService:
         slots_selected = flow_request.data.get("slots")  # '8', '8 AM - 9 AM'
         response = dict()
         if not slots_selected or len(slots_selected) == 0:
-            response['error_message'] = "Please select at least 1 slot"
+            response['error_messages'] = "Please select at least 1 slot"
             return response, Screen.SLOT_SELECTION.value
         slots_title = [self.slots.get(int(slot)) for slot in slots_selected]
         response['selected_date'] = f"{date_selected}"
         response['slots'] = f"{',  '.join(slots_title)}"
         response['amount'] = "100"
-        response['error_message'] = {}
+        response['error_messages'] = {}
         return response, Screen.BOOKING_CONFIRMATION.value
 
     def process_booking_confirmation_screen_data(self, flow_request):
@@ -146,7 +146,7 @@ class BoxService:
             response['selected_date'] = date_selected
             response['slots'] = flow_request.data.get("slots")
             response['amount'] = amount
-            response['error_message'] = {"vpa": "Invalid UPI ID"}
+            response['error_messages'] = {"vpa": "Invalid UPI ID"}
             return response, Screen.BOOKING_CONFIRMATION.value
         response['selected_date'] = f"{date_selected}"
         response['slots'] = f"{','.join(slots)}"
