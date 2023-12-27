@@ -138,20 +138,11 @@ class BoxService:
         date_selected = flow_request.data.get("selected_date")
         slots = flow_request.data.get("slots").split(",")
         amount = flow_request.data.get("amount")
-        vpa = flow_request.data.get("vpa")
         response = dict()
-        if not self.payment_service.is_valid_vpa(vpa=vpa):
-            response['selected_date'] = date_selected
-            response['slots'] = flow_request.data.get("slots")
-            response['amount'] = amount
-            response['error_messages'] = {"vpa": "Invalid UPI ID"}
-            return response, Screen.BOOKING_CONFIRMATION.value
-        self.payment_service.send_payment_collection_request(
-            vpa, amount, str(uuid.uuid4())[:-2]
-        )
+        response['selected_date'] = date_selected
+        response['slots'] = flow_request.data.get("slots")
         response['amount'] = amount
-        response['vpa'] = vpa
-        return response, Screen.PAYMENT_CONFIRMATION.value
+        return response, Screen.SUCCESS.value
 
     def validate_payment_response(self, header, response):
         # TODO get mobile number from response transaction ID
