@@ -143,4 +143,6 @@ https://tinyurl.com/558966ej?tx=1234"""
         self.api_service.send_post_request(return_message)
 
     def generate_payment_link(self, amount, transaction_id):
-        return self.payment_service.generate_payment_link(amount, transaction_id)
+        return self.payment_service.generate_payment_link(
+            amount, str(uuid.uuid4())[:-2]
+        )
