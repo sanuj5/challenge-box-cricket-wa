@@ -55,7 +55,7 @@ class BoxBooking:
             rule="/pay",
             view_func=self.payment_redirect,
             endpoint="payment_redirect",
-            methods=["POST"],
+            methods=["GET"],
         )
 
     def health_check(self):
