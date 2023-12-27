@@ -160,6 +160,20 @@ class BoxService:
         return_message = self.mbs.get_final_text_message(
             "918390903001",
             "",
-            "Congrats! Your booking is confirmed"
+            "Your booking is confirmed"
+        )
+        self.api_service.send_post_request(return_message)
+
+    def generate_payment_link(self, amount, transaction_id):
+        return self.payment_service.generate_payment_link(amount, transaction_id)
+
+
+    def send_payment_message(self):
+        return_message = self.mbs.get_final_text_message(
+            "918390903001",
+            "",
+            """Please make payment by clicking below link to confirm your booking. 
+
+https://tinyurl.com/558966ej?tx=1234"""
         )
         self.api_service.send_post_request(return_message)

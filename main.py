@@ -1,7 +1,7 @@
 import json
 from types import SimpleNamespace
 
-from flask import Flask, request, abort
+from flask import Flask, request, abort, redirect
 
 from encryption_service import Encryption
 from model.enums import MessageType
@@ -51,9 +51,21 @@ class BoxBooking:
             endpoint="process_payment_response",
             methods=["POST"],
         )
+        self.app.add_url_rule(
+            rule="/pay",
+            view_func=self.payment_redirect,
+            endpoint="payment_redirect",
+            methods=["POST"],
+        )
 
     def health_check(self):
         return ""
+
+    def payment_redirect(self):
+        transaction_id = request.args.get("tx")
+        url = self.service.generate_payment_link(200, transaction_id)
+        return redirect(url, code=302)
+
 
     def process_flow_request(self):
         encrypted_flow_data_b64 = request.json.get("encrypted_flow_data")
