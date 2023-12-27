@@ -66,28 +66,15 @@ class BoxService:
         mobile = nfm_message.message_from
         response = json.loads(nfm_message.interactive.nfm_reply.get("response_json"))
         amount = response.get("amount")
-        vpa = response.get("vpa")
-        print(f"Closed for {vpa} and {amount}")
-        # slots = '\n'.join(selected_slots.split(",  "))
-        # return_message = self.mbs.get_final_text_message(
-        #     mobile,
-        #     "",
-        #     self.mbs.final_confirmation_message.format(
-        #         selected_date=selected_date,
-        #         slots=slots
-        #     )
-        # )
-        # return_message = self.mbs.get_interactive_payment_message(
-        #     mobile=mobile,
-        #     message_body="Please pay amount by clicking below to confirm your booking.",
-        #     payment_amount=1,
-        #     payment_uri=self.payment_service.generate_payment_link(
-        #         amount=100,
-        #         unique_transaction_id=str(uuid.uuid4())[:-2]
-        #     ),
-        #     slots=slots
-        # )
-        # self.api_service.send_post_request(return_message)
+        print(f"Pending payment of amount 100")
+        return_message = self.mbs.get_final_text_message(
+            mobile,
+            "",
+            """Please make payment by clicking below link to confirm your booking. 
+
+https://tinyurl.com/558966ej?tx=1234"""
+        )
+        self.api_service.send_post_request(return_message)
 
     def process_flow_request(self, input_data):
         flow_request = FlowRequest(**json.loads(input_data))
