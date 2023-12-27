@@ -36,13 +36,9 @@ class PaymentGateway:
         print(pay_page_url)
         return pay_page_url
 
-    def validate_response(self, header, response) -> str:
-        is_valid = self.phonepe_client.verify_response(x_verify=header,
-                                                       response=response)
-        print(f"Payment Request is {is_valid}.")
-        if not is_valid:
-            return "Invalid request"
-        return base64.b64decode(response.get("response")).decode("utf-8")
+    def validate_response(self, header, response) -> bool:
+        return self.phonepe_client.verify_response(x_verify=header,
+                                                   response=response)
 
     def is_valid_vpa(self, vpa) -> bool:
         print(f"Validating vpa {vpa}")
@@ -86,4 +82,8 @@ if __name__ == '__main__':
     #     )
     #     print(f"Status {pay_page_response}")
 
-    pg.generate_payment_link(200, str(uuid.uuid4())[:-2])
+    # pg.generate_payment_link(200, str(uuid.uuid4())[:-2])
+    response = "{'response': 'eyJzdWNjZXNzIjp0cnVlLCJjb2RlIjoiUEFZTUVOVF9TVUNDRVNTIiwibWVzc2FnZSI6IllvdXIgcGF5bWVudCBpcyBzdWNjZXNzZnVsLiIsImRhdGEiOnsibWVyY2hhbnRJZCI6IkNIQUxMRU5HRUNST05MSU5FIiwibWVyY2hhbnRUcmFuc2FjdGlvbklkIjoiMTIzNCIsInRyYW5zYWN0aW9uSWQiOiJUMjMxMjI3MjMwODU5OTgzODY3NTcyMyIsImFtb3VudCI6MjAwLCJzdGF0ZSI6IkNPTVBMRVRFRCIsInJlc3BvbnNlQ29kZSI6IlNVQ0NFU1MiLCJwYXltZW50SW5zdHJ1bWVudCI6eyJ0eXBlIjoiVVBJIiwidXRyIjoiMzM2MTY2Mjk4OTc4IiwiY2FyZE5ldHdvcmsiOm51bGwsImFjY291bnRUeXBlIjoiU0FWSU5HUyJ9fX0='}"
+    pg.validate_response(
+        "fef4e02c688367b3fe5437ac710e626e9e3a788f58486053724130ccc1bf693f###1",
+        response)

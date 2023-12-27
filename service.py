@@ -134,12 +134,19 @@ https://tinyurl.com/558966ej?tx=1234"""
     def validate_payment_response(self, header, response):
         # TODO get mobile number from response transaction ID
         validated_response = self.payment_service.validate_response(header, response)
-        print(validated_response)
-        return_message = self.mbs.get_final_text_message(
-            "918390903001",
-            "",
-            "Your booking is confirmed"
-        )
+        print(f"Response validation {validated_response}")
+        if validated_response:
+            return_message = self.mbs.get_final_text_message(
+                "918390903001",
+                "",
+                "Your booking is confirmed"
+            )
+        else:
+            return_message = self.mbs.get_final_text_message(
+                "918390903001",
+                "",
+                "Some error has occurred while processing your request."
+            )
         self.api_service.send_post_request(return_message)
 
     def generate_payment_link(self, amount, transaction_id):
