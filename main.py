@@ -1,5 +1,4 @@
 import json
-from types import SimpleNamespace
 
 from flask import Flask, request, abort, redirect
 
@@ -7,9 +6,9 @@ from encryption_service import Encryption
 from model.enums import MessageType
 from model.interactive_flow_message_reply import InteractiveFlowMessageReply, \
     InteractiveFlowReply
-from service import BoxService
 from model.webhook_interactive import Message as InteractiveMessage, Interactive
 from model.webook_text import Message as TextMessage, Text
+from service import BoxService
 
 
 class BoxBooking:

@@ -1,3 +1,8 @@
+import time
+from datetime import datetime
+
+from dateutil.relativedelta import relativedelta
+
 import model.interactive_message as im
 import model.interactive_payment_message as ipm
 import model.interactive_flow_message as ifm
@@ -96,10 +101,17 @@ _Enjoy the game!_
         text_message.text = text
         return text_message
 
+    # https://developers.facebook.com/docs/whatsapp/flows/gettingstarted/sendingaflow
     @staticmethod
     def get_initial_screen_param(flow_id, flow_token):
         payload = dict()
+        data = dict()
+        current_date = datetime.today()
+        max_date = current_date + relativedelta(months=+2)
+        data["min_date"] = str(int(time.mktime(current_date.timetuple()) * 1000))
+        data["max_date"] = str(int(time.mktime(max_date.timetuple()) * 1000))
         payload["screen"] = Screen.DATE_SELECTION.value
+        payload["data"] = data
         parameter = ifm.Parameter()
         parameter.mode = "draft"  # TODO change to publish when ready
         parameter.flow_message_version = "3"
