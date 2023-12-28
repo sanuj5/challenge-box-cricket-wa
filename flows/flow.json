@@ -1,7 +1,7 @@
 {
   "version": "2.1",
   "data_api_version": "3.0",
-  "data_channel_uri": "https://quixotic-booth-407213.el.r.appspot.com/flow",
+  "data_channel_uri": "https://challengecricket.in/api/flow",
   "routing_model": {
     "DATE_SELECTION": [
       "SLOT_SELECTION"

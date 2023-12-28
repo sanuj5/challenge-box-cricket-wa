@@ -18,11 +18,11 @@ class PaymentGateway:
         self.phonepe_client = PhonePePaymentClient(
             merchant_id, salt_key, salt_index, env, should_publish_events
         )
-        self.s2s_callback_url = "https://quixotic-booth-407213.el.r.appspot.com/payment"
+        self.s2s_callback_url = "https://challengecricket.in/api/payment"
 
     def generate_payment_link(self, amount: int, unique_transaction_id) -> str:
         # ui_redirect_url = "http://localhost:8080/success" =
-        s2s_callback_url = "https://quixotic-booth-407213.el.r.appspot.com/payment"
+        s2s_callback_url = "https://challengecricket.in/api/payment"
         amount = amount  # In PAISE
         id_assigned_to_user_by_merchant = "test_user_1"
         pay_page_request = PgPayRequest.pay_page_pay_request_builder(
