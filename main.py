@@ -9,7 +9,7 @@ from model.interactive_flow_message_reply import InteractiveFlowMessageReply, \
 from model.webhook_interactive import Message as InteractiveMessage, Interactive
 from model.webook_text import Message as TextMessage, Text
 from service import BoxService
-
+from exceptions import InvalidStateException
 
 class BoxBooking:
 
@@ -71,9 +71,12 @@ class BoxBooking:
 
     def payment_redirect(self):
         transaction_id = request.args.get("tx")
-        url = self.service.generate_payment_link(200, transaction_id)
-        return redirect(url, code=302)
-
+        try:
+            url = self.service.generate_payment_link(200, transaction_id)
+            redirect(url, code=302)
+        except InvalidStateException as e:
+            return str(e), 500
+        return "Internal Server Error!", 500
 
     def process_flow_request(self):
         encrypted_flow_data_b64 = request.json.get("encrypted_flow_data")

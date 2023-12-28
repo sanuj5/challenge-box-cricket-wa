@@ -1,5 +1,6 @@
 import firebase_admin
 from firebase_admin import firestore, credentials
+from google.cloud.firestore_v1 import FieldFilter
 
 
 class DBService:
@@ -35,3 +36,9 @@ class DBService:
         data = {"mobile": mobile, "token": token}
         self.db.collection("booking_token").add(data)
         print("Added token successfully")
+
+    def is_valid_token(self, token):
+        tokens = self.db.collection("booking_token").where(
+            filter=FieldFilter("token", "==", token)
+        ).get()
+        return True if tokens else False

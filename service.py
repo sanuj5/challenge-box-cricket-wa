@@ -6,6 +6,7 @@ import uuid
 from phonepe.sdk.pg.env import Env
 
 from db import DBService
+from exceptions import InvalidStateException
 from message_builder_service import MessageBuilderService
 from model.enums import InteractiveRequestType, Screen
 from model.flow import FlowResponse, FlowRequest
@@ -72,7 +73,7 @@ class BoxService:
             "",
             """Please make payment by clicking below link to confirm your booking. 
 
-https://tinyurl.com/558966ej?tx=1234"""
+https://challengecricket.in/api/pay?tx=1234"""
         )
         self.api_service.send_post_request(return_message)
 
@@ -152,6 +153,8 @@ https://tinyurl.com/558966ej?tx=1234"""
         self.api_service.send_post_request(return_message)
 
     def generate_payment_link(self, amount, transaction_id):
+        if not self.db_service.is_valid_token(transaction_id):
+            raise InvalidStateException("Invalid transaction token")
         return self.payment_service.generate_payment_link(
-            amount, str(uuid.uuid4())[:-2]
+            amount, transaction_id
         )
