@@ -37,8 +37,8 @@ class DBService:
         self.db.collection("booking_token").add(data)
         print("Added token successfully")
 
-    def is_valid_token(self, token):
+    def get_mobile_token_mapping(self, token) -> dict:
         tokens = self.db.collection("booking_token").where(
             filter=FieldFilter("token", "==", token)
-        ).get()
-        return True if tokens else False
+        ).stream()
+        return tokens.to_dict() if tokens else None

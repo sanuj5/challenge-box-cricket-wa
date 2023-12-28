@@ -1,5 +1,4 @@
 import datetime
-import datetime
 import json
 import uuid
 
@@ -67,14 +66,24 @@ class BoxService:
         mobile = nfm_message.message_from
         response = json.loads(nfm_message.interactive.nfm_reply.get("response_json"))
         amount = response.get("amount")
-        print(f"Pending payment of amount 100")
-        return_message = self.mbs.get_final_text_message(
-            mobile,
-            "",
-            """Please make payment by clicking below link to confirm your booking. 
-
-https://challengecricket.in/api/pay?tx=1234"""
-        )
+        token = response.get("token")
+        print(f"Pending payment of amount {amount}")
+        pending_booking_token = self.db_service.get_mobile_token_mapping(token)
+        if not pending_booking_token or pending_booking_token.get("mobile") != mobile:
+            return_message = self.mbs.get_final_text_message(
+                mobile,
+                "",
+                "Request token is invalid or expired. "
+                "Please start the booking again."
+            )
+        else:
+            return_message = self.mbs.get_final_text_message(
+                mobile,
+                "",
+                f"""Please make payment by clicking below link to confirm your booking. 
+    
+    https://challengecricket.in/api/pay?tx={token}"""
+            )
         self.api_service.send_post_request(return_message)
 
     def process_flow_request(self, input_data):
@@ -90,8 +99,6 @@ https://challengecricket.in/api/pay?tx=1234"""
             response_data, next_screen = self.process_booking_confirmation_screen_data(
                 flow_request)
         return FlowResponse(screen=next_screen, data=response_data)
-
-
 
     def process_date_screen_data(self, flow_request) -> (dict, str):
         date_selected = flow_request.data.get("selected_date")
@@ -139,6 +146,8 @@ https://challengecricket.in/api/pay?tx=1234"""
         validated_response = self.payment_service.validate_response(header, response)
         print(f"Response validation {validated_response}")
         if validated_response:
+            response_string = json.loads(response).get("response", None)
+            print(response_string)
             return_message = self.mbs.get_final_text_message(
                 "918390903001",
                 "",
@@ -153,7 +162,7 @@ https://challengecricket.in/api/pay?tx=1234"""
         self.api_service.send_post_request(return_message)
 
     def generate_payment_link(self, amount, transaction_id):
-        if not self.db_service.is_valid_token(transaction_id):
+        if not self.db_service.get_mobile_token_mapping(transaction_id):
             raise InvalidStateException("Invalid transaction token")
         return self.payment_service.generate_payment_link(
             amount, transaction_id
