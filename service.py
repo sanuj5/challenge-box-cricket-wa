@@ -123,12 +123,14 @@ https://tinyurl.com/558966ej?tx=1234"""
 
     def process_booking_confirmation_screen_data(self, flow_request):
         date_selected = flow_request.data.get("selected_date")
+        token = flow_request.flow_token
         slots = flow_request.data.get("slots").split(",")
         amount = flow_request.data.get("amount")
         response = dict()
         response['selected_date'] = date_selected
         response['slots'] = flow_request.data.get("slots")
         response['amount'] = amount
+        response['token'] = token
         return response, Screen.SUCCESS.value
 
     def validate_payment_response(self, header, response):

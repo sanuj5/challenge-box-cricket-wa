@@ -1,6 +1,6 @@
 import json
 
-from flask import Flask, request, abort, redirect
+from flask import Flask, request, abort, redirect, render_template
 
 from encryption_service import Encryption
 from model.enums import MessageType
@@ -21,44 +21,53 @@ class BoxBooking:
 
     def _setup_routes(self):
         self.app.add_url_rule(
-            rule="/webhook",
+            rule="/api/webhook",
             view_func=self.webhook,
             endpoint="webhook",
             methods=["GET"],
         )
         self.app.add_url_rule(
-            rule="/webhook",
+            rule="/api/webhook",
             view_func=self.process_request,
             endpoint="process_request",
             methods=["POST"],
         )
         self.app.add_url_rule(
-            rule="/flow",
+            rule="/api/flow",
             view_func=self.health_check,
             endpoint="heal_check",
             methods=["GET"],
         )
         self.app.add_url_rule(
-            rule="/flow",
+            rule="/api/flow",
             view_func=self.process_flow_request,
             endpoint="process_flow_request",
             methods=["POST"],
         )
         self.app.add_url_rule(
-            rule="/payment",
+            rule="/api/payment",
             view_func=self.process_payment_response,
             endpoint="process_payment_response",
             methods=["POST"],
         )
         self.app.add_url_rule(
-            rule="/pay",
+            rule="/api/pay",
             view_func=self.payment_redirect,
             endpoint="payment_redirect",
+            methods=["GET"],
+        )
+        self.app.add_url_rule(
+            rule="/",
+            view_func=self.index_page,
+            endpoint="index_page",
             methods=["GET"],
         )
 
     def health_check(self):
         return ""
+
+    def index_page(self):
+        return render_template('index.html')
 
     def payment_redirect(self):
         transaction_id = request.args.get("tx")
