@@ -7,7 +7,7 @@ class DBService:
         cred = credentials.ApplicationDefault()
 
         firebase_admin.initialize_app(credential=cred, options={
-            "projectId": "quixotic-booth-407213"
+            "projectId": "challenge-cricket-409510"
         })
         # self.app = firebase_admin.initialize_app()
         self.db = firestore.client()
