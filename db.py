@@ -31,6 +31,7 @@ class DBService:
                 return doc.to_dict()
         return dict()
 
-    def save_flow_token(self, mobile, flow_token):
-
-        pass
+    def save_flow_token(self, mobile, token):
+        data = {"mobile": mobile, "token": token}
+        self.db.collection("booking_token").add(data)
+        print("Added token successfully")

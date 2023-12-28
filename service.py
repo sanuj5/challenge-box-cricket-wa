@@ -51,7 +51,7 @@ class BoxService:
     def process_text_message(self, request_body: TextWebhookMessage):
         #  TODO add view booking option
         mobile = request_body.message_from
-        flow_token = str(uuid.uuid4())
+        flow_token = str(uuid.uuid4())[:-2].replace("-", "")
         self.db_service.save_flow_token(mobile, flow_token)
         return_message = self.mbs.get_interactive_flow_message(
             mobile,
