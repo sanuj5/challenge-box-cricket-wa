@@ -69,7 +69,7 @@ class BoxService:
         token = response.get("token")
         print(f"Pending payment of amount {amount}")
         pending_booking_token = self.db_service.get_mobile_token_mapping(token)
-        if not pending_booking_token or pending_booking_token.get("mobile") != mobile:
+        if not pending_booking_token or pending_booking_token.get(token) != mobile:
             return_message = self.mbs.get_final_text_message(
                 mobile,
                 "",
