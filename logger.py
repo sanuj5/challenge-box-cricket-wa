@@ -1,5 +1,6 @@
 import logging
 logging.root.handlers = []
+logging.getLogger('apscheduler.executors.default').propagate = False
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
