@@ -45,4 +45,5 @@ class DBService:
         ).stream()
         if not tokens:
             return None
+        print(f"Found mobile for token {token}")
         return {t.to_dict().get("token"): t.to_dict().get("mobile") for t in tokens}
