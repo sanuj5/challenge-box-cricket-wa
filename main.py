@@ -77,7 +77,6 @@ class BoxBooking:
             redirect(url, code=302)
         except InvalidStateException as e:
             return str(e), 500
-        return "", 200
 
     def process_flow_request(self):
         encrypted_flow_data_b64 = request.json.get("encrypted_flow_data")
