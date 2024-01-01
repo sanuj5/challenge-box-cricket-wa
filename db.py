@@ -41,4 +41,6 @@ class DBService:
         tokens = self.db.collection("booking_token").where(
             filter=FieldFilter("token", "==", token)
         ).stream()
-        return tokens.to_dict() if tokens else None
+        if not tokens:
+            return None
+        return {t.to_dict().get("token"): t.to_dict().get("mobile") for t in tokens}
