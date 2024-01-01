@@ -14,6 +14,7 @@ from model.webhook_interactive import Message as InteractiveWebhookMessage
 from model.webook_text import Message as TextWebhookMessage
 from payment.phone_pe import PaymentGateway
 from whatsapp_api import WhatsappApi
+from logger import Logger
 
 
 class BoxService:
@@ -67,7 +68,7 @@ class BoxService:
         response = json.loads(nfm_message.interactive.nfm_reply.get("response_json"))
         amount = response.get("amount")
         token = response.get("token")
-        print(f"Pending payment of amount {amount}")
+        Logger.info(f"Pending payment of amount {amount}")
         pending_booking_token = self.db_service.get_mobile_token_mapping(token)
         if not pending_booking_token or pending_booking_token.get(token) != mobile:
             return_message = self.mbs.get_final_text_message(
@@ -146,10 +147,10 @@ https://challengecricket.in/api/pay?tx={token}"""
     def validate_payment_response(self, header, response):
         # TODO get mobile number from response transaction ID
         validated_response = self.payment_service.validate_response(header, response)
-        print(f"Response validation {validated_response}")
+        Logger.info(f"Response validation {validated_response}")
         if validated_response:
             response_string = json.loads(response).get("response", None)
-            print(response_string)
+            Logger.info(response_string)
             return_message = self.mbs.get_final_text_message(
                 "918390903001",
                 "",

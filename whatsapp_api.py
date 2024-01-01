@@ -1,6 +1,6 @@
 import requests
 import json
-
+from logger import Logger
 
 class WhatsappApi:
     def __init__(self, wa_api_token, mobile_id):
@@ -11,9 +11,9 @@ class WhatsappApi:
         }
 
     def send_post_request(self, data):
-        print(data)
+        Logger.info(data)
         json_data = json.dumps(data, indent=4,
                                default=lambda o: o.__dict__)
-        print(json_data)
+        Logger.info(json_data)
         r = requests.post(url=self.url, json=json.loads(json_data), headers=self.headers)
-        print(r.content)
+        Logger.info(r.content)

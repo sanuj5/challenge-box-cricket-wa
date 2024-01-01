@@ -3,7 +3,7 @@ import datetime
 import firebase_admin
 from firebase_admin import firestore, credentials
 from google.cloud.firestore_v1 import FieldFilter
-
+from logger import Logger
 
 class DBService:
     def __init__(self):
@@ -37,7 +37,7 @@ class DBService:
     def save_flow_token(self, mobile, token):
         data = {"mobile": mobile, "token": token, "created_ts": datetime.datetime.now()}
         self.db.collection("booking_token").add(data)
-        print(f"Token {token} added token successfully for {mobile}")
+        Logger.info(f"Token {token} added token successfully for {mobile}")
 
     def get_mobile_token_mapping(self, token) -> dict:
         tokens = self.db.collection("booking_token").where(
@@ -45,5 +45,5 @@ class DBService:
         ).stream()
         if not tokens:
             return None
-        print(f"Found mobile for token {token}")
+        Logger.info(f"Found mobile for token {token}")
         return {t.to_dict().get("token"): t.to_dict().get("mobile") for t in tokens}

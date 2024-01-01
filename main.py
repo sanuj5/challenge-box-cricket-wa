@@ -10,6 +10,8 @@ from model.webhook_interactive import Message as InteractiveMessage, Interactive
 from model.webook_text import Message as TextMessage, Text
 from service import BoxService
 from exceptions import InvalidStateException
+from logger import Logger
+
 
 class BoxBooking:
 
@@ -71,7 +73,7 @@ class BoxBooking:
 
     def payment_redirect(self):
         transaction_id = request.args.get("tx")
-        print(transaction_id)
+        Logger.info(transaction_id)
         try:
             url = self.service.generate_payment_link(200, transaction_id)
         except InvalidStateException as e:
@@ -87,10 +89,10 @@ class BoxBooking:
         decrypted_data, key, iv = self.encryption_service.decrypt_data(
             encrypted_flow_data_b64,
             encrypted_aes_key_b64, initial_vector_b64)
-        print(decrypted_data, key, iv)
+        Logger.info(decrypted_data, key, iv)
         response_data = self.service.process_flow_request(decrypted_data)
         response = json.dumps(response_data, indent=4, default=lambda o: o.__dict__)
-        print(json.dumps(response_data, indent=None, default=lambda o: o.__dict__))
+        Logger.info(json.dumps(response_data, indent=None, default=lambda o: o.__dict__))
         return self.encryption_service.encrypt_data(response, key, iv)
 
     def webhook(self):
@@ -105,7 +107,7 @@ class BoxBooking:
 
     def process_request(self):
         request_body = request.json
-        print(request_body)
+        Logger.info(request_body)
         message_type: MessageType = None
         parsed_message = None
         if (request_body.get("entry") and
@@ -139,7 +141,7 @@ class BoxBooking:
     def process_payment_response(self):
         header = request.headers.get("X-VERIFY")
         response = request.get_data()
-        print(f"{header} \n {response}")
+        Logger.info(f"{header} \n {response}")
         self.service.validate_payment_response(header, response)
         return "", 200
 

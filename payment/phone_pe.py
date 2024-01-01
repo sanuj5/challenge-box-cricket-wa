@@ -1,11 +1,8 @@
-import base64
-import json
-import uuid
-
 from phonepe.sdk.pg.common.exceptions import ExpectationFailed
+from phonepe.sdk.pg.env import Env
 from phonepe.sdk.pg.payments.v1.models.request.pg_pay_request import PgPayRequest
 from phonepe.sdk.pg.payments.v1.payment_client import PhonePePaymentClient
-from phonepe.sdk.pg.env import Env
+from logger import Logger
 
 
 class PaymentGateway:
@@ -33,7 +30,7 @@ class PaymentGateway:
             redirect_mode="POST")
         pay_page_response = self.phonepe_client.pay(pay_page_request)
         pay_page_url = pay_page_response.data.instrument_response.redirect_info.url
-        print(pay_page_url)
+        Logger.info(pay_page_url)
         return pay_page_url
 
     def validate_response(self, header, response) -> bool:
@@ -41,17 +38,17 @@ class PaymentGateway:
                                                    response=response)
 
     def is_valid_vpa(self, vpa) -> bool:
-        print(f"Validating vpa {vpa}")
+        Logger.info(f"Validating vpa {vpa}")
         try:
             pay_page_response = self.phonepe_client.validate_vpa(vpa)
-            print(f"Status {pay_page_response.success}")
+            Logger.info(f"Status {pay_page_response.success}")
         except ExpectationFailed:
             return False
         return pay_page_response.success
 
     def send_payment_collection_request(self, vpa, amount,
                                         unique_transaction_id) -> bool:
-        print(f"Sending request to vpa {vpa} for amount {amount}")
+        Logger.info(f"Sending request to vpa {vpa} for amount {amount}")
         upi_collect_request_data = PgPayRequest.upi_collect_pay_request_builder(
             merchant_transaction_id=unique_transaction_id,
             merchant_order_id=unique_transaction_id,
@@ -64,7 +61,7 @@ class PaymentGateway:
             auto_failure_timeout=300)
         try:
             pay_page_response = self.phonepe_client.pay(upi_collect_request_data)
-            print(f"Status {pay_page_response}")
+            Logger.info(f"Status {pay_page_response}")
         except ExpectationFailed:
             return False
         return pay_page_response.success
@@ -80,7 +77,7 @@ if __name__ == '__main__':
     #     pay_page_response = pg.send_payment_collection_request(
     #         amount=100, vpa=vpa, unique_transaction_id=str(uuid.uuid4())[:-2]
     #     )
-    #     print(f"Status {pay_page_response}")
+    #     Logger.info(f"Status {pay_page_response}")
 
     # pg.generate_payment_link(200, str(uuid.uuid4())[:-2])
     response = "{'response': 'eyJzdWNjZXNzIjp0cnVlLCJjb2RlIjoiUEFZTUVOVF9TVUNDRVNTIiwibWVzc2FnZSI6IllvdXIgcGF5bWVudCBpcyBzdWNjZXNzZnVsLiIsImRhdGEiOnsibWVyY2hhbnRJZCI6IkNIQUxMRU5HRUNST05MSU5FIiwibWVyY2hhbnRUcmFuc2FjdGlvbklkIjoiMTIzNCIsInRyYW5zYWN0aW9uSWQiOiJUMjMxMjI3MjMwODU5OTgzODY3NTcyMyIsImFtb3VudCI6MjAwLCJzdGF0ZSI6IkNPTVBMRVRFRCIsInJlc3BvbnNlQ29kZSI6IlNVQ0NFU1MiLCJwYXltZW50SW5zdHJ1bWVudCI6eyJ0eXBlIjoiVVBJIiwidXRyIjoiMzM2MTY2Mjk4OTc4IiwiY2FyZE5ldHdvcmsiOm51bGwsImFjY291bnRUeXBlIjoiU0FWSU5HUyJ9fX0='}"
