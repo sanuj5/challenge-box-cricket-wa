@@ -116,6 +116,7 @@ class BoxService:
 
     def process_slot_screen_data(self, flow_request):
         date_selected = flow_request.data.get("selected_date")
+        token = flow_request.flow_token
         date = datetime.datetime.strptime(date_selected, self.mbs.date_format)
         slots_selected = flow_request.data.get("slots")  # '8', '8 AM - 9 AM'
         response = dict()
@@ -126,6 +127,7 @@ class BoxService:
         response['selected_date'] = f"{date_selected}"
         response['slots'] = f"{',  '.join(slots_title)}"
         response['amount'] = "100"
+        response['token'] = token
         response['error_messages'] = {}
         return response, Screen.BOOKING_CONFIRMATION.value
 
@@ -138,7 +140,7 @@ class BoxService:
         response['selected_date'] = date_selected
         response['slots'] = flow_request.data.get("slots")
         response['amount'] = amount
-        response['token_z'] = token
+        response['token'] = token
         return response, Screen.SUCCESS.value
 
     def validate_payment_response(self, header, response):
