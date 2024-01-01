@@ -1,3 +1,5 @@
+import datetime
+
 import firebase_admin
 from firebase_admin import firestore, credentials
 from google.cloud.firestore_v1 import FieldFilter
@@ -33,9 +35,9 @@ class DBService:
         return dict()
 
     def save_flow_token(self, mobile, token):
-        data = {"mobile": mobile, "token": token}
+        data = {"mobile": mobile, "token": token, "created_ts": datetime.datetime.now()}
         self.db.collection("booking_token").add(data)
-        print("Added token successfully")
+        print(f"Token {token} added token successfully for {mobile}")
 
     def get_mobile_token_mapping(self, token) -> dict:
         tokens = self.db.collection("booking_token").where(
