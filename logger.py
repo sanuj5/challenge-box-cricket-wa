@@ -1,7 +1,8 @@
 import logging
 import sys
 
-log = logging.getLogger()
+log = logging.getLogger('cbc')
+log.setLevel(logging.DEBUG)
 _format = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 
 ch = logging.StreamHandler(sys.stdout)

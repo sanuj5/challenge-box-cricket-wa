@@ -5,8 +5,10 @@ from firebase_admin import firestore, credentials
 from google.cloud.firestore_v1 import FieldFilter
 from logger import Logger
 
+
 class DBService:
     def __init__(self):
+        Logger.info("Initializing firestore client..")
         cred = credentials.ApplicationDefault()
 
         firebase_admin.initialize_app(credential=cred, options={
