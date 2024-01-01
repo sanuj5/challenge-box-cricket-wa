@@ -74,9 +74,11 @@ class BoxBooking:
         print(transaction_id)
         try:
             url = self.service.generate_payment_link(200, transaction_id)
-            redirect(url, code=302)
         except InvalidStateException as e:
             return str(e), 500
+        if not url:
+            return "Internal Server Error" , 500
+        return redirect(url, code=302)
 
     def process_flow_request(self):
         encrypted_flow_data_b64 = request.json.get("encrypted_flow_data")

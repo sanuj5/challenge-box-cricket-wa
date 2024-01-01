@@ -82,7 +82,7 @@ class BoxService:
                 "",
                 f"""Please make payment by clicking below link to confirm your booking. 
     
-    https://challengecricket.in/api/pay?tx={token}"""
+https://challengecricket.in/api/pay?tx={token}"""
             )
         self.api_service.send_post_request(return_message)
 
