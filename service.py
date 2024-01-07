@@ -89,8 +89,13 @@ class BoxService:
             return_message = self.mbs.get_final_text_message(
                 mobile,
                 "",
-                f"""Please make payment by clicking below link to confirm your booking. 
-    
+                f"""You are almost there for your below booking!
+Date: {date}
+Slots: {slots}
+Amount: {amount}
+
+Please make payment by clicking below link to confirm your booking. 
+
 https://challengecricket.in/api/pay?tx={token}"""
             )
         self.api_service.send_post_request(return_message)
@@ -156,30 +161,40 @@ https://challengecricket.in/api/pay?tx={token}"""
         # TODO get mobile number from response transaction ID
         validated_response = self.payment_service.validate_response(header, response)
         Logger.info(f"Response validation {validated_response}")
+        existing_booking = dict()
         if validated_response:
             response_string = base64.b64decode(
                 json.loads(response).get("response"))
             Logger.info(response_string)
             response_dict = json.loads(response_string)
+            transaction_id = response_dict.get("data").get("merchantTransactionId")
+            existing_booking = self.db_service.get_pending_booking(transaction_id)
             if response_dict.get("code") == "PAYMENT_SUCCESS":
-                transaction_id = response_dict.get("data").get("merchantTransactionId")
                 amount = response_dict.get("data").get("amount")
                 # TODO validate amount
                 return_message = self.mbs.get_final_text_message(
-                    "918390903001",
+                    existing_booking.get("mobile"),
                     "",
-                    "Your booking is confirmed"
+                    f"""Awesome, your booking is confirmed!!! 
+"amount": {existing_booking.get("amount")}
+"date": {existing_booking.get("date")}
+"slots": {",".join([self.slots(slot) for slot in existing_booking.get("slots")])}         
+
+Happy Cricketing!!!           
+"""
                 )
-                self.db_service.confirm_booking(transaction_id, response_string)
+                self.db_service.confirm_booking(
+                    existing_booking, transaction_id, response_dict
+                )
             else:
                 return_message = self.mbs.get_final_text_message(
-                    "918390903001",
+                    existing_booking.get("mobile"),
                     "",
                     "Your payment is timed out. Please start new booking."
                 )
         else:
             return_message = self.mbs.get_final_text_message(
-                "918390903001",
+                existing_booking.get("mobile"),
                 "",
                 "Some error has occurred while processing your request."
             )

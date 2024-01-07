@@ -62,24 +62,25 @@ class DBService:
         self.db.collection("pending_bookings").add(data)
         Logger.info(f"Booking added for {token} and {mobile}")
 
-    def confirm_booking(self, token, payment_response):
-        bookings = self.db.collection("pending_bookings").where(
-            filter=FieldFilter("token", "==", token)
-        ).get()
-        Logger.info(bookings)
-        booking = bookings[0]
+    def confirm_booking(self, existing_booking, token, payment_response):
         data = {
-            "mobile": booking.get("mobile"),
+            "mobile": existing_booking.get("mobile"),
             "token": token,
             "created_ts": datetime.datetime.now(),
-            "amount": float(booking.get("amount")),
-            "date": booking.get("date"),
-            "slots": booking.get("slots"),
+            "amount": float(existing_booking.get("amount")),
+            "date": existing_booking.get("date"),
+            "slots": existing_booking.get("slots"),
             "cancelled": False,
             "payment_response": payment_response
         }
         self.db.collection("confirmed_bookings").add(data)
-        Logger.info(f"Booking confirmed for {token} and {booking.get('mobile')}")
+        Logger.info(f"Booking confirmed for {token}, {existing_booking.get('mobile')}")
+
+    def get_pending_booking(self, token):
+        bookings = self.db.collection("pending_bookings").where(
+            filter=FieldFilter("token", "==", token)
+        ).get()
+        return bookings[0]
 
     def cancel_booking(self, token, mobile):
         booking = self.db.collection("confirmed_bookings").where(
