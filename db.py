@@ -67,7 +67,7 @@ class DBService:
             filter=FieldFilter("token", "==", token)
         ).get()
         Logger.info(bookings)
-        booking = bookings.get(0)
+        booking = bookings[0]
         data = {
             "mobile": booking.get("mobile"),
             "token": token,
