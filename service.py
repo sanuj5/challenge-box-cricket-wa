@@ -89,7 +89,8 @@ class BoxService:
             return_message = self.mbs.get_final_text_message(
                 mobile,
                 "",
-                f"""You are almost there for your below booking!
+                f"""Almost there for your below booking!
+
 Date: {date}
 Slots: {slots}
 Amount: {amount}
@@ -178,7 +179,7 @@ https://challengecricket.in/api/pay?tx={token}"""
                     f"""Awesome, your booking is confirmed!!! 
 "amount": {existing_booking.get("amount")}
 "date": {existing_booking.get("date")}
-"slots": {",".join([self.slots(slot) for slot in existing_booking.get("slots")])}         
+"slots": {",".join([self.slots.get(int(slot)) for slot in existing_booking.get("slots")])}         
 
 Happy Cricketing!!!           
 """
