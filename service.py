@@ -67,10 +67,13 @@ class BoxService:
     def process_nfm_reply_message(self, nfm_message: InteractiveFlowMessageReply):
         mobile = nfm_message.message_from
         response = json.loads(nfm_message.interactive.nfm_reply.get("response_json"))
+        Logger.info(f"nfm reply: {response}")
         amount = response.get("amount")
         token = response.get("token")
         slots = response.get("slots")
-        slots_id = [self.revers_slots_mapping.get(slot) for slot in slots.split(",")]
+        slots_id = [
+            self.revers_slots_mapping.get(slot.strip()) for slot in slots.split(",")
+        ]
         date = response.get("selected_date")
         Logger.info(f"Pending payment of amount {amount}")
         pending_booking_token = self.db_service.get_mobile_token_mapping(token)
@@ -159,12 +162,15 @@ https://challengecricket.in/api/pay?tx={token}"""
             Logger.info(response_string)
             response_dict = json.loads(response_string)
             if response_dict.get("code") == "PAYMENT_SUCCESS":
+                transaction_id = response_dict.get("data").get("merchantTransactionId")
+                amount = response_dict.get("data").get("amount")
+                # TODO validate amount
                 return_message = self.mbs.get_final_text_message(
                     "918390903001",
                     "",
                     "Your booking is confirmed"
                 )
-                self.db_service.confirm_booking(response_string)
+                self.db_service.confirm_booking(transaction_id, response_string)
             else:
                 return_message = self.mbs.get_final_text_message(
                     "918390903001",
