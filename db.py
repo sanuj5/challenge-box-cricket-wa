@@ -49,3 +49,37 @@ class DBService:
             return None
         Logger.info(f"Found mobile for token {token}")
         return {t.to_dict().get("token"): t.to_dict().get("mobile") for t in tokens}
+
+    def create_booking(self, mobile, token, amount, date, slots: list[int]):
+        data = {
+            "mobile": mobile,
+            "token": token,
+            "created_ts": datetime.datetime.now(),
+            "amount": float(amount),
+            "date": date,
+            "slots": slots
+        }
+        self.db.collection("pending_bookings").add(data)
+        Logger.info(f"Booking added for {token} and {mobile}")
+
+    def confirm_booking(self, mobile, token, amount, date, slots: list[int],
+                        payment_response):
+        data = {
+            "mobile": mobile,
+            "token": token,
+            "created_ts": datetime.datetime.now(),
+            "amount": float(amount),
+            "date": date,
+            "slots": slots,
+            "cancelled": False,
+            "payment_response": payment_response
+        }
+        self.db.collection("confirmed_bookings").add(data)
+        Logger.info(f"Booking confirmed for {token} and {mobile}")
+
+    def cancel_booking(self, token, mobile):
+        booking = self.db.collection("confirmed_bookings").where(
+            filter=FieldFilter("token", "==", token)
+        )
+        booking.update({"cancelled": True})
+        Logger.info(f"Booking cancelled for {token} and {mobile}")
