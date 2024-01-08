@@ -177,9 +177,10 @@ https://challengecricket.in/api/pay?tx={token}"""
                     existing_booking.get("mobile"),
                     "",
                     f"""Awesome, your booking is confirmed!!! 
-"amount": {existing_booking.get("amount")}
-"date": {existing_booking.get("date")}
-"slots": {",".join([self.slots.get(int(slot)) for slot in existing_booking.get("slots")])}         
+
+Date: {existing_booking.get("date")}
+Slots: {",".join([self.slots.get(int(slot)) for slot in existing_booking.get("slots")])}
+Amount paid: {existing_booking.get("amount")}         
 
 Happy Cricketing!!!           
 """
