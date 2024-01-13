@@ -1,4 +1,5 @@
 import datetime
+from random import randrange
 
 import firebase_admin
 from firebase_admin import firestore, credentials
@@ -59,6 +60,7 @@ class DBService:
 
     def create_booking(self, mobile, token, amount, date, slots: list[int]):
         current_ts = datetime.datetime.now()
+        _id = f'{current_ts.strftime("%Y%m%d%H%M%S")}-{randrange(10000,100000)}'
         ttl_ts = current_ts + datetime.timedelta(minutes=10)
         data = {
             "mobile": mobile,
@@ -69,7 +71,7 @@ class DBService:
             "slots": slots,
             "ttl_ts": ttl_ts
         }
-        self.db.collection("pending_bookings").add(data)
+        self.db.collection("pending_bookings").document(_id).set(data)
         Logger.info(f"Booking added for {token} and {mobile}")
 
     def confirm_booking(self, existing_booking, token, payment_response):
