@@ -92,7 +92,8 @@ class BoxService:
             )
         else:
             self.db_service.create_booking(
-                mobile, token, total_amount, date, slots_id.split(",")
+                mobile, token, total_amount, date,
+                [slot.strip() for slot in slots_id.split(",")]
             )
             return_message = self.mbs.get_final_text_message(
                 mobile,
@@ -211,7 +212,7 @@ If booking is not done in 10 minutes, it will be cancelled.
                     f"""Awesome, your booking is confirmed!!! 
 
 Date: {existing_booking.get("date")}
-Slots: {",".join([self.slots.get(slot).get("title") for slot in existing_booking.get("slots")])}
+Slots: {", ".join([self.slots.get(slot.strip()).get("title") for slot in existing_booking.get("slots")])}
 Amount paid: {existing_booking.get("amount")}         
 
 Happy Cricketing!!!           
@@ -241,4 +242,4 @@ Happy Cricketing!!!
 
 if __name__ == '__main__':
     service = BoxService()
-    service.process_date_screen_data(None)
+    service.db_service.get_reserved_slots("13 Jan 2024")
