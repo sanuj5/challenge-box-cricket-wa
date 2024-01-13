@@ -72,6 +72,8 @@ class BoxService:
         token = response.get("token")
         slots_id = response.get("slots")
         date = response.get("selected_date")
+        slots_title = [self.slots.get(slot.strip()).get("title")
+                       for slot in slots_id.split(',')]
         Logger.info(f"Pending payment of amount {amount}")
         pending_booking_token = self.db_service.get_mobile_token_mapping(token)
         if not pending_booking_token or pending_booking_token.get(token) != mobile:
@@ -89,7 +91,7 @@ class BoxService:
                 f"""Almost there for your below booking!
 
 Date: {date}
-Slots: {slots}
+Slots: {slots_title}
 Amount: {amount}
 
 Please make payment by clicking below link to confirm your booking. 
@@ -113,8 +115,8 @@ https://challengecricket.in/api/pay?tx={token}"""
         return FlowResponse(screen=next_screen, data=response_data)
 
     def process_date_screen_data(self, flow_request) -> (dict, str):
-        # date_selected = flow_request.data.get("selected_date")
-        date_selected = datetime.datetime.now().timestamp() * 1000
+        date_selected = flow_request.data.get("selected_date")
+        # date_selected = datetime.datetime.now().timestamp() * 1000
         response = dict()
         if not date_selected:
             response['error_messages'] = "Please select date"
