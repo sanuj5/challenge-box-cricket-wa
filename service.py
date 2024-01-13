@@ -21,7 +21,7 @@ from logger import Logger
 class BoxService:
     def __init__(self):
         self.db_service = DBService()
-        self.slots, self.revers_slots_mapping = self.db_service.get_all_slots()
+        self.slots, self.day_wise_slots = self.db_service.get_all_slots()
         secrets = self.db_service.get_all_secrets()
         self.api_service = WhatsappApi(secrets.get("WA_API_TOKEN"),
                                        secrets.get("MOBILE_ID"))
@@ -116,17 +116,27 @@ https://challengecricket.in/api/pay?tx={token}"""
         return FlowResponse(screen=next_screen, data=response_data)
 
     def process_date_screen_data(self, flow_request) -> (dict, str):
-        date_selected = flow_request.data.get("selected_date")
+        # date_selected = flow_request.data.get("selected_date")
+        date_selected = datetime.datetime.now().timestamp() * 1000
         response = dict()
         if not date_selected:
             response['error_messages'] = "Please select date"
             return response, Screen.DATE_SELECTION.value
         date = datetime.datetime.fromtimestamp(float(date_selected) / 1000,
                                                tz=datetime.timezone.utc)
+        weekday = date.weekday()
+        slots = self.day_wise_slots.get(weekday)
         response['selected_date'] = f'{date.strftime(self.mbs.date_format)}'
         #  TODO check available slots
-        response['slots'] = [{"id": str(key), "title": value} for key, value in
-                             self.slots.items()]
+        response['slots'] = [
+            {
+                "id": item.get("id"),
+                "title": f'{item.get("title")}',
+                "description": f'₹ {item.get("price")}',
+                "enabled": True
+            }
+            for item in slots
+        ]
         return response, Screen.SLOT_SELECTION.value
 
     def process_slot_screen_data(self, flow_request):
@@ -140,7 +150,8 @@ https://challengecricket.in/api/pay?tx={token}"""
             return response, Screen.SLOT_SELECTION.value
         slots_title = [self.slots.get(int(slot)) for slot in slots_selected]
         response['selected_date'] = f"{date_selected}"
-        response['slots'] = f"{',  '.join(slots_title)}"
+        response['slots_title'] = f"{',  '.join(slots_title)}"
+        response['slots'] = f"{',  '.join(slots_selected)}"
         response['amount'] = "100"
         response['token'] = token
         response['error_messages'] = {}
@@ -208,3 +219,8 @@ Happy Cricketing!!!
         return self.payment_service.generate_payment_link(
             amount, transaction_id
         )
+
+
+if __name__ == '__main__':
+    service = BoxService()
+    service.process_date_screen_data(None)

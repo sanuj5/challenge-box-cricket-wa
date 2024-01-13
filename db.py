@@ -21,12 +21,16 @@ class DBService:
         slots_ref = self.db.collection("slots")
         docs = slots_ref.order_by("id").stream()
         slots = dict()
-        reverse_mapping = dict()
+        day_wise_slots: dict[int, list: dict] = dict()
+
+        for day in range(0, 7):
+            _list = list()
+            day_wise_slots[day] = _list
 
         for doc in docs:
-            slots[doc.to_dict().get('id')] = doc.to_dict().get('title')
-            reverse_mapping[doc.to_dict().get('title')] = doc.to_dict().get('id')
-        return slots, reverse_mapping
+            slots[doc.to_dict().get('id')] = doc.to_dict()
+            day_wise_slots.get(doc.get("day_id")).append(doc.to_dict())
+        return slots, day_wise_slots
 
     def get_all_secrets(self) -> dict:
         slots_ref = self.db.collection("secrets")
