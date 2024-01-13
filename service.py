@@ -80,7 +80,7 @@ class BoxService:
         slots_title = ", ".join([self.slots.get(slot.strip()).get("title")
                                  for slot in slots_id.split(',')])
         total_amount = sum(
-            [self.slots.get(slot).get("price") for slot in slots_id.split(',')])
+            [self.slots.get(slot.strip()).get("price") for slot in slots_id.split(',')])
         Logger.info(f"Pending payment of amount {total_amount}")
         pending_booking_token = self.db_service.get_mobile_token_mapping(token)
         if not pending_booking_token or pending_booking_token.get(token) != mobile:
@@ -167,8 +167,8 @@ If booking is not done in 10 minutes, it will be cancelled.
         total_amount = sum(
             [self.slots.get(slot).get("price") for slot in slots_selected])
         response['selected_date'] = f"{date_selected}"
-        response['slots_title'] = f"{',  '.join(slots_title)}"
-        response['slots'] = f"{',  '.join(slots_selected)}"
+        response['slots_title'] = f"{', '.join(slots_title)}"
+        response['slots'] = f"{', '.join(slots_selected)}"
         response['amount'] = f"₹ {total_amount}/-"
         response['token'] = token
         response['error_messages'] = {}

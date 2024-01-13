@@ -142,7 +142,7 @@ class DBService:
     def remove_pending_bookings(self):
         current_ts = datetime.datetime.now()
         pending_bookings = self.db.collection("pending_bookings").where(
-            filter=FieldFilter("ttl_ts", "<=", current_ts)
+            filter=FieldFilter("ttl_ts", "<", current_ts)
         ).stream()
         for booking in pending_bookings:
             Logger.info(f"Removing pending booking for {booking.to_dict().get('mobile')}")
