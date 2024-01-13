@@ -70,10 +70,7 @@ class BoxService:
         Logger.info(f"nfm reply: {response}")
         amount = response.get("amount")
         token = response.get("token")
-        slots = response.get("slots")
-        slots_id = [
-            self.revers_slots_mapping.get(slot.strip()) for slot in slots.split(",")
-        ]
+        slots_id = response.get("slots")
         date = response.get("selected_date")
         Logger.info(f"Pending payment of amount {amount}")
         pending_booking_token = self.db_service.get_mobile_token_mapping(token)
