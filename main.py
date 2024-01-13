@@ -1,7 +1,5 @@
 import json
-
 from flask import Flask, request, abort, redirect, render_template
-
 from encryption_service import Encryption
 from model.enums import MessageType
 from model.interactive_flow_message_reply import InteractiveFlowMessageReply, \

@@ -17,6 +17,7 @@ class DBService:
         })
         # self.app = firebase_admin.initialize_app()
         self.db = firestore.client()
+        self.batch = self.db.batch()
 
     def get_all_slots(self) -> (dict, dict):
         docs = self.db.collection("slots").where(
@@ -57,13 +58,16 @@ class DBService:
         return {t.to_dict().get("token"): t.to_dict().get("mobile") for t in tokens}
 
     def create_booking(self, mobile, token, amount, date, slots: list[int]):
+        current_ts = datetime.datetime.now()
+        ttl_ts = current_ts + datetime.timedelta(minutes=10)
         data = {
             "mobile": mobile,
             "token": token,
-            "created_ts": datetime.datetime.now(),
+            "created_ts": current_ts,
             "amount": float(amount),
             "date": date,
-            "slots": slots
+            "slots": slots,
+            "ttl_ts": ttl_ts
         }
         self.db.collection("pending_bookings").add(data)
         Logger.info(f"Booking added for {token} and {mobile}")
@@ -134,3 +138,13 @@ class DBService:
             filter=FieldFilter("cancelled", "==", False)
         ).stream()
         return Booking.create_booking(pending_bookings)
+
+    def remove_pending_bookings(self):
+        current_ts = datetime.datetime.now()
+        pending_bookings = self.db.collection("pending_bookings").where(
+            filter=FieldFilter("ttl_ts", "<=", current_ts)
+        ).stream()
+        for booking in pending_bookings:
+            Logger.info(f"Removing pending booking for {booking.to_dict().get('mobile')}")
+            self.batch.delete(booking.reference)
+        self.batch.commit()

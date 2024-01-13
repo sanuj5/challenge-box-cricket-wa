@@ -2,9 +2,9 @@ import base64
 import datetime
 import json
 import uuid
+# import atexit
 
 from phonepe.sdk.pg.env import Env
-
 from db import DBService
 from exceptions import InvalidStateException
 from message_builder_service import MessageBuilderService
@@ -16,6 +16,9 @@ from model.webook_text import Message as TextWebhookMessage
 from payment.phone_pe import PaymentGateway
 from whatsapp_api import WhatsappApi
 from logger import Logger
+
+
+# from apscheduler.schedulers.background import BackgroundScheduler
 
 
 class BoxService:
@@ -31,6 +34,11 @@ class BoxService:
                                               salt_key=secrets.get("PROD_SALT_KEY"),
                                               salt_index=secrets.get("SALT_INDEX"),
                                               env=Env.PROD)
+
+        # scheduler = BackgroundScheduler()
+        # scheduler.add_job(self.remove_pending_bookings, 'interval', seconds=5)
+        # scheduler.start()
+        # atexit.register(lambda: scheduler.shutdown())
 
     def process_interactive_message(self, message: InteractiveWebhookMessage):
         mobile = message.message_from
@@ -117,8 +125,8 @@ https://challengecricket.in/api/pay?tx={token}"""
         return FlowResponse(screen=next_screen, data=response_data)
 
     def process_date_screen_data(self, flow_request) -> (dict, str):
-        # date_selected = flow_request.data.get("selected_date")
-        date_selected = datetime.datetime.now().timestamp() * 1000
+        date_selected = flow_request.data.get("selected_date")
+        # date_selected = datetime.datetime.now().timestamp() * 1000
         response = dict()
         if not date_selected:
             response['error_messages'] = "Please select date"
@@ -129,6 +137,7 @@ https://challengecricket.in/api/pay?tx={token}"""
         slots = self.day_wise_slots.get(weekday)
         formatted_date = f'{date.strftime(self.mbs.date_format)}'
         response['selected_date'] = formatted_date
+        self.db_service.remove_pending_bookings()
         reserved_slots: dict = self.db_service.get_reserved_slots(formatted_date)
         response['slots'] = list()
         for slot in slots:
@@ -224,7 +233,6 @@ Happy Cricketing!!!
         return self.payment_service.generate_payment_link(
             amount, transaction_id
         )
-
 
 if __name__ == '__main__':
     service = BoxService()
