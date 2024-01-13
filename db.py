@@ -18,8 +18,9 @@ class DBService:
         self.db = firestore.client()
 
     def get_all_slots(self) -> (dict, dict):
-        slots_ref = self.db.collection("slots")
-        docs = slots_ref.order_by("id").stream()
+        docs = self.db.collection("slots").where(
+            filter=FieldFilter("active", "==", True)
+        ).order_by("sort_order").stream()
         slots = dict()
         day_wise_slots: dict[int, list: dict] = dict()
 

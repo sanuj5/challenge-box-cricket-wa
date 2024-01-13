@@ -145,7 +145,7 @@ https://challengecricket.in/api/pay?tx={token}"""
         if not slots_selected or len(slots_selected) == 0:
             response['error_messages'] = "Please select at least 1 slot"
             return response, Screen.SLOT_SELECTION.value
-        slots_title = [self.slots.get(int(slot)) for slot in slots_selected]
+        slots_title = [self.slots.get(slot) for slot in slots_selected]
         response['selected_date'] = f"{date_selected}"
         response['slots_title'] = f"{',  '.join(slots_title)}"
         response['slots'] = f"{',  '.join(slots_selected)}"
