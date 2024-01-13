@@ -4,6 +4,7 @@ import firebase_admin
 from firebase_admin import firestore, credentials
 from google.cloud.firestore_v1 import FieldFilter
 from logger import Logger
+from model.booking import Booking
 
 
 class DBService:
@@ -93,3 +94,43 @@ class DBService:
         )
         booking.update({"cancelled": True})
         Logger.info(f"Booking cancelled for {token} and {mobile}")
+
+    def get_reserved_slots(self, date) -> dict[int]:
+        bookings: dict[int] = dict()
+        confirmed_bookings = self.db.collection("confirmed_bookings").where(
+            filter=FieldFilter("date", "==", date)
+        ).where(
+            filter=FieldFilter("cancelled", "==", False)
+        ).stream()
+
+        pending_bookings = self.db.collection("pending_bookings").where(
+            filter=FieldFilter("date", "==", date)
+        ).stream()
+
+        for booking in confirmed_bookings:
+            b: dict = booking.to_dict()
+            for slot in b.get("slots"):
+                bookings[slot] = True
+
+        for booking in pending_bookings:
+            b: dict = booking.to_dict()
+            for slot in b.get("slots"):
+                bookings[slot] = True
+
+        return bookings
+
+    def get_confirmed_bookings(self, date) -> list[Booking]:
+        confirmed_bookings = self.db.collection("confirmed_bookings").where(
+            filter=FieldFilter("date", "==", date)
+        ).where(
+            filter=FieldFilter("cancelled", "==", False)
+        ).stream()
+        return Booking.create_booking(confirmed_bookings)
+
+    def get_pending_bookings(self, date) -> list[Booking]:
+        pending_bookings = self.db.collection("pending_bookings").where(
+            filter=FieldFilter("date", "==", date)
+        ).where(
+            filter=FieldFilter("cancelled", "==", False)
+        ).stream()
+        return Booking.create_booking(pending_bookings)

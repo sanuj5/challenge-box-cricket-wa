@@ -72,8 +72,8 @@ class BoxService:
         token = response.get("token")
         slots_id = response.get("slots")
         date = response.get("selected_date")
-        slots_title = [self.slots.get(slot.strip()).get("title")
-                       for slot in slots_id.split(',')]
+        slots_title = "".join([self.slots.get(slot.strip()).get("title")
+                               for slot in slots_id.split(',')])
         Logger.info(f"Pending payment of amount {amount}")
         pending_booking_token = self.db_service.get_mobile_token_mapping(token)
         if not pending_booking_token or pending_booking_token.get(token) != mobile:
@@ -84,7 +84,9 @@ class BoxService:
                 "Please start the booking again."
             )
         else:
-            self.db_service.create_booking(mobile, token, amount, date, slots_id)
+            self.db_service.create_booking(
+                mobile, token, amount, date, slots_id.split(",")
+            )
             return_message = self.mbs.get_final_text_message(
                 mobile,
                 "",
@@ -115,8 +117,8 @@ https://challengecricket.in/api/pay?tx={token}"""
         return FlowResponse(screen=next_screen, data=response_data)
 
     def process_date_screen_data(self, flow_request) -> (dict, str):
-        date_selected = flow_request.data.get("selected_date")
-        # date_selected = datetime.datetime.now().timestamp() * 1000
+        # date_selected = flow_request.data.get("selected_date")
+        date_selected = datetime.datetime.now().timestamp() * 1000
         response = dict()
         if not date_selected:
             response['error_messages'] = "Please select date"
@@ -125,17 +127,20 @@ https://challengecricket.in/api/pay?tx={token}"""
                                                tz=datetime.timezone.utc)
         weekday = date.weekday()
         slots = self.day_wise_slots.get(weekday)
-        response['selected_date'] = f'{date.strftime(self.mbs.date_format)}'
-        #  TODO check available slots
-        response['slots'] = [
-            {
-                "id": item.get("id"),
-                "title": f'{item.get("title")}',
-                "description": f'₹ {item.get("price")}',
+        formatted_date = f'{date.strftime(self.mbs.date_format)}'
+        response['selected_date'] = formatted_date
+        reserved_slots: dict = self.db_service.get_reserved_slots(formatted_date)
+        response['slots'] = list()
+        for slot in slots:
+            item = {
+                "id": slot.get("id"),
+                "title": f'{slot.get("title")}',
+                "description": f'₹ {slot.get("price")}',
                 "enabled": True
             }
-            for item in slots
-        ]
+            if reserved_slots.get(slot.get("id")):
+                item["enabled"] = False
+            response['slots'].append(item)
         return response, Screen.SLOT_SELECTION.value
 
     def process_slot_screen_data(self, flow_request):
@@ -183,20 +188,21 @@ https://challengecricket.in/api/pay?tx={token}"""
             if response_dict.get("code") == "PAYMENT_SUCCESS":
                 amount = response_dict.get("data").get("amount")
                 # TODO validate amount
+
+                self.db_service.confirm_booking(
+                    existing_booking, transaction_id, response_dict
+                )
                 return_message = self.mbs.get_final_text_message(
                     existing_booking.get("mobile"),
                     "",
                     f"""Awesome, your booking is confirmed!!! 
 
 Date: {existing_booking.get("date")}
-Slots: {",".join([self.slots.get(int(slot)) for slot in existing_booking.get("slots")])}
+Slots: {",".join([self.slots.get(slot).get("title") for slot in existing_booking.get("slots")])}
 Amount paid: {existing_booking.get("amount")}         
 
 Happy Cricketing!!!           
 """
-                )
-                self.db_service.confirm_booking(
-                    existing_booking, transaction_id, response_dict
                 )
             else:
                 return_message = self.mbs.get_final_text_message(
