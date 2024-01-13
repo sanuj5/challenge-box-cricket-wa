@@ -3,7 +3,7 @@ import datetime
 import json
 import uuid
 # import atexit
-
+# from apscheduler.schedulers.background import BackgroundScheduler
 from phonepe.sdk.pg.env import Env
 from db import DBService
 from exceptions import InvalidStateException
@@ -16,9 +16,6 @@ from model.webook_text import Message as TextWebhookMessage
 from payment.phone_pe import PaymentGateway
 from whatsapp_api import WhatsappApi
 from logger import Logger
-
-
-# from apscheduler.schedulers.background import BackgroundScheduler
 
 
 class BoxService:
@@ -80,9 +77,11 @@ class BoxService:
         token = response.get("token")
         slots_id = response.get("slots")
         date = response.get("selected_date")
-        slots_title = "".join([self.slots.get(slot.strip()).get("title")
-                               for slot in slots_id.split(',')])
-        Logger.info(f"Pending payment of amount {amount}")
+        slots_title = ", ".join([self.slots.get(slot.strip()).get("title")
+                                 for slot in slots_id.split(',')])
+        total_amount = sum(
+            [self.slots.get(slot).get("price") for slot in slots_id.split(',')])
+        Logger.info(f"Pending payment of amount {total_amount}")
         pending_booking_token = self.db_service.get_mobile_token_mapping(token)
         if not pending_booking_token or pending_booking_token.get(token) != mobile:
             return_message = self.mbs.get_final_text_message(
@@ -93,7 +92,7 @@ class BoxService:
             )
         else:
             self.db_service.create_booking(
-                mobile, token, amount, date, slots_id.split(",")
+                mobile, token, total_amount, date, slots_id.split(",")
             )
             return_message = self.mbs.get_final_text_message(
                 mobile,
@@ -102,11 +101,14 @@ class BoxService:
 
 Date: {date}
 Slots: {slots_title}
-Amount: {amount}
+Amount: ₹ {total_amount}/-
 
 Please make payment by clicking below link to confirm your booking. 
 
-https://challengecricket.in/api/pay?tx={token}"""
+https://challengecricket.in/api/pay?tx={token}
+
+If booking is not done in 10 minutes, it will be cancelled.
+"""
             )
         self.api_service.send_post_request(return_message)
 
@@ -156,16 +158,18 @@ https://challengecricket.in/api/pay?tx={token}"""
         date_selected = flow_request.data.get("selected_date")
         token = flow_request.flow_token
         date = datetime.datetime.strptime(date_selected, self.mbs.date_format)
-        slots_selected = flow_request.data.get("slots")  # '8', '8 AM - 9 AM'
+        slots_selected = flow_request.data.get("slots")
         response = dict()
         if not slots_selected or len(slots_selected) == 0:
             response['error_messages'] = "Please select at least 1 slot"
             return response, Screen.SLOT_SELECTION.value
         slots_title = [self.slots.get(slot).get("title") for slot in slots_selected]
+        total_amount = sum(
+            [self.slots.get(slot).get("price") for slot in slots_selected])
         response['selected_date'] = f"{date_selected}"
         response['slots_title'] = f"{',  '.join(slots_title)}"
         response['slots'] = f"{',  '.join(slots_selected)}"
-        response['amount'] = "100"
+        response['amount'] = f"₹ {total_amount}/-"
         response['token'] = token
         response['error_messages'] = {}
         return response, Screen.BOOKING_CONFIRMATION.value
@@ -233,6 +237,7 @@ Happy Cricketing!!!
         return self.payment_service.generate_payment_link(
             amount, transaction_id
         )
+
 
 if __name__ == '__main__':
     service = BoxService()
