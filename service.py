@@ -235,14 +235,16 @@ Happy Cricketing!!!
     def generate_payment_link(self, amount, transaction_id):
         if not self.db_service.get_mobile_token_mapping(transaction_id):
             raise InvalidStateException("Invalid transaction token")
-        if not self.db_service.get_pending_booking(transaction_id):
+        elif not self.db_service.get_pending_booking(transaction_id):
             raise InvalidStateException("<h1>This payment link is expired. "
                                         "Please start new booking in WhatsApp.</h1>")
-        return self.payment_service.generate_payment_link(
-            amount, transaction_id
-        )
+        else:
+            return self.payment_service.generate_payment_link(
+                amount, transaction_id
+            )
 
 
 if __name__ == '__main__':
     service = BoxService()
-    service.db_service.get_reserved_slots("13 Jan 2024")
+    # service.db_service.get_reserved_slots("13 Jan 2024")
+    service.generate_payment_link(200, "9725dc452770493bbb26c7b0869378")
