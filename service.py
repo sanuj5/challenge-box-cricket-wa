@@ -2,6 +2,8 @@ import base64
 import datetime
 import json
 import uuid
+
+import pytz
 # import atexit
 # from apscheduler.schedulers.background import BackgroundScheduler
 from phonepe.sdk.pg.env import Env
@@ -129,20 +131,20 @@ If booking is not done in 10 minutes, it will be cancelled.
 
     def process_date_screen_data(self, flow_request) -> (dict, str):
         date_selected = flow_request.data.get("selected_date")
-        # date_selected = datetime.datetime.now().timestamp() * 1000
         response = dict()
         if not date_selected:
             response['error_messages'] = "Please select date"
             return response, Screen.DATE_SELECTION.value
         date = datetime.datetime.fromtimestamp(float(date_selected) / 1000,
-                                               tz=datetime.timezone.utc)
+                                               tz=pytz.timezone("Asia/Kolkata"))
+        today_date = datetime.datetime.today()
         weekday = date.weekday()
         slots = self.day_wise_slots.get(weekday)
         formatted_date = f'{date.strftime(self.mbs.date_format)}'
-        response['selected_date'] = formatted_date
         self.db_service.remove_pending_bookings()
         reserved_slots: dict = self.db_service.get_reserved_slots(formatted_date)
         response['slots'] = list()
+        current_hour = today_date.hour
         for slot in slots:
             item = {
                 "id": slot.get("id"),
@@ -152,7 +154,11 @@ If booking is not done in 10 minutes, it will be cancelled.
             }
             if reserved_slots.get(slot.get("id")):
                 item["enabled"] = False
+            if (today_date.date() == date.date()
+                    and slot.get("start_hour") <= current_hour):
+                item["enabled"] = False
             response['slots'].append(item)
+        response['selected_date'] = formatted_date
         return response, Screen.SLOT_SELECTION.value
 
     def process_slot_screen_data(self, flow_request):
@@ -233,11 +239,12 @@ Happy Cricketing!!!
         self.api_service.send_post_request(return_message)
 
     def generate_payment_link(self, amount, transaction_id):
+        self.db_service.remove_pending_bookings()
         if not self.db_service.get_mobile_token_mapping(transaction_id):
             raise InvalidStateException("Invalid transaction token")
         elif not self.db_service.get_pending_booking(transaction_id):
             raise InvalidStateException("<h1>This payment link is expired. "
-                                        "Please start new booking in WhatsApp.</h1>")
+                                        "Please start new booking from WhatsApp.</h1>")
         else:
             return self.payment_service.generate_payment_link(
                 amount, transaction_id
