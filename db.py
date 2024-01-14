@@ -45,9 +45,20 @@ class DBService:
         return dict()
 
     def save_flow_token(self, mobile, token):
-        data = {"mobile": mobile, "token": token, "created_ts": datetime.datetime.now()}
-        self.db.collection("booking_token").add(data)
+        _id = self.generate_id(mobile)
+        data = {
+            "mobile": mobile,
+            "token": token,
+            "created_ts": datetime.datetime.now(),
+            "ttl_ts": datetime.datetime.now() + datetime.timedelta(days=30)
+        }
+        self.db.collection("booking_token").document(_id).set(data)
         Logger.info(f"Token {token} added token successfully for {mobile}")
+
+    @staticmethod
+    def generate_id(mobile):
+        current_ts = datetime.datetime.now()
+        return f'{mobile}_{current_ts.strftime("%Y%m%d%H%M%S")}'
 
     def get_mobile_token_mapping(self, token) -> dict:
         tokens = self.db.collection("booking_token").where(
@@ -59,22 +70,22 @@ class DBService:
         return {t.to_dict().get("token"): t.to_dict().get("mobile") for t in tokens}
 
     def create_booking(self, mobile, token, amount, date, slots: list[int]):
-        current_ts = datetime.datetime.now()
-        _id = f'{current_ts.strftime("%Y%m%d%H%M%S")}-{randrange(10000,100000)}'
-        ttl_ts = current_ts + datetime.timedelta(minutes=10)
+        _id = self.generate_id(mobile)
         data = {
             "mobile": mobile,
             "token": token,
-            "created_ts": current_ts,
+            "created_ts": datetime.datetime.now(),
             "amount": float(amount),
             "date": date,
             "slots": slots,
-            "ttl_ts": ttl_ts
+            "ttl_ts": datetime.datetime.now() + datetime.timedelta(minutes=10)
         }
         self.db.collection("pending_bookings").document(_id).set(data)
+        self.db.collection("pending_bookings_history").document(_id).set(data)
         Logger.info(f"Booking added for {token} and {mobile}")
 
     def confirm_booking(self, existing_booking, token, payment_response):
+        _id = self.generate_id(existing_booking.get("mobile"))
         data = {
             "mobile": existing_booking.get("mobile"),
             "token": token,
@@ -85,8 +96,9 @@ class DBService:
             "cancelled": False,
             "payment_response": payment_response
         }
-        self.db.collection("confirmed_bookings").add(data)
-        Logger.info(f"Booking confirmed for {token}, {existing_booking.get('mobile')}")
+        self.db.collection("confirmed_bookings").document(_id).set(data)
+        Logger.info(f"Booking confirmed for {existing_booking.id}, {token}, "
+                    f"{existing_booking.get('mobile')}")
 
     def get_pending_booking(self, token):
         bookings = self.db.collection("pending_bookings").where(
@@ -147,6 +159,7 @@ class DBService:
             filter=FieldFilter("ttl_ts", "<", current_ts)
         ).stream()
         for booking in pending_bookings:
-            Logger.info(f"Removing pending booking for {booking.to_dict().get('mobile')}")
+            Logger.info(
+                f"Removing pending booking for {booking.to_dict().get('mobile')}")
             self.batch.delete(booking.reference)
         self.batch.commit()
