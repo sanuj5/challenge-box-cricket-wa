@@ -137,7 +137,7 @@ If booking is not done in 10 minutes, it will be cancelled.
             return response, Screen.DATE_SELECTION.value
         date = datetime.datetime.fromtimestamp(float(date_selected) / 1000,
                                                tz=pytz.timezone("Asia/Kolkata"))
-        today_date = datetime.datetime.today()
+        today_date = datetime.datetime.now(pytz.timezone('Asia/Kolkata'))
         weekday = date.weekday()
         slots = self.day_wise_slots.get(weekday)
         formatted_date = f'{date.strftime(self.mbs.date_format)}'
