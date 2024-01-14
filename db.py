@@ -104,7 +104,10 @@ class DBService:
         bookings = self.db.collection("pending_bookings").where(
             filter=FieldFilter("token", "==", token)
         ).get()
-        return bookings[0]
+        if bookings and len(bookings) > 0:
+            return bookings[0]
+        else:
+            return None
 
     def cancel_booking(self, token, mobile):
         booking = self.db.collection("confirmed_bookings").where(
