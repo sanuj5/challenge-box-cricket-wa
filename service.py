@@ -148,8 +148,9 @@ If booking is not done in 10 minutes, it will be cancelled.
         for booking in reserved_slots:
             if self.slots.get(booking.get("id")).get("preference") == 2:
                 evening_slot_booked = self.slots.get(booking.get("id"))
+                Logger.info("Is evening slot booked: " + evening_slot_booked)
                 continue
-        Logger.info("Is evening slot booked: " + evening_slot_booked)
+
         response['slots'] = list()
         current_hour = today_date.hour
 
