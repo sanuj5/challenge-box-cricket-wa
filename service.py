@@ -155,6 +155,7 @@ If booking is not done in 10 minutes, it will be cancelled.
         current_hour = today_date.hour
 
         for slot in slots:
+            print(slot)
             if evening_slot_booked and (
                     slot.get("preference") == 2 or
                     slot.get("start_hour") == evening_slot_booked.get("start_hour")
@@ -174,8 +175,8 @@ If booking is not done in 10 minutes, it will be cancelled.
             if (today_date.date() == date.date()
                     and slot.get("start_hour") <= current_hour):
                 item["enabled"] = False
-            print(item)
             response['slots'].append(item)
+            print(item)
         response['selected_date'] = formatted_date
         return response, Screen.SLOT_SELECTION.value
 
