@@ -144,15 +144,20 @@ If booking is not done in 10 minutes, it will be cancelled.
         # For current user, remove all pending bookings
         self.db_service.remove_pending_bookings()
         reserved_slots: dict = self.db_service.get_reserved_slots(formatted_date)
-        evening_slot_booked = False
+        evening_slot_booked = None
         for booking in reserved_slots:
             if self.slots.get(booking.get("id")).get("preference") == 2:
-                evening_slot_booked = True
+                evening_slot_booked = self.slots.get(booking.get("id"))
                 continue
+        Logger.info("Is evening slot booked: " + evening_slot_booked)
         response['slots'] = list()
         current_hour = today_date.hour
+
         for slot in slots:
-            if evening_slot_booked and slot.get("preference") == 2:
+            if evening_slot_booked and (
+                    slot.get("preference") == 2 or
+                    slot.get("start_hour") == evening_slot_booked.get("start_hour")
+            ):
                 continue
             elif (not evening_slot_booked and slot.get("preference") == 1
                   and slot.get("start_hour") >= 18):
@@ -168,6 +173,7 @@ If booking is not done in 10 minutes, it will be cancelled.
             if (today_date.date() == date.date()
                     and slot.get("start_hour") <= current_hour):
                 item["enabled"] = False
+            print(item)
             response['slots'].append(item)
         response['selected_date'] = formatted_date
         return response, Screen.SLOT_SELECTION.value
