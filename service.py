@@ -158,10 +158,14 @@ If booking is not done in 10 minutes, it will be cancelled.
         current_hour = today_date.hour
 
         for slot in slots:
-            print(slot)
             if (evening_slot_booked and slot.get("start_hour") >= 18 and
-                    slot.get("preference") == 1 and
-                    slot.get("start_hour") != evening_slot_booked.get("start_hour")
+                    ((slot.get("preference") == 1 and
+                      slot.get("start_hour") != evening_slot_booked.get("start_hour"))
+                     or
+                     (slot.get("preference") == 2 and
+                      evening_slot_booked.get("end_hour") < slot.get(
+                                 "start_hour") <= evening_slot_booked.get("start_hour"))
+                    )
             ):
                 continue
             elif (not evening_slot_booked and slot.get("preference") == 2
