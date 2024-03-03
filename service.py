@@ -146,6 +146,7 @@ If booking is not done in 10 minutes, it will be cancelled.
         reserved_slots: dict = self.db_service.get_reserved_slots(formatted_date)
         evening_slot_booked = None
         for _, booking in reserved_slots.items():
+            Logger.info(booking)
             booked_slot = self.slots.get(booking.get("id"))
             if (booked_slot.get("start_hour") >= 18 and
                     booked_slot.get("preference") == 1):

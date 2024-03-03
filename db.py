@@ -131,12 +131,12 @@ class DBService:
         for booking in confirmed_bookings:
             b: dict = booking.to_dict()
             for slot in b.get("slots"):
-                bookings[slot] = booking
+                bookings[slot] = booking.to_dict()
 
         for booking in pending_bookings:
             b: dict = booking.to_dict()
             for slot in b.get("slots"):
-                bookings[slot] = booking
+                bookings[slot] = booking.to_dict()
 
         return bookings
 
