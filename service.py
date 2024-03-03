@@ -151,7 +151,7 @@ If booking is not done in 10 minutes, it will be cancelled.
                 if (booked_slot.get("start_hour") >= 18 and
                         booked_slot.get("preference") == 1):
                     evening_slot_booked = booked_slot
-                    Logger.info("Evening booked slot: " + evening_slot_booked)
+                    Logger.info("Evening booked slot: " + str(evening_slot_booked))
                     continue
 
         response['slots'] = list()
