@@ -141,11 +141,22 @@ If booking is not done in 10 minutes, it will be cancelled.
         weekday = date.weekday()
         slots = self.day_wise_slots.get(weekday)
         formatted_date = f'{date.strftime(self.mbs.date_format)}'
+        # For current user, remove all pending bookings
         self.db_service.remove_pending_bookings()
         reserved_slots: dict = self.db_service.get_reserved_slots(formatted_date)
+        evening_slot_booked = False
+        for booking in reserved_slots:
+            if self.slots.get(booking.get("id")).get("preference") == 2:
+                evening_slot_booked = True
+                continue
         response['slots'] = list()
         current_hour = today_date.hour
         for slot in slots:
+            if evening_slot_booked and slot.get("preference") == 2:
+                continue
+            elif (not evening_slot_booked and slot.get("preference") == 1
+                  and slot.get("start_hour") >= 18):
+                continue
             item = {
                 "id": slot.get("id"),
                 "title": f'{slot.get("title")}',

@@ -116,8 +116,8 @@ class DBService:
         booking.update({"cancelled": True})
         Logger.info(f"Booking cancelled for {token} and {mobile}")
 
-    def get_reserved_slots(self, date) -> dict[int]:
-        bookings: dict[int] = dict()
+    def get_reserved_slots(self, date) -> dict:
+        bookings: dict = dict()
         confirmed_bookings = self.db.collection("confirmed_bookings").where(
             filter=FieldFilter("date", "==", date)
         ).where(
@@ -131,12 +131,12 @@ class DBService:
         for booking in confirmed_bookings:
             b: dict = booking.to_dict()
             for slot in b.get("slots"):
-                bookings[slot] = True
+                bookings[slot] = booking
 
         for booking in pending_bookings:
             b: dict = booking.to_dict()
             for slot in b.get("slots"):
-                bookings[slot] = True
+                bookings[slot] = booking
 
         return bookings
 
