@@ -163,8 +163,8 @@ If booking is not done in 10 minutes, it will be cancelled.
                       slot.get("start_hour") != evening_slot_booked.get("start_hour"))
                      or
                      (slot.get("preference") == 2 and
-                      evening_slot_booked.get("end_hour") < slot.get(
-                                 "start_hour") <= evening_slot_booked.get("start_hour"))
+                      evening_slot_booked.get("start_hour") <= slot.get(
+                                 "start_hour") < evening_slot_booked.get("end_hour"))
                     )
             ):
                 continue
