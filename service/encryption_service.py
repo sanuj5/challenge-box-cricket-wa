@@ -8,7 +8,7 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 class Encryption:
     def __init__(self):
-        self.private_key = Path('cbc-cert.pem').read_text()
+        self.private_key = Path('../cbc-cert.pem').read_text()
 
     def decrypt_data(self, encrypted_flow_data_b64, encrypted_aes_key_b64,
                      initial_vector_b64) -> (str, bytes, bytes):

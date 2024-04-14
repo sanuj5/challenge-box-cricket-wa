@@ -11,6 +11,26 @@ from model.webhook_interactive import Message as InteractiveMessage, Interactive
 from model.webook_text import Message as TextMessage, Text
 
 
+class MessageFactory:
+    def __init__(self):
+        self.text_message_processor = TextMessageProcessor()
+        self.interactive_message_processor = InteractiveMessageProcessor()
+        self.nfm_reply_processor = NfmMessageProcessor()
+
+    def process(self, message, message_type: MessageType):
+        match message_type:
+            case MessageType.TEXT:
+                message_service = self.text_message_processor
+            case MessageType.INTERACTIVE:
+                message_service = self.interactive_message_processor
+            case MessageType.NFM_REPLY:
+                message_service = self.nfm_reply_processor
+            case _:
+                return "Message type not supported", 200
+        message_service.process_message(message)
+        return "", 200
+
+
 class BaseMessageProcessor(BaseProcessor):
     def __init__(self):
         super().__init__()

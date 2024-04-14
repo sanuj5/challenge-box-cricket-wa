@@ -2,7 +2,7 @@ import base64
 import json
 
 from service.base_message_processor import BaseProcessor
-from exceptions import InvalidStateException
+from model.exceptions import InvalidStateException
 from logger import Logger
 
 

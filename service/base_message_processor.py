@@ -1,10 +1,10 @@
 from abc import ABC
 
-from db import DBService
+from service.db import DBService
 from message_builder_service import MessageBuilderService
 from model.enums import PaymentProvider
-from service.factory import PaymentFactory
-from whatsapp_api import WhatsappApi
+from external.payment import PaymentFactory
+from external.whatsapp_api import WhatsappApi
 
 
 class BaseProcessor(ABC):

@@ -9,6 +9,24 @@ from model.enums import Screen
 from model.flow import FlowResponse
 
 
+class FlowFactory:
+    def __init__(self):
+        self.date_screen_processor = DateScreenProcessor()
+        self.slot_screen_processor = SlotScreenProcessor()
+        self.booking_confirmation_processor = BookingConfirmationProcessor()
+
+    def process(self, message, screen: Screen):
+        match screen:
+            case Screen.DATE_SELECTION:
+                service = self.date_screen_processor
+            case Screen.SLOT_SELECTION:
+                service = self.slot_screen_processor
+            case Screen.BOOKING_CONFIRMATION:
+                service = self.booking_confirmation_processor
+            case _:
+                raise ValueError("Invalid screen")
+        return service.process_flow_request(message)
+
 class BaseFlowRequestProcessor(BaseProcessor):
     def __init__(self):
         super().__init__()

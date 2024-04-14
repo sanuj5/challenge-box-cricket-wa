@@ -1,12 +1,13 @@
 import json
 from flask import Flask, request, abort, redirect, render_template
-from encryption_service import Encryption
+from service.encryption_service import Encryption
 from model.enums import MessageType, Screen
 from model.flow import FlowRequest
-from exceptions import InvalidStateException
+from model.exceptions import InvalidStateException
 from logger import Logger
 import service.message_processor as m
-from service.factory import MessageFactory, FlowFactory
+from service.factory import MessageFactory
+from service.flow_processing import FlowFactory
 from service.payment_processor import PaymentProcessor
 
 
