@@ -2,7 +2,7 @@ import json
 import uuid
 from abc import abstractmethod
 
-from base_message_processor import BaseProcessor
+from service.base_message_processor import BaseProcessor
 from logger import Logger
 from model.enums import InteractiveRequestType, MessageType
 from model.interactive_flow_message_reply import InteractiveFlowMessageReply, \

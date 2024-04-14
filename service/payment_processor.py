@@ -1,7 +1,7 @@
 import base64
 import json
 
-from base_message_processor import BaseProcessor
+from service.base_message_processor import BaseProcessor
 from exceptions import InvalidStateException
 from logger import Logger
 
@@ -19,7 +19,8 @@ class PaymentProcessor(BaseProcessor):
             response_string = base64.b64decode(
                 json.loads(response).get("response"))
             Logger.info(response_string)
-            existing_booking = self.db_service.get_pending_booking(validated_response.get("order_id"))
+            existing_booking = self.db_service.get_pending_booking(
+                validated_response.get("order_id"))
             if validated_response.get("success"):
                 amount = validated_response.get("amount")
                 # TODO validate amount

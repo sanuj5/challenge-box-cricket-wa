@@ -3,7 +3,8 @@ from abc import abstractmethod
 
 import pytz
 
-from base_message_processor import BaseProcessor
+from logger import Logger
+from service.base_message_processor import BaseProcessor
 from model.enums import Screen
 from model.flow import FlowResponse
 
