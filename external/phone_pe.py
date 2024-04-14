@@ -6,7 +6,7 @@ from phonepe.sdk.pg.env import Env
 from phonepe.sdk.pg.payments.v1.models.request.pg_pay_request import PgPayRequest
 from phonepe.sdk.pg.payments.v1.payment_client import PhonePePaymentClient
 from logger import Logger
-from payment.payment import BasePayment
+from external.payment import BasePayment
 
 
 class PhonepePayment(BasePayment):

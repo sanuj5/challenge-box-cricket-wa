@@ -1,9 +1,9 @@
 import datetime
-from random import randrange
 
 import firebase_admin
 from firebase_admin import firestore, credentials
 from google.cloud.firestore_v1 import FieldFilter
+
 from logger import Logger
 from model.booking import Booking
 

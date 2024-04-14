@@ -1,6 +1,6 @@
 import uuid
 
-from payment.payment import BasePayment
+from external.payment import BasePayment
 import razorpay
 from logger import Logger
 import datetime as dt
