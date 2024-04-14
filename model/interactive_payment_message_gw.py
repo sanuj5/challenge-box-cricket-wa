@@ -106,42 +106,54 @@ class Order:
         self.discount = discount
 
 
-class PaymentLink:
-    uri: str
+class RazorPay:
+    notes: dict
+    receipt: str
 
-    def __init__(self, uri: str = None) -> None:
-        self.uri = uri
+    def __init__(self, notes: dict = None, receipt: str = None):
+        self.notes = notes
+        self.receipt = receipt
+
+
+class PaymentGateway:
+    type: str
+    configuration_name: str
+    razorpay: RazorPay
+
+    def __init__(self, type: str = "razorpay",
+                 configuration_name: str = "cbc_razorpay_test",
+                 razorpay: RazorPay = None) -> None:
+        self.type = type
+        self.configuration_name = configuration_name
+        self.razorpay = razorpay
 
 
 class PaymentSetting:
     type: str
-    payment_link: PaymentLink
+    payment_gateway: PaymentGateway
 
-    def __init__(self, type: str = "payment_link",
-                 payment_link: PaymentLink = None) -> None:
+    def __init__(self, type: str = "payment_gateway",
+                 payment_gateway: PaymentGateway = None) -> None:
         self.type = type
-        self.payment_link = payment_link
+        self.payment_gateway = payment_gateway
 
 
 class Parameters:
     reference_id: str
     type: str
-    payment_type: str
-    payment_settings: List[PaymentSetting]
+    payment_settings: PaymentSetting
     currency: str
     total_amount: TotalAmount
     order: Order
 
     def __init__(self, reference_id: str = "",
                  type: str = "digital-goods",
-                 payment_type: str = "upi",
-                 payment_settings: List[PaymentSetting] = None,
+                 payment_settings: PaymentSetting = None,
                  currency: str = "INR",
                  total_amount: TotalAmount = None,
-                 order: Order = None) -> None:
+                 order: Order = None, ) -> None:
         self.reference_id = reference_id
         self.type = type
-        self.payment_type = payment_type
         self.payment_settings = payment_settings
         self.currency = currency
         self.total_amount = total_amount

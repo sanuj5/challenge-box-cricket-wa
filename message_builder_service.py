@@ -5,6 +5,7 @@ from dateutil.relativedelta import relativedelta
 
 import model.interactive_message as im
 import model.interactive_payment_message as ipm
+import model.interactive_payment_message_gw as ipm_gw
 import model.interactive_flow_message as ifm
 import model.text_message as tm
 from model.enums import Screen
@@ -127,7 +128,8 @@ _Enjoy the game!_
                                         message_body: str,
                                         payment_uri: str,
                                         payment_amount: int,
-                                        slots: list) -> ipm.InteractivePaymentMessage:
+                                        slots: list,
+                                        reference_id: str) -> ipm.InteractivePaymentMessage:
         total_amount = ipm.TotalAmount(value=payment_amount)
         tax_discount = ipm.Discount()
 
@@ -146,6 +148,7 @@ _Enjoy the game!_
         parameters.payment_settings = [
             ipm.PaymentSetting(payment_link=ipm.PaymentLink(payment_uri))
         ]
+        parameters.reference_id = reference_id
 
         action = ipm.Action(name="review_and_pay", parameters=parameters)
         header = ipm.Header("text", None)
@@ -157,6 +160,44 @@ _Enjoy the game!_
                                       action=action)
 
         message = ipm.InteractivePaymentMessage()
+        message.to = mobile
+        message.interactive = interactive
+        return message
+
+    @staticmethod
+    def get_interactive_payment_message_gw(mobile: str,
+                                           message_body: str,
+                                           payment_amount: int,
+                                           slots: list,
+                                           reference_id: str) -> ipm_gw.InteractivePaymentMessage:
+        total_amount = ipm_gw.TotalAmount(value=payment_amount)
+        tax_discount = ipm_gw.Discount()
+
+        item = ipm_gw.Item()
+        item.amount = total_amount
+        item.quantity = len(slots)
+
+        order = ipm_gw.Order()
+        order.subtotal = total_amount
+        order.tax = tax_discount
+        order.items = [item]
+
+        parameters = ipm_gw.Parameters()
+        parameters.total_amount = total_amount
+        parameters.order = order
+        parameters.payment_settings = ipm_gw.PaymentGateway()
+        parameters.reference_id = reference_id
+
+        action = ipm_gw.Action(name="review_and_pay", parameters=parameters)
+        header = ipm_gw.Header("text", None)
+        body = ipm_gw.Body(message_body)
+        interactive = ipm_gw.Interactive(type="order_details",
+                                         header=header,
+                                         body=body,
+                                         footer=None,
+                                         action=action)
+
+        message = ipm_gw.InteractivePaymentMessage()
         message.to = mobile
         message.interactive = interactive
         return message

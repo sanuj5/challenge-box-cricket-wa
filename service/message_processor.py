@@ -134,28 +134,38 @@ class NfmMessageProcessor(BaseMessageProcessor):
             return_message = self.mbs.get_final_text_message(
                 mobile,
                 "",
-                "Request token is invalid or expired. "
-                "Please start the booking again."
+                "Request is invalid or expired. "
+                "Please start the booking again by sending 'Hi'."
             )
         else:
             self.db_service.create_booking(
                 mobile, token, total_amount, date,
                 [slot.strip() for slot in slots_id.split(",")]
             )
-            return_message = self.mbs.get_final_text_message(
-                mobile,
-                "",
-                f"""Almost there for your below booking!
+            return_message = self.mbs.get_interactive_payment_message_gw(
+                mobile=mobile,
+                message_body=f"""
+Almost there for your below booking!
+Date: {date}
+Slots: {slots_title}
 
-        Date: {date}
-        Slots: {slots_title}
-        Amount: ₹ {total_amount}/-
-
-        Please make payment by clicking below link to confirm your booking. 
-
-        https://challengecricket.in/api/pay?tx={token}
-
-        If booking is not done in 10 minutes, it will be cancelled.
-        """
+Please pay using below link!
+"""
             )
+        #     return_message = self.mbs.get_final_text_message(
+        #         mobile,
+        #         "",
+        #         f"""Almost there for your below booking!
+        #
+        # Date: {date}
+        # Slots: {slots_title}
+        # Amount: ₹ {total_amount}/-
+        #
+        # Please make payment by clicking below link to confirm your booking.
+        #
+        # https://challengecricket.in/api/pay?tx={token}
+        #
+        # If booking is not done in 10 minutes, it will be cancelled.
+        # """
+        #     )
         self.api_service.send_post_request(return_message)
