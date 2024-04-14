@@ -198,7 +198,7 @@ _Enjoy the game!_
         parameters.reference_id = reference_id
 
         action = ipm_gw.Action(name="review_and_pay", parameters=parameters)
-        header = ipm_gw.Header("text", None)
+        header = ipm_gw.Header()
         body = ipm_gw.Body(message_body)
         interactive = ipm_gw.Interactive(type="order_details",
                                          header=header,

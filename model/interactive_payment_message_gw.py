@@ -188,17 +188,19 @@ class Body:
 
 
 class Image:
-    id: str
+    link: str
 
-    def __init__(self, id: str) -> None:
-        self.id = id
+    def __init__(self,
+                 link="https://www.challengecricket.in/static/images/cca-bg-1.jpg"
+                 ) -> None:
+        self.link = link
 
 
 class Header:
     type: str
     image: Image
 
-    def __init__(self, type: str = None, image: Image = None) -> None:
+    def __init__(self, type: str = "image", image: Image = Image()) -> None:
         self.type = type
         self.image = image
 
@@ -221,16 +223,19 @@ class Interactive:
 
 class InteractivePaymentMessage:
     messaging_product: str
+    recipient_type: str
     to: str
     type: str
     interactive: Interactive
 
     def __init__(self,
                  messaging_product: str = "whatsapp",
+                 recipient_type: str = "individual",
                  to: str = None,
                  type: str = "interactive",
                  interactive: Interactive = None) -> None:
         self.messaging_product = messaging_product
+        self.recipient_type = recipient_type
         self.to = to
         self.type = type
         self.interactive = interactive
