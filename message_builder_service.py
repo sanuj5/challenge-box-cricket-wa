@@ -171,7 +171,7 @@ _Enjoy the game!_
                                            slots: list,
                                            reference_id: str) -> ipm_gw.InteractivePaymentMessage:
         total_amount = ipm_gw.TotalAmount(value=payment_amount)
-        tax_discount = ipm_gw.Discount()
+        tax_discount = ipm_gw.Tax()
 
         item = ipm_gw.Item()
         item.amount = total_amount

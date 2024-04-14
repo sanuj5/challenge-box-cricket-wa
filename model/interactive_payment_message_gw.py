@@ -1,6 +1,17 @@
 from typing import Optional, List
 
 
+class Tax:
+    value: int
+    offset: int
+    description: str
+
+    def __init__(self, value: int = 0, offset: int = 100, description: str = "") -> None:
+        self.value = value
+        self.offset = offset
+        self.description = description
+
+
 class Discount:
     value: int
     offset: int
@@ -86,16 +97,16 @@ class Order:
     expiration: Expiration
     items: List[Item]
     subtotal: TotalAmount
-    tax: Discount
-    shipping: Discount
+    tax: Tax
+    shipping: Tax
     discount: Discount
 
     def __init__(self, status: str = "pending",
                  expiration: Expiration = None,
                  items: List[Item] = None,
                  subtotal: TotalAmount = None,
-                 tax: Discount = None,
-                 shipping: Discount = None,
+                 tax: Tax = None,
+                 shipping: Tax = None,
                  discount: Discount = None) -> None:
         self.status = status
         self.expiration = expiration
