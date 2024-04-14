@@ -9,13 +9,14 @@ from model.booking import Booking
 
 
 class DBService:
+    cred = credentials.ApplicationDefault()
+
+    firebase_admin.initialize_app(credential=cred, options={
+        "projectId": "challenge-cricket-409510"
+    })
+
     def __init__(self):
         Logger.info("Initializing firestore client..")
-        cred = credentials.ApplicationDefault()
-
-        firebase_admin.initialize_app(credential=cred, options={
-            "projectId": "challenge-cricket-409510"
-        })
         # self.app = firebase_admin.initialize_app()
         self.db = firestore.client()
         self.batch = self.db.batch()
