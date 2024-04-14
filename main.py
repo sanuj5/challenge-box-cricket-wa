@@ -5,8 +5,7 @@ from model.enums import MessageType, Screen
 from model.flow import FlowRequest
 from model.exceptions import InvalidStateException
 from logger import Logger
-import service.message_processor as m
-from service.factory import MessageFactory
+from service.message_processor import MessageFactory, BaseMessageProcessor
 from service.flow_processing import FlowFactory
 from service.payment_processor import PaymentProcessor
 
@@ -112,7 +111,7 @@ class BoxBooking:
                     and messages.get("interactive").get("type")
                     == MessageType.NFM_REPLY.value):
                 message_type = MessageType.NFM_REPLY
-            parsed_message = m.BaseMessageProcessor.parse_message(messages,
+            parsed_message = BaseMessageProcessor.parse_message(messages,
                                                                   message_type)
             return self.message_factory.process(parsed_message, message_type)
         return "Message type not supported", 200
