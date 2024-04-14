@@ -15,6 +15,26 @@ class Discount:
         self.discount_program_name = discount_program_name
 
 
+class ImporterAddress:
+    address_line1: str
+    address_line2: str
+    city: str
+    zone_code: str
+    postal_code: int
+    country_code: str
+
+    def __init__(self, address_line1: str = "The Challenge Cricket Academy",
+                 address_line2: str = "Jitodia", city: str = "Anand",
+                 zone_code: str = "ANND", postal_code: int = "388001",
+                 country_code: str = "IN") -> None:
+        self.address_line1 = address_line1
+        self.address_line2 = address_line2
+        self.city = city
+        self.zone_code = zone_code
+        self.postal_code = postal_code
+        self.country_code = country_code
+
+
 class Expiration:
     timestamp: str
     description: str
@@ -41,7 +61,7 @@ class Item:
     sale_amount: TotalAmount
     country_of_origin: str
     importer_name: str
-    importer_address: str
+    importer_address: ImporterAddress
 
     def __init__(self, retailer_id: int = 0,
                  name: str = "Booking Slots",
@@ -50,7 +70,7 @@ class Item:
                  sale_amount: TotalAmount = None,
                  country_of_origin: str = "India",
                  importer_name: str = "Challenge Box Cricket",
-                 importer_address: str = "Jitodia") -> None:
+                 importer_address: ImporterAddress = ImporterAddress()) -> None:
         self.retailer_id = retailer_id
         self.name = name
         self.amount = amount
