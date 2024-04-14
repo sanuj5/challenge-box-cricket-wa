@@ -144,6 +144,9 @@ class NfmMessageProcessor(BaseMessageProcessor):
             )
             return_message = self.mbs.get_interactive_payment_message_gw(
                 mobile=mobile,
+                payment_amount=total_amount,
+                slots=[slot.strip() for slot in slots_id.split(",")],
+                reference_id=pending_booking_token,
                 message_body=f"""
 Almost there for your below booking!
 Date: {date}
