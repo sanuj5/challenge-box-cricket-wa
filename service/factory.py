@@ -1,7 +1,7 @@
 from model.enums import MessageType, Screen, PaymentProvider
-from message_processor import TextMessageProcessor, InteractiveMessageProcessor, \
+from service.message_processor import TextMessageProcessor, InteractiveMessageProcessor, \
     NfmMessageProcessor
-import flow_processing as fp
+import service.flow_processing as fp
 from payment.phone_pe import PhonepePayment
 from payment.razorpay import RazorpayPayment
 
