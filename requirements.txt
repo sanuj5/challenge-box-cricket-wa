@@ -7,3 +7,4 @@ firebase_admin
 phonepe_sdk
 python-dateutil~=2.8.2
 APScheduler~=3.10.1
+razorpay

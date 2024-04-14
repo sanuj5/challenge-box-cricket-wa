@@ -1,14 +1,13 @@
 import json
 from flask import Flask, request, abort, redirect, render_template
 from encryption_service import Encryption
-from model.enums import MessageType
-from model.interactive_flow_message_reply import InteractiveFlowMessageReply, \
-    InteractiveFlowReply
-from model.webhook_interactive import Message as InteractiveMessage, Interactive
-from model.webook_text import Message as TextMessage, Text
-from service import BoxService
+from model.enums import MessageType, Screen
+from model.flow import FlowRequest
 from exceptions import InvalidStateException
 from logger import Logger
+import service.message_processor as m
+from service.factory import MessageFactory, FlowFactory
+from service.payment_processor import PaymentProcessor
 
 
 class BoxBooking:
@@ -16,8 +15,10 @@ class BoxBooking:
     def __init__(self):
         self.app = Flask(__name__)
         self._setup_routes()
-        self.service = BoxService()
         self.encryption_service = Encryption()
+        self.flow_factory = FlowFactory()
+        self.message_factory = MessageFactory()
+        self.payment_processor = PaymentProcessor()
 
     def _setup_routes(self):
         self.app.add_url_rule(
@@ -28,14 +29,14 @@ class BoxBooking:
         )
         self.app.add_url_rule(
             rule="/api/webhook",
-            view_func=self.process_request,
+            view_func=self.process_message_request,
             endpoint="process_request",
             methods=["POST"],
         )
         self.app.add_url_rule(
             rule="/api/flow",
             view_func=self.health_check,
-            endpoint="heal_check",
+            endpoint="health_check",
             methods=["GET"],
         )
         self.app.add_url_rule(
@@ -73,25 +74,12 @@ class BoxBooking:
         transaction_id = request.args.get("tx")
         Logger.info(transaction_id)
         try:
-            url = self.service.generate_payment_link(200, transaction_id)
+            url = self.payment_processor.generate_payment_link(200, transaction_id)
         except InvalidStateException as e:
             return str(e), 500
         if not url:
-            return "Internal Server Error" , 500
+            return "Internal Server Error", 500
         return redirect(url, code=302)
-
-    def process_flow_request(self):
-        encrypted_flow_data_b64 = request.json.get("encrypted_flow_data")
-        encrypted_aes_key_b64 = request.json.get("encrypted_aes_key")
-        initial_vector_b64 = request.json.get("initial_vector")
-        decrypted_data, key, iv = self.encryption_service.decrypt_data(
-            encrypted_flow_data_b64,
-            encrypted_aes_key_b64, initial_vector_b64)
-        Logger.info(decrypted_data, key, iv)
-        response_data = self.service.process_flow_request(decrypted_data)
-        response = json.dumps(response_data, indent=4, default=lambda o: o.__dict__)
-        Logger.info(json.dumps(response_data, indent=None, default=lambda o: o.__dict__))
-        return self.encryption_service.encrypt_data(response, key, iv)
 
     def webhook(self):
         hub_mode = request.args.get("hub.mode")
@@ -103,11 +91,9 @@ class BoxBooking:
         else:
             abort(403)
 
-    def process_request(self):
+    def process_message_request(self):
         request_body = request.json
         Logger.info(request_body)
-        message_type: MessageType = None
-        parsed_message = None
         if (request_body.get("entry") and
                 request_body.get("entry")[0] and
                 request_body.get("entry")[0].get("changes") and
@@ -125,51 +111,33 @@ class BoxBooking:
                     and messages.get("interactive").get("type")
                     == MessageType.NFM_REPLY.value):
                 message_type = MessageType.NFM_REPLY
-            parsed_message = self.parse_message(messages, message_type)
-        if message_type == MessageType.TEXT:
-            self.service.process_text_message(parsed_message)
-        elif message_type == MessageType.INTERACTIVE:
-            self.service.process_interactive_message(parsed_message)
-        elif message_type == MessageType.NFM_REPLY:
-            self.service.process_nfm_reply_message(parsed_message)
-        else:
-            return "Message type not supported", 200
-        return "", 200
+            parsed_message = m.BaseMessageProcessor.parse_message(messages,
+                                                                  message_type)
+            return self.message_factory.process(parsed_message, message_type)
+        return "Message type not supported", 200
+
+    def process_flow_request(self):
+        encrypted_flow_data_b64 = request.json.get("encrypted_flow_data")
+        encrypted_aes_key_b64 = request.json.get("encrypted_aes_key")
+        initial_vector_b64 = request.json.get("initial_vector")
+        decrypted_data, key, iv = self.encryption_service.decrypt_data(
+            encrypted_flow_data_b64,
+            encrypted_aes_key_b64, initial_vector_b64)
+        Logger.info(decrypted_data, key, iv)
+        flow_request = FlowRequest(**json.loads(decrypted_data))
+        response_data = self.flow_factory.process(
+            flow_request, Screen(flow_request.screen))
+        response = json.dumps(response_data, indent=4, default=lambda o: o.__dict__)
+        Logger.info(
+            json.dumps(response_data, indent=None, default=lambda o: o.__dict__))
+        return self.encryption_service.encrypt_data(response, key, iv)
 
     def process_payment_response(self):
         header = request.headers.get("X-VERIFY")
         response = request.get_data()
         Logger.info(f"{header} \n {response}")
-        self.service.validate_payment_response(header, response)
+        self.payment_processor.validate_payment_response(header, response)
         return "", 200
-
-    @staticmethod
-    def parse_message(param, message_type):
-        if message_type == MessageType.TEXT:
-            return TextMessage(
-                id=param.get("id"),
-                message_from=param.get("from"),
-                timestamp=param.get("timestamp"),
-                text=Text(**param.get("text")),
-                type=param.get("type")
-            )
-        if message_type == MessageType.INTERACTIVE:
-            return InteractiveMessage(
-                id=param.get("id"),
-                message_from=param.get("from"),
-                timestamp=param.get("timestamp"),
-                interactive=Interactive(**param.get("interactive")),
-                type=param.get("type")
-            )
-        if message_type == MessageType.NFM_REPLY:
-            return InteractiveFlowMessageReply(
-                context=param.get("context"),
-                id=param.get("id"),
-                message_from=param.get("from"),
-                timestamp=param.get("timestamp"),
-                interactive=InteractiveFlowReply(**param.get("interactive")),
-                type=param.get("type")
-            )
 
 
 service = BoxBooking()

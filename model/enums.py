@@ -65,7 +65,13 @@ class Screen(enum.Enum):
     PAYMENT_CONFIRMATION = "PAYMENT_CONFIRMATION"
     SUCCESS = "SUCCESS"
 
+
 class MessageType(enum.Enum):
     INTERACTIVE = "interactive"
     TEXT = "text"
     NFM_REPLY = "nfm_reply"
+
+
+class PaymentProvider(enum.Enum):
+    PHONEPE = "phone_pe"
+    RAZORPAY = "razor_pay"

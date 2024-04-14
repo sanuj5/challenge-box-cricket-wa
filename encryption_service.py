@@ -11,7 +11,7 @@ class Encryption:
         self.private_key = Path('cbc-cert.pem').read_text()
 
     def decrypt_data(self, encrypted_flow_data_b64, encrypted_aes_key_b64,
-                     initial_vector_b64) -> (str, bytes, bytes) :
+                     initial_vector_b64) -> (str, bytes, bytes):
         encrypted_aes_key = b64decode(encrypted_aes_key_b64)
         private_key = serialization.load_pem_private_key(
             self.private_key.encode("utf-8"),
