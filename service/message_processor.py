@@ -146,7 +146,7 @@ class NfmMessageProcessor(BaseMessageProcessor):
                 mobile=mobile,
                 payment_amount=total_amount,
                 slots=[slot.strip() for slot in slots_id.split(",")],
-                reference_id=pending_booking_token,
+                reference_id=token,
                 message_body=f"""
 Almost there for your below booking!
 Date: {date}
