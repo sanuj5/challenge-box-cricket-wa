@@ -182,10 +182,13 @@ _Enjoy the game!_
         order.tax = tax_discount
         order.items = [item]
 
+
         parameters = ipm_gw.Parameters()
         parameters.total_amount = total_amount
         parameters.order = order
-        parameters.payment_settings = ipm_gw.PaymentGateway()
+        parameters.payment_settings = [ipm_gw.PaymentSetting(
+            payment_gateway=ipm_gw.PaymentGateway())
+        ]
         parameters.reference_id = reference_id
 
         action = ipm_gw.Action(name="review_and_pay", parameters=parameters)
