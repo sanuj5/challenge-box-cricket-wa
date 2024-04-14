@@ -1,5 +1,5 @@
 import time
-from datetime import datetime
+import datetime
 
 from dateutil.relativedelta import relativedelta
 
@@ -107,7 +107,7 @@ _Enjoy the game!_
     def get_initial_screen_param(flow_id, flow_token):
         payload = dict()
         data = dict()
-        current_date = datetime.today()
+        current_date = datetime.datetime.today()
         max_date = current_date + relativedelta(months=+2)
         data["min_date"] = str(int(time.mktime(current_date.timetuple()) * 1000))
         data["max_date"] = str(int(time.mktime(max_date.timetuple()) * 1000))
@@ -176,12 +176,18 @@ _Enjoy the game!_
         item = ipm_gw.Item()
         item.amount = total_amount
         item.quantity = len(slots)
+        expiry_time = datetime.datetime.now() + datetime.timedelta(minutes=10)
+
+        expiration = ipm_gw.Expiration(
+            timestamp=expiry_time.isoformat(),
+            description="Order expiry time"
+        )
 
         order = ipm_gw.Order()
         order.subtotal = total_amount
         order.tax = tax_discount
         order.items = [item]
-
+        order.expiration = expiration
 
         parameters = ipm_gw.Parameters()
         parameters.total_amount = total_amount
