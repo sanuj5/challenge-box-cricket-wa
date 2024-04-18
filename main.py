@@ -54,7 +54,7 @@ class BoxBooking:
         self.app.add_url_rule(
             rule="/api/razorpay/payment",
             view_func=self.process_razorpay_payment,
-            endpoint="process_payment_response",
+            endpoint="process_razorpay_payment",
             methods=["POST"],
         )
         self.app.add_url_rule(
