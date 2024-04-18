@@ -148,11 +148,11 @@ class NfmMessageProcessor(BaseMessageProcessor):
                 slots=[slot.strip() for slot in slots_id.split(",")],
                 reference_id=token,
                 message_body=f"""
-Almost there for your below booking!
+Almost there for your below booking! Please pay to confirm your booking.
+
 Date: {date}
 Slots: {slots_title}
 
-Please pay using below link!
 """
             )
         #     return_message = self.mbs.get_final_text_message(

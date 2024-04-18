@@ -179,7 +179,7 @@ _Enjoy the game!_
         expiry_time = datetime.datetime.now() + datetime.timedelta(minutes=10)
 
         expiration = ipm_gw.Expiration(
-            timestamp=expiry_time.isoformat(),
+            timestamp=str(int(time.mktime(expiry_time.timetuple()))),
             description="Order expiry time"
         )
 

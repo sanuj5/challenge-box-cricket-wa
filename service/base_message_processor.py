@@ -17,5 +17,5 @@ class BaseProcessor(ABC):
                                        secrets.get("MOBILE_ID"))
         self.flow_id = secrets.get("FLOW_ID")
         self.payment_service = PaymentFactory.get_payment_service(
-            payment_provider=PaymentProvider.PHONEPE, secrets=secrets
+            payment_provider=PaymentProvider.RAZORPAY, secrets=secrets
         )

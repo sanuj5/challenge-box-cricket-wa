@@ -52,6 +52,12 @@ class BoxBooking:
             methods=["POST"],
         )
         self.app.add_url_rule(
+            rule="/api/razorpay/payment",
+            view_func=self.process_razorpay_payment,
+            endpoint="process_payment_response",
+            methods=["POST"],
+        )
+        self.app.add_url_rule(
             rule="/api/pay",
             view_func=self.payment_redirect,
             endpoint="payment_redirect",
@@ -134,6 +140,13 @@ class BoxBooking:
 
     def process_payment_response(self):
         header = request.headers.get("X-VERIFY")
+        response = request.get_data()
+        Logger.info(f"{header} \n {response}")
+        self.payment_processor.validate_payment_response(header, response)
+        return "", 200
+
+    def process_razorpay_payment(self):
+        header = request.headers.get("X-Razorpay-Signature")
         response = request.get_data()
         Logger.info(f"{header} \n {response}")
         self.payment_processor.validate_payment_response(header, response)
