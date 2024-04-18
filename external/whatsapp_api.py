@@ -14,13 +14,24 @@ class WhatsappApi:
             "Authorization": f"Bearer {wa_api_token}"
         }
 
-    def send_post_request(self, data, header=None):
-        if header:
-            header.update(self.auth_header)
-            headers = header
-        else:
-            headers = self.default_headers
+    def send_post_request(self, data, header: dict = None):
+        headers = self.get_headers(header)
         json_data = json.dumps(data, default=lambda o: o.__dict__)
         Logger.info(json_data)
         r = requests.post(url=self.url, json=json.loads(json_data), headers=headers)
         Logger.info(r.content)
+
+    def send_post_request_url_encoded(self, data, header: dict = None):
+        headers = self.get_headers(header)
+        json_data = json.dumps(data, default=lambda o: o.__dict__)
+        Logger.info(json_data)
+        r = requests.post(url=self.url, data=json.loads(json_data), headers=headers)
+        Logger.info(r.content)
+
+    def get_headers(self, header):
+        if header:
+            header.update(self.auth_header)
+            return header
+        else:
+            return self.default_headers
+
