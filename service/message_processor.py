@@ -171,4 +171,4 @@ Slots: {slots_title}
         # If booking is not done in 10 minutes, it will be cancelled.
         # """
         #     )
-        self.api_service.send_post_request_url_encoded(data=return_message)
+        self.api_service.send_post_request(data=return_message)
