@@ -140,14 +140,14 @@ class BoxBooking:
 
     def process_payment_response(self):
         header = request.headers.get("X-VERIFY")
-        response = request.get_data()
+        response = request
         Logger.info(f"{header} \n {response}")
         self.payment_processor.validate_payment_response(header, response)
         return "", 200
 
     def process_razorpay_payment(self):
         header = request.headers.get("X-Razorpay-Signature")
-        response = request.get_data()
+        response = request.data.decode()
         Logger.info(f"{header} \n {response}")
         self.payment_processor.validate_payment_response(header, response)
         return "", 200
