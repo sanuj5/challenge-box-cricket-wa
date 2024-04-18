@@ -25,7 +25,7 @@ class WhatsappApi:
         headers = self.get_headers(header)
         json_data = json.dumps(data, default=lambda o: o.__dict__)
         Logger.info(json_data)
-        r = requests.post(url=self.url, data=json.loads(json_data), headers=headers)
+        r = requests.post(url=self.url, data=json_data, headers=headers)
         Logger.info(r.content)
 
     def get_headers(self, header):
