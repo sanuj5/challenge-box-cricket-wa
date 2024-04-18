@@ -134,8 +134,8 @@ class BoxBooking:
         response_data = self.flow_factory.process(
             flow_request, Screen(flow_request.screen))
         response = json.dumps(response_data, indent=4, default=lambda o: o.__dict__)
-        Logger.info(
-            json.dumps(response_data, indent=None, default=lambda o: o.__dict__))
+        # Logger.info(
+        #     json.dumps(response_data, indent=None, default=lambda o: o.__dict__))
         return self.encryption_service.encrypt_data(response, key, iv)
 
     def process_payment_response(self):

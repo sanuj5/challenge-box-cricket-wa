@@ -91,7 +91,6 @@ class DateScreenProcessor(BaseFlowRequestProcessor):
                     and slot.get("start_hour") <= current_hour):
                 item["enabled"] = False
             response['slots'].append(item)
-            print(item)
         response['selected_date'] = formatted_date
         return FlowResponse(data=response, screen=Screen.SLOT_SELECTION.value)
 
