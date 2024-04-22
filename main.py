@@ -79,7 +79,12 @@ class BoxBooking:
         )
 
     def health_check(self):
-        return ""
+        return {
+            "version": "3.0",
+            "data": {
+                "status": "active"
+            }
+        }
 
     def index_page(self):
         return render_template('index.html')
