@@ -146,6 +146,13 @@ class BoxBooking:
             encrypted_flow_data_b64,
             encrypted_aes_key_b64, initial_vector_b64)
         Logger.info("Flow request: " + decrypted_data)
+        if decrypted_data.get("action") == "ping":
+            return {
+                "version": "3.0",
+                "data": {
+                    "status": "active"
+                }
+            }
         flow_request = FlowRequest(**json.loads(decrypted_data))
         response_data = self.flow_factory.process(
             flow_request, Screen(flow_request.screen))
