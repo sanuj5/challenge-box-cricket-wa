@@ -137,7 +137,7 @@ class BoxBooking:
         decrypted_data, key, iv = self.encryption_service.decrypt_data(
             encrypted_flow_data_b64,
             encrypted_aes_key_b64, initial_vector_b64)
-        Logger.info(decrypted_data, key, iv)
+        Logger.info(decrypted_data)
         flow_request = FlowRequest(**json.loads(decrypted_data))
         response_data = self.flow_factory.process(
             flow_request, Screen(flow_request.screen))
