@@ -79,12 +79,7 @@ class BoxBooking:
         )
 
     def health_check(self):
-        return {
-            "version": "3.0",
-            "data": {
-                "status": "active"
-            }
-        }
+        return ""
 
     def index_page(self):
         return render_template('index.html')
@@ -113,9 +108,15 @@ class BoxBooking:
     def process_message_request(self):
         request_body = request.json
         Logger.info(request_body)
+        Logger.info(request_body.get("action"))
         if request_body.get("action") == "ping":
-            return self.health_check()
-        if (request_body.get("entry") and
+            return {
+                    "version": "3.0",
+                    "data": {
+                        "status": "active"
+                    }
+                }
+        elif (request_body.get("entry") and
                 request_body.get("entry")[0] and
                 request_body.get("entry")[0].get("changes") and
                 request_body.get("entry")[0].get("changes")[0].get("value") and
