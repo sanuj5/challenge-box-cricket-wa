@@ -113,6 +113,8 @@ class BoxBooking:
     def process_message_request(self):
         request_body = request.json
         Logger.info(request_body)
+        if request_body.get("action") == "ping":
+            return self.health_check()
         if (request_body.get("entry") and
                 request_body.get("entry")[0] and
                 request_body.get("entry")[0].get("changes") and
