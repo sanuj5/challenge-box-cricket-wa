@@ -12,10 +12,10 @@ from model.webook_text import Message as TextMessage, Text
 
 
 class MessageFactory:
-    def __init__(self):
-        self.text_message_processor = TextMessageProcessor()
-        self.interactive_message_processor = InteractiveMessageProcessor()
-        self.nfm_reply_processor = NfmMessageProcessor()
+    def __init__(self, db_service):
+        self.text_message_processor = TextMessageProcessor(db_service)
+        self.interactive_message_processor = InteractiveMessageProcessor(db_service)
+        self.nfm_reply_processor = NfmMessageProcessor(db_service)
 
     def process(self, message, message_type: MessageType):
         match message_type:
@@ -32,8 +32,8 @@ class MessageFactory:
 
 
 class BaseMessageProcessor(BaseProcessor):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, db_service):
+        super().__init__(db_service)
 
     @abstractmethod
     def process_message(self, message, *args, **kwargs):
@@ -69,8 +69,8 @@ class BaseMessageProcessor(BaseProcessor):
 
 
 class TextMessageProcessor(BaseMessageProcessor):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, db_service):
+        super().__init__(db_service)
 
     def process_message(self, message, *args, **kwargs):
         if not message:
@@ -90,8 +90,8 @@ class TextMessageProcessor(BaseMessageProcessor):
 
 
 class InteractiveMessageProcessor(BaseMessageProcessor):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, db_service):
+        super().__init__(db_service)
 
     def process_message(self, message, *args, **kwargs):
         mobile = message.message_from
@@ -113,8 +113,8 @@ class InteractiveMessageProcessor(BaseMessageProcessor):
 
 
 class NfmMessageProcessor(BaseMessageProcessor):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, db_service):
+        super().__init__(db_service)
 
     def process_message(self, message, *args, **kwargs):
         mobile = message.message_from

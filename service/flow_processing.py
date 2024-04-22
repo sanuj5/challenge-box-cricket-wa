@@ -10,10 +10,10 @@ from model.flow import FlowResponse
 
 
 class FlowFactory:
-    def __init__(self):
-        self.date_screen_processor = DateScreenProcessor()
-        self.slot_screen_processor = SlotScreenProcessor()
-        self.booking_confirmation_processor = BookingConfirmationProcessor()
+    def __init__(self, db_service):
+        self.date_screen_processor = DateScreenProcessor(db_service)
+        self.slot_screen_processor = SlotScreenProcessor(db_service)
+        self.booking_confirmation_processor = BookingConfirmationProcessor(db_service)
 
     def process(self, message, screen: Screen):
         match screen:
@@ -27,9 +27,10 @@ class FlowFactory:
                 raise ValueError("Invalid screen")
         return service.process_flow_request(message)
 
+
 class BaseFlowRequestProcessor(BaseProcessor):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, db_service):
+        super().__init__(db_service)
 
     @abstractmethod
     def process_flow_request(self, message, *args, **kwargs) -> FlowResponse:
@@ -37,6 +38,9 @@ class BaseFlowRequestProcessor(BaseProcessor):
 
 
 class DateScreenProcessor(BaseFlowRequestProcessor):
+
+    def __init__(self, db_service):
+        super().__init__(db_service)
     def process_flow_request(self, message, *args, **kwargs):
         date_selected = message.data.get("selected_date")
         response = dict()
@@ -96,6 +100,9 @@ class DateScreenProcessor(BaseFlowRequestProcessor):
 
 
 class SlotScreenProcessor(BaseFlowRequestProcessor):
+
+    def __init__(self, db_service):
+        super().__init__(db_service)
     def process_flow_request(self, message, *args, **kwargs) -> FlowResponse:
         date_selected = message.data.get("selected_date")
         token = message.flow_token
@@ -118,6 +125,9 @@ class SlotScreenProcessor(BaseFlowRequestProcessor):
 
 
 class BookingConfirmationProcessor(BaseFlowRequestProcessor):
+
+    def __init__(self, db_service):
+        super().__init__(db_service)
     def process_flow_request(self, message, *args, **kwargs) -> FlowResponse:
         date_selected = message.data.get("selected_date")
         token = message.flow_token

@@ -1,7 +1,10 @@
 import json
 from flask import Flask, request, abort, redirect, render_template
+
+from external.payment import PaymentFactory
+from service.db import DBService
 from service.encryption_service import Encryption
-from model.enums import MessageType, Screen
+from model.enums import MessageType, Screen, PaymentProvider
 from model.flow import FlowRequest
 from model.exceptions import InvalidStateException
 from logger import Logger
@@ -13,12 +16,17 @@ from service.payment_processor import PaymentProcessor
 class BoxBooking:
 
     def __init__(self):
+        db_service = DBService()
         self.app = Flask(__name__)
         self._setup_routes()
         self.encryption_service = Encryption()
-        self.flow_factory = FlowFactory()
-        self.message_factory = MessageFactory()
-        self.payment_processor = PaymentProcessor()
+        payment_service = PaymentFactory.get_payment_service(
+            payment_provider=PaymentProvider.RAZORPAY,
+            secrets=db_service.get_all_secrets()
+        )
+        self.flow_factory = FlowFactory(db_service)
+        self.message_factory = MessageFactory(db_service)
+        self.payment_processor = PaymentProcessor(db_service, payment_service)
 
     def _setup_routes(self):
         self.app.add_url_rule(

@@ -7,8 +7,9 @@ from logger import Logger
 
 
 class PaymentProcessor(BaseProcessor):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, db_service, payment_service):
+        super().__init__(db_service)
+        self.payment_service = payment_service
 
     def validate_payment_response(self, header, response):
         # TODO get mobile number from response transaction ID
