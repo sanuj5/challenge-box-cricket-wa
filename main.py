@@ -146,7 +146,7 @@ class BoxBooking:
             encrypted_flow_data_b64,
             encrypted_aes_key_b64, initial_vector_b64)
         json_data = json.loads(decrypted_data)
-        Logger.info("Flow request: " + json_data)
+        Logger.info("Flow request: " + decrypted_data)
         if json_data.get("action") == "ping":
             return {
                 "version": "3.0",
