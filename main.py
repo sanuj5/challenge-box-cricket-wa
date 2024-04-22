@@ -145,15 +145,16 @@ class BoxBooking:
         decrypted_data, key, iv = self.encryption_service.decrypt_data(
             encrypted_flow_data_b64,
             encrypted_aes_key_b64, initial_vector_b64)
-        Logger.info("Flow request: " + decrypted_data)
-        if decrypted_data.get("action") == "ping":
+        json_data = json.loads(decrypted_data)
+        Logger.info("Flow request: " + json_data)
+        if json_data.get("action") == "ping":
             return {
                 "version": "3.0",
                 "data": {
                     "status": "active"
                 }
             }
-        flow_request = FlowRequest(**json.loads(decrypted_data))
+        flow_request = FlowRequest(**json_data)
         response_data = self.flow_factory.process(
             flow_request, Screen(flow_request.screen))
         response = json.dumps(response_data, indent=4, default=lambda o: o.__dict__)
