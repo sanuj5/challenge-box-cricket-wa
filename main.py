@@ -111,17 +111,17 @@ class BoxBooking:
         Logger.info(request_body.get("action"))
         if request_body.get("action") == "ping":
             return {
-                    "version": "3.0",
-                    "data": {
-                        "status": "active"
-                    }
+                "version": "3.0",
+                "data": {
+                    "status": "active"
                 }
+            }
         elif (request_body.get("entry") and
-                request_body.get("entry")[0] and
-                request_body.get("entry")[0].get("changes") and
-                request_body.get("entry")[0].get("changes")[0].get("value") and
-                request_body.get("entry")[0].get("changes")[0].get("value").get(
-                    "messages")):
+              request_body.get("entry")[0] and
+              request_body.get("entry")[0].get("changes") and
+              request_body.get("entry")[0].get("changes")[0].get("value") and
+              request_body.get("entry")[0].get("changes")[0].get("value").get(
+                  "messages")):
             messages = (
                 request_body.get("entry")[0]
                 .get("changes")[0]
@@ -134,7 +134,7 @@ class BoxBooking:
                     == MessageType.NFM_REPLY.value):
                 message_type = MessageType.NFM_REPLY
             parsed_message = BaseMessageProcessor.parse_message(messages,
-                                                                  message_type)
+                                                                message_type)
             return self.message_factory.process(parsed_message, message_type)
         return "Message type not supported", 200
 
@@ -145,7 +145,7 @@ class BoxBooking:
         decrypted_data, key, iv = self.encryption_service.decrypt_data(
             encrypted_flow_data_b64,
             encrypted_aes_key_b64, initial_vector_b64)
-        Logger.info(decrypted_data)
+        Logger.info("Flow request: " + decrypted_data)
         flow_request = FlowRequest(**json.loads(decrypted_data))
         response_data = self.flow_factory.process(
             flow_request, Screen(flow_request.screen))
