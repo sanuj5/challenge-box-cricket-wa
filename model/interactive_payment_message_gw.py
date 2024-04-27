@@ -198,11 +198,11 @@ class Image:
 
 class Header:
     type: str
-    image: Image
+    text: str
 
-    def __init__(self, type: str = "image", image: Image = Image()) -> None:
+    def __init__(self, type: str = "text", text: str = "Almost there for you booking!") -> None:
         self.type = type
-        self.image = image
+        self.text = text
 
 
 class Interactive:

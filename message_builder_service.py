@@ -151,7 +151,7 @@ _Enjoy the game!_
         parameters.reference_id = reference_id
 
         action = ipm.Action(name="review_and_pay", parameters=parameters)
-        header = ipm.Header("text", None)
+        header = ipm.Header("text", "Almost there for your booking!")
         body = ipm.Body(message_body)
         interactive = ipm.Interactive(type="order_details",
                                       header=header,

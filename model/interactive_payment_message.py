@@ -164,20 +164,13 @@ class Body:
         self.text = text
 
 
-class Image:
-    id: str
-
-    def __init__(self, id: str) -> None:
-        self.id = id
-
-
 class Header:
     type: str
-    image: Image
+    text: str
 
-    def __init__(self, type: str = None, image: Image = None) -> None:
+    def __init__(self, type: str = None, text: str = None) -> None:
         self.type = type
-        self.image = image
+        self.text = text
 
 
 class Interactive:
