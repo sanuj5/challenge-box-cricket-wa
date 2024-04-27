@@ -17,6 +17,7 @@ class WhatsappApi:
 
     def send_post_request(self, data, header: dict = None):
         headers = self.get_headers(header)
+        Logger.info(headers)
         json_data = json.dumps(data, default=lambda o: o.__dict__)
         Logger.info(json_data)
         r = requests.post(url=self.url, json=json.loads(json_data), headers=headers)
@@ -35,3 +36,22 @@ class WhatsappApi:
             return header
         else:
             return self.default_headers
+
+
+if __name__ == '__main__':
+    api = WhatsappApi("EAAOXlAJRh9cBOZCSk7kRtRh5UH7ZA0LaeWII2LQdgTgAi01cGYstTWWPqXQ2kEr9Ij6ZBQlRSuaZCP5ZAqcg2TY7ZCVQmQFF6D47OmjK2CHUMmirthFXoPsOjyhInJFgGdJoC2xZAw7eOrym3JdGQwtx1cYIZBVMwpjwjujxRwb15ZAjUDpmRpUDOt7I8UjZBE0RkN", "163821933489146")
+    message = MessageBuilderService.get_interactive_payment_message_gw(
+                mobile="918390903001",
+                payment_amount=100,
+                slots=["1-4"],
+                reference_id="de3e0146cf4d4010ba278fe5ad6b1e",
+                message_body=f"""
+Almost there for your below booking! Please pay to confirm your booking.
+
+Date: 23-Apr-2023
+Slots: 6-7 AM
+
+"""
+            )
+    response = api.send_post_request(message)
+    print(response)
