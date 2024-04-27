@@ -147,7 +147,12 @@ class NfmMessageProcessor(BaseMessageProcessor):
                 payment_amount=total_amount,
                 slots=[slot.strip() for slot in slots_id.split(",")],
                 reference_id=token,
-                message_body=f"Please pay to confirm your booking. Date: {date} Slots: {slots_title}"
+                message_body=f"""
+Date: {date} 
+Slots: {slots_title}
+
+Please pay to confirm your booking.
+"""
             )
         #     return_message = self.mbs.get_final_text_message(
         #         mobile,

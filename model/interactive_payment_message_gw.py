@@ -200,7 +200,7 @@ class Header:
     type: str
     text: str
 
-    def __init__(self, type: str = "text", text: str = "Almost there for you booking!") -> None:
+    def __init__(self, type: str = "text", text: str = "Almost there for you booking! \n\n") -> None:
         self.type = type
         self.text = text
 
