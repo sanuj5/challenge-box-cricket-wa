@@ -77,7 +77,10 @@ class PaymentProcessor(BaseProcessor):
         if message.status == "captured":
             self.db_service.confirm_booking(existing_booking,
                                             message.payment.reference_id,
-                                            json.dumps(message))
+                                            json.dumps(message,
+                                                       default=lambda o: o.__dict__
+                                                       )
+                                            )
             self.api_service.send_post_request(
                 self.mbs.get_order_confirmation_message(
                     mobile=message.recipient_id,

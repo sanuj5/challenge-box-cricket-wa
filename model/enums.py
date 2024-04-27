@@ -71,6 +71,7 @@ class MessageType(enum.Enum):
     TEXT = "text"
     NFM_REPLY = "nfm_reply"
     PAYMENT = "payment"
+    NONE = None
 
 
 class PaymentProvider(enum.Enum):
