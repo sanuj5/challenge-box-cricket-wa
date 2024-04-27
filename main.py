@@ -128,9 +128,9 @@ class BoxBooking:
                         and messages.get("interactive").get("type")
                         == MessageType.NFM_REPLY.value):
                     message_type = MessageType.NFM_REPLY
-                    parsed_message = BaseMessageProcessor.parse_message(messages,
-                                                                        message_type)
-                    return self.message_factory.process(parsed_message, message_type)
+                parsed_message = BaseMessageProcessor.parse_message(messages,
+                                                                    message_type)
+                return self.message_factory.process(parsed_message, message_type)
             elif webhook_message.get("statuses"):
                 messages = webhook_message.get("statuses")[0]
                 message_type = MessageType(messages.get("type"))
