@@ -70,6 +70,7 @@ class MessageType(enum.Enum):
     INTERACTIVE = "interactive"
     TEXT = "text"
     NFM_REPLY = "nfm_reply"
+    PAYMENT = "payment"
 
 
 class PaymentProvider(enum.Enum):

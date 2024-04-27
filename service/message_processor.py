@@ -2,6 +2,7 @@ import json
 import uuid
 from abc import abstractmethod
 
+from model.payment_status import Payment, PaymentStatus
 from service.base_message_processor import BaseProcessor
 from logger import Logger
 from model.enums import InteractiveRequestType, MessageType
@@ -65,6 +66,15 @@ class BaseMessageProcessor(BaseProcessor):
                 timestamp=param.get("timestamp"),
                 interactive=InteractiveFlowReply(**param.get("interactive")),
                 type=param.get("type")
+            )
+        if message_type == MessageType.PAYMENT:
+            return PaymentStatus(
+                id=param.get("id"),
+                status=param.get("status"),
+                timestamp=param.get("timestamp"),
+                recipient_id=param.get("recipient_id"),
+                type=param.get("type"),
+                payment=Payment(**param.get("payment"))
             )
 
 

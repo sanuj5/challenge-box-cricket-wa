@@ -8,6 +8,7 @@ import model.interactive_payment_message as ipm
 import model.interactive_payment_message_gw as ipm_gw
 import model.interactive_flow_message as ifm
 import model.text_message as tm
+import model.order_confirmation as oc
 from model.enums import Screen
 
 
@@ -170,7 +171,7 @@ _Enjoy the game!_
                                            payment_amount: int,
                                            slots: list,
                                            reference_id: str) -> ipm_gw.InteractivePaymentMessage:
-        total_amount = ipm_gw.TotalAmount(value=payment_amount//10)  # TODO
+        total_amount = ipm_gw.TotalAmount(value=payment_amount // 10)  # TODO
         tax_discount = ipm_gw.Tax()
 
         item = ipm_gw.Item()
@@ -207,6 +208,19 @@ _Enjoy the game!_
                                          action=action)
 
         message = ipm_gw.InteractivePaymentMessage()
+        message.to = mobile
+        message.interactive = interactive
+        return message
+
+    @staticmethod
+    def get_order_confirmation_message(mobile: str, message: str, token: str):
+        order = oc.Order(status="completed", description="Slot booking is confirmed.")
+        parameters = oc.Parameters(reference_id=token, order=order)
+        action = oc.Action(name="review_order", parameters=parameters)
+        interactive = oc.Interactive(type="order_status",
+                                     body=oc.Body(message),
+                                     action=action)
+        message = oc.OrderConfirmation()
         message.to = mobile
         message.interactive = interactive
         return message

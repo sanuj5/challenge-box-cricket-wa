@@ -1,6 +1,7 @@
 import base64
 import json
 
+from model.payment_status import PaymentStatus
 from service.base_message_processor import BaseProcessor
 from model.exceptions import InvalidStateException
 from logger import Logger
@@ -66,4 +67,20 @@ class PaymentProcessor(BaseProcessor):
         else:
             return self.payment_service.generate_payment_link(
                 amount, transaction_id
+            )
+
+    def validate_status(self, message: PaymentStatus):
+        Logger.info(f"Payment Status {message}")
+        existing_booking = self.db_service.get_pending_booking(
+            message.payment.reference_id
+        )
+        if message.status == "captured":
+            self.db_service.confirm_booking(existing_booking,
+                                            message.payment.reference_id,
+                                            json.dumps(message))
+            self.api_service.send_post_request(
+                self.mbs.get_order_confirmation_message(
+                    mobile=message.recipient_id,
+                    token=message.payment.reference_id,
+                    message="Booking Confirmed")
             )

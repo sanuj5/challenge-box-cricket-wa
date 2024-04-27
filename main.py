@@ -108,7 +108,6 @@ class BoxBooking:
     def process_message_request(self):
         request_body = request.json
         Logger.info(request_body)
-        Logger.info(request_body.get("action"))
         if request_body.get("action") == "ping":
             return {
                 "version": "3.0",
@@ -119,23 +118,26 @@ class BoxBooking:
         elif (request_body.get("entry") and
               request_body.get("entry")[0] and
               request_body.get("entry")[0].get("changes") and
-              request_body.get("entry")[0].get("changes")[0].get("value") and
-              request_body.get("entry")[0].get("changes")[0].get("value").get(
-                  "messages")):
-            messages = (
-                request_body.get("entry")[0]
-                .get("changes")[0]
-                .get("value")
-                .get("messages")[0]
-            )
-            message_type = MessageType(messages.get("type"))
-            if (message_type == MessageType.INTERACTIVE
-                    and messages.get("interactive").get("type")
-                    == MessageType.NFM_REPLY.value):
-                message_type = MessageType.NFM_REPLY
-            parsed_message = BaseMessageProcessor.parse_message(messages,
-                                                                message_type)
-            return self.message_factory.process(parsed_message, message_type)
+              request_body.get("entry")[0].get("changes")[0].get("value")
+              ):
+            webhook_message = request_body.get("entry")[0].get("changes")[0].get("value")
+            if webhook_message.get("messages"):
+                messages = webhook_message.get("messages")[0]
+                message_type = MessageType(messages.get("type"))
+                if (message_type == MessageType.INTERACTIVE
+                        and messages.get("interactive").get("type")
+                        == MessageType.NFM_REPLY.value):
+                    message_type = MessageType.NFM_REPLY
+                    parsed_message = BaseMessageProcessor.parse_message(messages,
+                                                                        message_type)
+                    return self.message_factory.process(parsed_message, message_type)
+            elif webhook_message.get("statuses"):
+                messages = webhook_message.get("statuses")[0]
+                message_type = MessageType(messages.get("type"))
+                parsed_message = BaseMessageProcessor.parse_message(messages,
+                                                                    message_type)
+                return self.payment_processor.validate_status(parsed_message)
+
         return "Message type not supported", 200
 
     def process_flow_request(self):
