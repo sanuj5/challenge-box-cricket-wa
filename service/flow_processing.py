@@ -112,6 +112,9 @@ class SlotScreenProcessor(BaseFlowRequestProcessor):
         if not slots_selected or len(slots_selected) == 0:
             response['error_messages'] = "Please select at least 1 slot"
             return FlowResponse(data=response, screen=Screen.SLOT_SELECTION.value)
+        if self.overlapping_slots(slots_selected):
+            response['error_messages'] = "Please select slots of different time"
+            return FlowResponse(data=response, screen=Screen.SLOT_SELECTION.value)
         slots_title = [self.slots.get(slot).get("title") for slot in slots_selected]
         total_amount = sum(
             [self.slots.get(slot).get("price") for slot in slots_selected])
@@ -122,6 +125,16 @@ class SlotScreenProcessor(BaseFlowRequestProcessor):
         response['token'] = token
         response['error_messages'] = {}
         return FlowResponse(data=response, screen=Screen.BOOKING_CONFIRMATION.value)
+
+    @staticmethod
+    def overlapping_slots(slots_selected):
+        slots = dict()
+        for slot in slots_selected:
+            hour = slot.split("--")[1]
+            if slots.get(hour):
+                return False
+            slots[hour] = True
+        return True
 
 
 class BookingConfirmationProcessor(BaseFlowRequestProcessor):

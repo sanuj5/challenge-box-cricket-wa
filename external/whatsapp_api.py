@@ -37,3 +37,13 @@ class WhatsappApi:
             return header
         else:
             return self.default_headers
+
+if __name__ == '__main__':
+    api = WhatsappApi("EAAOXlAJRh9cBOZCSk7kRtRh5UH7ZA0LaeWII2LQdgTgAi01cGYstTWWPqXQ2kEr9Ij6ZBQlRSuaZCP5ZAqcg2TY7ZCVQmQFF6D47OmjK2CHUMmirthFXoPsOjyhInJFgGdJoC2xZAw7eOrym3JdGQwtx1cYIZBVMwpjwjujxRwb15ZAjUDpmRpUDOt7I8UjZBE0RkN", "163821933489146")
+    # message = MessageBuilderService.get_order_confirmation_message(
+    #                 mobile="918390903001",
+    #                 token="87a4e4695e854ce6b24a39e85d919f",
+    #                 message="Booking Confirmed")
+    # response = api.send_message_request(message)
+    response = api.get_payment_status("17dbcf5b0b33463cb3bb392e09d70e")
+    print(response)
