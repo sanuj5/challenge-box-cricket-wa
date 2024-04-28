@@ -81,7 +81,9 @@ class PaymentProcessor(BaseProcessor):
             # razorpay_payment_status = self.payment_service.get_payment(
             #     message.payment.reference_id)
             if (
-                    wa_payment_status.get("status") == "CAPTURED"
+                    wa_payment_status.get("payments")
+                    and wa_payment_status.get("payments")[0]
+                    and wa_payment_status.get("payments")[0].get("status") == "CAPTURED"
             ):
                 self.db_service.confirm_booking(existing_booking,
                                                 message.payment.reference_id,
