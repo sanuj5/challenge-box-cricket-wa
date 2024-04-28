@@ -41,6 +41,7 @@ class DateScreenProcessor(BaseFlowRequestProcessor):
 
     def __init__(self, db_service):
         super().__init__(db_service)
+
     def process_flow_request(self, message, *args, **kwargs):
         date_selected = message.data.get("selected_date")
         response = dict()
@@ -103,6 +104,7 @@ class SlotScreenProcessor(BaseFlowRequestProcessor):
 
     def __init__(self, db_service):
         super().__init__(db_service)
+
     def process_flow_request(self, message, *args, **kwargs) -> FlowResponse:
         date_selected = message.data.get("selected_date")
         token = message.flow_token
@@ -110,10 +112,12 @@ class SlotScreenProcessor(BaseFlowRequestProcessor):
         slots_selected = message.data.get("slots")
         response = dict()
         if not slots_selected or len(slots_selected) == 0:
-            response['error_messages'] = "Please select at least 1 slot"
+            response['error_messages'] = {"slot": "Please select at least 1 slot"}
             return FlowResponse(data=response, screen=Screen.SLOT_SELECTION.value)
         if self.overlapping_slots(slots_selected):
-            response['error_messages'] = "Please select slots of different time"
+            response['error_messages'] = {
+                "slot": "Can't select slot of same time"
+            }
             return FlowResponse(data=response, screen=Screen.SLOT_SELECTION.value)
         slots_title = [self.slots.get(slot).get("title") for slot in slots_selected]
         total_amount = sum(
@@ -132,15 +136,16 @@ class SlotScreenProcessor(BaseFlowRequestProcessor):
         for slot in slots_selected:
             hour = slot.split("--")[1]
             if slots.get(hour):
-                return False
+                return True
             slots[hour] = True
-        return True
+        return False
 
 
 class BookingConfirmationProcessor(BaseFlowRequestProcessor):
 
     def __init__(self, db_service):
         super().__init__(db_service)
+
     def process_flow_request(self, message, *args, **kwargs) -> FlowResponse:
         date_selected = message.data.get("selected_date")
         token = message.flow_token
