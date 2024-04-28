@@ -77,3 +77,7 @@ class MessageType(enum.Enum):
 class PaymentProvider(enum.Enum):
     PHONEPE = "phone_pe"
     RAZORPAY = "razor_pay"
+
+
+class Constants(enum.Enum):
+    PAYMENT_CONFIGURATION = "cbc_razorpay_test"

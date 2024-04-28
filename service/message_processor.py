@@ -96,7 +96,7 @@ class TextMessageProcessor(BaseMessageProcessor):
                 self.flow_id, flow_token
             )
         )
-        self.api_service.send_post_request(return_message)
+        self.api_service.send_message_request(return_message)
 
 
 class InteractiveMessageProcessor(BaseMessageProcessor):
@@ -119,7 +119,7 @@ class InteractiveMessageProcessor(BaseMessageProcessor):
                 "",
                 "Your booking is confirmed. Please send hi again to start new booking."
             )
-        self.api_service.send_post_request(return_message)
+        self.api_service.send_message_request(return_message)
 
 
 class NfmMessageProcessor(BaseMessageProcessor):
@@ -180,4 +180,4 @@ Please pay to confirm your booking.
         # If booking is not done in 10 minutes, it will be cancelled.
         # """
         #     )
-        self.api_service.send_post_request(data=return_message)
+        self.api_service.send_message_request(data=return_message)

@@ -136,8 +136,12 @@ class BoxBooking:
                 message_type = MessageType(messages.get("type"))
                 parsed_message = BaseMessageProcessor.parse_message(messages,
                                                                     message_type)
-                return self.payment_processor.validate_status(parsed_message)
-
+                if message_type == MessageType.PAYMENT:
+                    return self.payment_processor.validate_status(parsed_message)
+                else:
+                    Logger.debug("Message type not yet handled")
+            else:
+                Logger.debug("Message type not yet handled")
         return "Message type not supported", 200
 
     def process_flow_request(self):

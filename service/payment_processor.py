@@ -1,6 +1,7 @@
 import base64
 import json
 
+from external.payment import BasePayment
 from model.payment_status import PaymentStatus
 from service.base_message_processor import BaseProcessor
 from model.exceptions import InvalidStateException
@@ -10,7 +11,7 @@ from logger import Logger
 class PaymentProcessor(BaseProcessor):
     def __init__(self, db_service, payment_service):
         super().__init__(db_service)
-        self.payment_service = payment_service
+        self.payment_service: BasePayment = payment_service
 
     def validate_payment_response(self, header, response):
         # TODO get mobile number from response transaction ID
@@ -55,7 +56,7 @@ class PaymentProcessor(BaseProcessor):
                 "",
                 "Some error has occurred while processing your request."
             )
-        self.api_service.send_post_request(return_message)
+        self.api_service.send_message_request(return_message)
 
     def generate_payment_link(self, amount, transaction_id):
         self.db_service.remove_pending_bookings()
@@ -74,16 +75,33 @@ class PaymentProcessor(BaseProcessor):
         existing_booking = self.db_service.get_pending_booking(
             message.payment.reference_id
         )
-        if message.status == "captured":
-            self.db_service.confirm_booking(existing_booking,
-                                            message.payment.reference_id,
-                                            json.dumps(message,
-                                                       default=lambda o: o.__dict__
-                                                       )
-                                            )
-            self.api_service.send_post_request(
-                self.mbs.get_order_confirmation_message(
-                    mobile=message.recipient_id,
-                    token=message.payment.reference_id,
-                    message="Booking Confirmed")
-            )
+        if existing_booking and message.status == "captured":
+            wa_payment_status = self.api_service.get_payment_status(
+                message.payment.reference_id)
+            razorpay_payment_status = self.payment_service.get_payment(
+                message.payment.reference_id)
+            if (
+                    wa_payment_status.get("status") == "captured"
+                    and razorpay_payment_status.get("status") == "capture"
+            ):
+                self.db_service.confirm_booking(existing_booking,
+                                                message.payment.reference_id,
+                                                json.dumps(message,
+                                                           default=lambda o: o.__dict__
+                                                           )
+                                                )
+                self.api_service.send_message_request(
+                    self.mbs.get_order_confirmation_message(
+                        mobile=message.recipient_id,
+                        token=message.payment.reference_id,
+                        message="Booking Confirmed")
+                )
+            else:
+                Logger.error("Payment Status is invalid {} {}".format(
+                    wa_payment_status,
+                    razorpay_payment_status))
+        else:
+            Logger.error("Payment Status is invalid {} {}".format(
+                existing_booking,
+                message.status))
+        return "", 200

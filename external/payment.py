@@ -49,6 +49,10 @@ class BasePayment(ABC):
                                         unique_transaction_id, *args, **kwargs) -> bool:
         pass
 
+    @abstractmethod
+    def get_payment(self, token):
+        pass
+
 
 class PhonepePayment(BasePayment):
     def __init__(self, **kwargs):
@@ -127,6 +131,9 @@ class PhonepePayment(BasePayment):
             return False
         return pay_page_response.success
 
+    def get_payment(self, token):
+        pass
+
 
 class RazorpayPayment(BasePayment):
     def __init__(self, **kwargs):
@@ -182,3 +189,6 @@ class RazorpayPayment(BasePayment):
     def send_payment_collection_request(self, vpa, amount,
                                         unique_transaction_id, *args, **kwargs) -> bool:
         pass
+
+    def get_payment(self, token):
+        return self.client.payment.fetch(token)

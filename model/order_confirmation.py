@@ -44,16 +44,19 @@ class Interactive:
 
 
 class OrderConfirmation:
+    messaging_product: str
     recipient_type: str
     to: str
     type: str
     interactive: Interactive
 
     def __init__(self,
+                 messaging_product: str = "whatsapp",
                  recipient_type: str = "individual",
                  to: str = None,
                  type: str = "interactive",
                  interactive: Interactive = None) -> None:
+        self.messaging_product = messaging_product
         self.recipient_type = recipient_type
         self.to = to
         self.type = type

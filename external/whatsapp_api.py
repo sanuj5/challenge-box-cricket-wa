@@ -1,25 +1,35 @@
 import requests
 import json
 from logger import Logger
-from message_builder_service import MessageBuilderService
+from model.enums import Constants
 
 
 class WhatsappApi:
     def __init__(self, wa_api_token, mobile_id):
-        self.url = f"https://graph.facebook.com/v18.0/{mobile_id}/messages"
+        self.base_url = f"https://graph.facebook.com/v18.0/{mobile_id}"
         self.default_headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {wa_api_token}"
+            "Authorization": "Bearer {}".format(wa_api_token)
         }
         self.auth_header = {
-            "Authorization": f"Bearer {wa_api_token}"
+            "Authorization": "Bearer {}".format(wa_api_token)
         }
 
-    def send_post_request(self, data, header: dict = None):
+    def send_message_request(self, data, header: dict = None):
         headers = self.get_headers(header)
         json_data = json.dumps(data, default=lambda o: o.__dict__)
         Logger.info(json_data)
-        requests.post(url=self.url, json=json.loads(json_data), headers=headers)
+        requests.post(url=f"{self.base_url}/messages",
+                      json=json.loads(json_data),
+                      headers=headers)
+
+    def get_payment_status(self, token: str):
+        url = "{}/payments/{}/{}".format(
+            self.base_url, Constants.PAYMENT_CONFIGURATION.value, token
+        )
+        Logger.info(url)
+        result = requests.get(url=url, headers=self.auth_header)
+        return result.json()
 
     def get_headers(self, header):
         if header:

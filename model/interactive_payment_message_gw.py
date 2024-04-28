@@ -1,5 +1,7 @@
 from typing import Optional, List
 
+from model.enums import Constants
+
 
 class Tax:
     value: int
@@ -132,7 +134,7 @@ class PaymentGateway:
     razorpay: RazorPay
 
     def __init__(self, type: str = "razorpay",
-                 configuration_name: str = "cbc_razorpay_test",
+                 configuration_name: str = Constants.PAYMENT_CONFIGURATION.value,
                  razorpay: RazorPay = None) -> None:
         self.type = type
         self.configuration_name = configuration_name
