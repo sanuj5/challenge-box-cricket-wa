@@ -78,11 +78,10 @@ class PaymentProcessor(BaseProcessor):
         if existing_booking and message.status == "captured":
             wa_payment_status = self.api_service.get_payment_status(
                 message.payment.reference_id)
-            razorpay_payment_status = self.payment_service.get_payment(
-                message.payment.reference_id)
+            # razorpay_payment_status = self.payment_service.get_payment(
+            #     message.payment.reference_id)
             if (
                     wa_payment_status.get("status") == "captured"
-                    and razorpay_payment_status.get("status") == "capture"
             ):
                 self.db_service.confirm_booking(existing_booking,
                                                 message.payment.reference_id,
@@ -97,9 +96,7 @@ class PaymentProcessor(BaseProcessor):
                         message="Booking Confirmed")
                 )
             else:
-                Logger.error("Payment Status is invalid {} {}".format(
-                    wa_payment_status,
-                    razorpay_payment_status))
+                Logger.error("Payment Status is invalid {}".format(wa_payment_status))
         else:
             Logger.error("Payment Status is invalid {} {}".format(
                 existing_booking,
