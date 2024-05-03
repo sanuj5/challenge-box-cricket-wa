@@ -51,8 +51,8 @@ class DateScreenProcessor(BaseFlowRequestProcessor):
                                                tz=pytz.timezone("Asia/Kolkata"))
         formatted_date = f'{date.strftime(self.mbs.date_format)}'
         # For current user, remove all pending bookings
-        self.db_service.remove_pending_bookings(formatted_date)
-        response['slots'] = self.get_available_slots(date)
+        self.db_service.remove_pending_bookings()
+        response['slots'] = self.get_available_slots(formatted_date)
         response['selected_date'] = formatted_date
         response['error_messages'] = {}
         response['show_error_message'] = False
