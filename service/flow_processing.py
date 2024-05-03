@@ -54,7 +54,7 @@ class DateScreenProcessor(BaseFlowRequestProcessor):
         self.db_service.remove_pending_bookings()
         response['slots'] = self.get_available_slots(formatted_date)
         response['selected_date'] = formatted_date
-        response['error_messages'] = {}
+        response['error_messages'] = ""
         response['show_error_message'] = False
         return FlowResponse(data=response, screen=Screen.SLOT_SELECTION.value)
 
@@ -72,16 +72,14 @@ class SlotScreenProcessor(BaseFlowRequestProcessor):
         response = dict()
         if not slots_selected or len(slots_selected) == 0:
             response['selected_date'] = date_selected
-            response['error_messages'] = {"slot": "Please select at least 1 slot"}
+            response['error_messages'] = "Please select at least 1 slot"
             response['show_error_message'] = True
             response['slots'] = self.get_available_slots(date_selected)
             return FlowResponse(data=response, screen=Screen.SLOT_SELECTION.value)
         if self.overlapping_slots(slots_selected):
             response['selected_date'] = date_selected
             response['slots'] = self.get_available_slots(date_selected)
-            response['error_messages'] = {
-                "slot": "Can't select slot of same time"
-            }
+            response['error_messages'] = "Can't select slot of same time"
             response['show_error_message'] = True
             return FlowResponse(data=response, screen=Screen.SLOT_SELECTION.value)
         slots_title = [self.slots.get(slot).get("title") for slot in slots_selected]
