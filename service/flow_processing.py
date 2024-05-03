@@ -90,17 +90,20 @@ class SlotScreenProcessor(BaseFlowRequestProcessor):
         response['slots'] = f"{', '.join(slots_selected)}"
         response['amount'] = f"₹ {total_amount}/-"
         response['token'] = token
-        response['error_messages'] = {}
         return FlowResponse(data=response, screen=Screen.BOOKING_CONFIRMATION.value)
 
-    @staticmethod
-    def overlapping_slots(slots_selected):
-        slots = dict()
+    def overlapping_slots(self, slots_selected):
+        hours = dict()
         for slot in slots_selected:
-            hour = slot.split("--")[1]
-            if slots.get(hour):
-                return True
-            slots[hour] = True
+            c_slot = self.slots.get(slot)
+            start_hour = c_slot.get("start_hour")
+            end_hour = c_slot.get("end_hour")
+            # Below will break when slot range goes across multiple days
+            while start_hour < end_hour:
+                if hours.get(start_hour):
+                    return True
+                hours[start_hour] = True
+                start_hour += 1
         return False
 
 
