@@ -72,7 +72,7 @@ class SlotScreenProcessor(BaseFlowRequestProcessor):
         response = dict()
         if not slots_selected or len(slots_selected) == 0:
             response['selected_date'] = date_selected
-            response['error_messages'] = {"error_field": "Please select at least 1 slot"}
+            response['error_messages'] = {"slot": "Please select at least 1 slot"}
             response['show_error_message'] = True
             response['slots'] = self.get_available_slots(date_selected)
             return FlowResponse(data=response, screen=Screen.SLOT_SELECTION.value)
@@ -80,7 +80,7 @@ class SlotScreenProcessor(BaseFlowRequestProcessor):
             response['selected_date'] = date_selected
             response['slots'] = self.get_available_slots(date_selected)
             response['error_messages'] = {
-                "error_field": "Can't select slot of same time"
+                "slot": "Can't select slot of same time"
             }
             response['show_error_message'] = True
             return FlowResponse(data=response, screen=Screen.SLOT_SELECTION.value)
