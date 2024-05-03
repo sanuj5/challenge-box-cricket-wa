@@ -18,11 +18,12 @@ class BaseProcessor(ABC):
                                        secrets.get("MOBILE_ID"))
         self.flow_id = secrets.get("FLOW_ID")
 
-    def get_available_slots(self, date) -> list[dict]:
+    def get_available_slots(self, formatted_date) -> list[dict]:
         today_date = datetime.datetime.now(pytz.timezone('Asia/Kolkata'))
+        date = datetime.datetime.strptime(formatted_date, self.mbs.date_format)
         weekday = date.weekday()
         slots = self.day_wise_slots.get(weekday)
-        reserved_slots: dict = self.db_service.get_reserved_slots(date)
+        reserved_slots: dict = self.db_service.get_reserved_slots(formatted_date)
         evening_slot_booked = None
         for _, booking in reserved_slots.items():
             for slot in booking.get("slots"):
