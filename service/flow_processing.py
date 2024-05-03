@@ -50,52 +50,10 @@ class DateScreenProcessor(BaseFlowRequestProcessor):
             return response, Screen.DATE_SELECTION.value
         date = datetime.datetime.fromtimestamp(float(date_selected) / 1000,
                                                tz=pytz.timezone("Asia/Kolkata"))
-        today_date = datetime.datetime.now(pytz.timezone('Asia/Kolkata'))
-        weekday = date.weekday()
-        slots = self.day_wise_slots.get(weekday)
         formatted_date = f'{date.strftime(self.mbs.date_format)}'
         # For current user, remove all pending bookings
         self.db_service.remove_pending_bookings()
-        reserved_slots: dict = self.db_service.get_reserved_slots(formatted_date)
-        evening_slot_booked = None
-        for _, booking in reserved_slots.items():
-            for slot in booking.get("slots"):
-                booked_slot = self.slots.get(slot)
-                if (booked_slot.get("start_hour") >= 18 and
-                        booked_slot.get("preference") == 1):
-                    evening_slot_booked = booked_slot
-                    Logger.info("Evening booked slot: " + str(evening_slot_booked))
-                    continue
-
-        response['slots'] = list()
-        current_hour = today_date.hour
-
-        for slot in slots:
-            if (evening_slot_booked and slot.get("start_hour") >= 18 and
-                    ((slot.get("preference") == 1 and
-                      slot.get("start_hour") != evening_slot_booked.get("start_hour"))
-                     or
-                     (slot.get("preference") == 2 and
-                      evening_slot_booked.get("start_hour") <= slot.get(
-                                 "start_hour") < evening_slot_booked.get("end_hour"))
-                    )
-            ):
-                continue
-            elif (not evening_slot_booked and slot.get("preference") == 2
-                  and slot.get("start_hour") >= 18):
-                continue
-            item = {
-                "id": slot.get("id"),
-                "title": f'{slot.get("title")}',
-                "description": f'₹ {slot.get("price")}',
-                "enabled": True
-            }
-            if reserved_slots.get(slot.get("id")):
-                item["enabled"] = False
-            if (today_date.date() == date.date()
-                    and slot.get("start_hour") <= current_hour):
-                item["enabled"] = False
-            response['slots'].append(item)
+        response['slots'] = self.get_available_slots(formatted_date)
         response['selected_date'] = formatted_date
         response['error_messages'] = {}
         response['show_error_message'] = False
@@ -114,10 +72,14 @@ class SlotScreenProcessor(BaseFlowRequestProcessor):
         slots_selected = message.data.get("slots")
         response = dict()
         if not slots_selected or len(slots_selected) == 0:
+            response['selected_date'] = date_selected
             response['error_messages'] = {"error_field": "Please select at least 1 slot"}
             response['show_error_message'] = True
+            response['slots'] = self.get_available_slots(date_selected)
             return FlowResponse(data=response, screen=Screen.SLOT_SELECTION.value)
         if self.overlapping_slots(slots_selected):
+            response['selected_date'] = date_selected
+            response['slots'] = self.get_available_slots(date_selected)
             response['error_messages'] = {
                 "error_field": "Can't select slot of same time"
             }
