@@ -97,6 +97,8 @@ class DateScreenProcessor(BaseFlowRequestProcessor):
                 item["enabled"] = False
             response['slots'].append(item)
         response['selected_date'] = formatted_date
+        response['error_messages'] = {}
+        response['show_error_message'] = False
         return FlowResponse(data=response, screen=Screen.SLOT_SELECTION.value)
 
 
@@ -112,12 +114,14 @@ class SlotScreenProcessor(BaseFlowRequestProcessor):
         slots_selected = message.data.get("slots")
         response = dict()
         if not slots_selected or len(slots_selected) == 0:
-            response['error_messages'] = {"slot": "Please select at least 1 slot"}
+            response['error_messages'] = {"error_field": "Please select at least 1 slot"}
+            response['show_error_message'] = True
             return FlowResponse(data=response, screen=Screen.SLOT_SELECTION.value)
         if self.overlapping_slots(slots_selected):
             response['error_messages'] = {
-                "slot": "Can't select slot of same time"
+                "error_field": "Can't select slot of same time"
             }
+            response['show_error_message'] = True
             return FlowResponse(data=response, screen=Screen.SLOT_SELECTION.value)
         slots_title = [self.slots.get(slot).get("title") for slot in slots_selected]
         total_amount = sum(
