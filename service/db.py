@@ -173,9 +173,10 @@ class DBService:
         self.batch.commit()
 
     def get_user_future_bookings(self, mobile, date) -> list[Booking]:
+        Logger.info("Getting future bookings for {} and date {}".format(mobile, date))
         future_bookings = self.db.collection("confirmed_bookings").where(
-            filter=FieldFilter("actual_date", ">=", date)
-        ).where(
             filter=FieldFilter("mobile", "==", mobile)
+        ).where(
+            filter=FieldFilter("actual_date", ">=", date)
         ).stream()
         return Booking.create_booking(future_bookings)
