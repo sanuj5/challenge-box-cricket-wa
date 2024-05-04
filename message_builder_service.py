@@ -49,16 +49,11 @@ _Enjoy the game!_
         action = im.Action()
         action.buttons = buttons
 
-        header = im.Header()
-        header.type = "text"
-        header.text = "CBC"
-
         body = im.Body()
         body.text = message_body
 
         interactive = im.Interactive()
         interactive.type = "button"
-        interactive.header = header
         interactive.body = body
         interactive.action = action
 
@@ -77,16 +72,11 @@ _Enjoy the game!_
         action.name = "flow"
         action.parameters = parameters
 
-        header = ifm.Header()
-        header.type = "text"
-        header.text = "CBC"
-
         body = ifm.Body()
         body.text = message_body
 
         interactive = ifm.Interactive()
         interactive.type = "flow"
-        interactive.header = header
         interactive.body = body
         interactive.action = action
 

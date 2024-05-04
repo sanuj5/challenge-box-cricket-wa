@@ -93,7 +93,7 @@ class TextMessageProcessor(BaseMessageProcessor):
         mobile = message.message_from
         return_message = self.mbs.get_interactive_message(
             mobile,
-            "Manage Booking"
+            "Click below to view existing booking or create new booking."
         )
         self.api_service.send_message_request(return_message)
 
@@ -124,7 +124,7 @@ Amount: {booking.amount}
             self.db_service.save_flow_token(mobile, flow_token)
             return_message = self.mbs.get_interactive_flow_message(
                 mobile,
-                "Click below to start booking",
+                "Click below to start new booking",
                 self.mbs.get_initial_screen_param(
                     self.flow_id, flow_token, self.flow_mode
                 )
