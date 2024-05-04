@@ -119,7 +119,7 @@ Slots: {', '.join(booking.slots)}
 Amount: {booking.amount}
 
 """
-            return_message = self.mbs.get_final_text_message(message)
+            return_message = self.mbs.get_final_text_message(mobile, "", message)
         elif request_type == InteractiveRequestType.NEW_BOOKING:
             flow_token = str(uuid.uuid4())[:-2].replace("-", "")
             self.db_service.save_flow_token(mobile, flow_token)
