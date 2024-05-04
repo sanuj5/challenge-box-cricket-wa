@@ -115,9 +115,8 @@ class InteractiveMessageProcessor(BaseMessageProcessor):
             for booking in bookings:
                 message = f"""{message}
 Date: {booking.date}
-Slots: {', '.join(booking.slots)}
+Slots: {', '.join([self.slots.get(slot).get("title") for slot in booking.slots])}
 Amount: {booking.amount}
-
 """
             return_message = self.mbs.get_final_text_message(mobile, "", message)
         elif request_type == InteractiveRequestType.NEW_BOOKING:
