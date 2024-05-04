@@ -2,12 +2,9 @@ import enum
 
 
 class InteractiveRequestType(enum.Enum):
-    GOTO_MAIN = 0
-    MONTH_SELECTED = 1
-    DATE_SELECTED = 2
-    SLOT_SELECTED = 3
-    ADDITIONAL_SLOT = 4
-    CONFIRMED = 5
+    VIEW_BOOKING = "VIEW_BOOKING"
+    NEW_BOOKING = "NEW_BOOKING"
+    CANCEL_BOOKING = "CANCEL_BOOKING"
 
 
 class Day(enum.Enum):

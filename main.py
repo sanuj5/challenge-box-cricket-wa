@@ -159,7 +159,7 @@ class BoxBooking:
                 "data": {
                     "status": "active"
                 }
-            }
+            }, 200
         flow_request = FlowRequest(**json_data)
         response_data = self.flow_factory.process(
             flow_request, Screen(flow_request.screen))

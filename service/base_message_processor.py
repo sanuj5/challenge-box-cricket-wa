@@ -6,11 +6,12 @@ import pytz
 from external.whatsapp_api import WhatsappApi
 from logger import Logger
 from message_builder_service import MessageBuilderService
+from service.db import DBService
 
 
 class BaseProcessor(ABC):
     def __init__(self, db_service):
-        self.db_service = db_service
+        self.db_service: DBService = db_service
         self.slots, self.day_wise_slots = self.db_service.get_all_slots()
         self.mbs = MessageBuilderService()
         secrets = self.db_service.get_all_secrets()

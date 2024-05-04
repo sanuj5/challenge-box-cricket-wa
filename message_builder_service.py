@@ -9,7 +9,7 @@ import model.interactive_payment_message_gw as ipm_gw
 import model.interactive_flow_message as ifm
 import model.text_message as tm
 import model.order_confirmation as oc
-from model.enums import Screen
+from model.enums import Screen, InteractiveRequestType
 
 
 class MessageBuilderService:
@@ -29,18 +29,25 @@ _Enjoy the game!_
 
     @staticmethod
     def get_interactive_message(mobile: str,
-                                message_body: str,
-                                button_text: str,
-                                data: list[im.Row]) -> im.InteractiveMessage:
-        sections = list()
-        section = im.Section()
-        section.title = ""
-        section.rows = data
-        sections.append(section)
+                                message_body: str) -> im.InteractiveMessage:
+
+        buttons = list()
+        buttons.append(
+            im.Button(reply=im.Reply(
+                id=InteractiveRequestType.NEW_BOOKING.value, title="New Booking"
+            ))
+        )
+        buttons.append(
+            im.Button(reply=im.Reply(
+                id=InteractiveRequestType.VIEW_BOOKING.value, title="View Bookings"
+            ))
+        )
+        # buttons.append(
+        #     im.Button(reply=im.Reply(id="CANCEL_BOOKING", title="Cancel Bookings"))
+        # )
 
         action = im.Action()
-        action.button = button_text
-        action.sections = sections
+        action.buttons = buttons
 
         header = im.Header()
         header.type = "text"
@@ -50,7 +57,7 @@ _Enjoy the game!_
         body.text = message_body
 
         interactive = im.Interactive()
-        interactive.type = "list"
+        interactive.type = "reply"
         interactive.header = header
         interactive.body = body
         interactive.action = action

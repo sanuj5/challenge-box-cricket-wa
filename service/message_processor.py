@@ -85,16 +85,10 @@ class TextMessageProcessor(BaseMessageProcessor):
     def process_message(self, message, *args, **kwargs):
         if not message:
             raise ValueError("Missing parameter request_body")
-
         mobile = message.message_from
-        flow_token = str(uuid.uuid4())[:-2].replace("-", "")
-        self.db_service.save_flow_token(mobile, flow_token)
-        return_message = self.mbs.get_interactive_flow_message(
+        return_message = self.mbs.get_interactive_message(
             mobile,
-            "Click below to start booking",
-            self.mbs.get_initial_screen_param(
-                self.flow_id, flow_token
-            )
+            "Manage Booking"
         )
         self.api_service.send_message_request(return_message)
 
@@ -103,21 +97,30 @@ class InteractiveMessageProcessor(BaseMessageProcessor):
     def __init__(self, db_service):
         super().__init__(db_service)
 
-    def process_message(self, message, *args, **kwargs):
+    def process_message(self, message: InteractiveMessage, *args, **kwargs):
         mobile = message.message_from
-        request_type = InteractiveRequestType.GOTO_MAIN
+        request_type = message.interactive.button_reply.id
         return_message = None
-        if request_type == InteractiveRequestType.GOTO_MAIN:
-            return_message = self.mbs.get_interactive_message(
-                mobile, "Booking",
-                "Select Month",
-                list()
-            )
-        elif request_type == InteractiveRequestType.CONFIRMED:
-            return_message = self.mbs.get_final_text_message(
+        if request_type == InteractiveRequestType.VIEW_BOOKING:
+            bookings = self.db_service.get_user_future_bookings(mobile)
+            message = ""
+            for booking in bookings:
+                message = f"""{message}
+Date: {booking.date}
+Slots: {', '.join(booking.slots)}
+Amount: {booking.amount}
+
+"""
+            return_message = self.mbs.get_final_text_message(message)
+        elif request_type == InteractiveRequestType.NEW_BOOKING:
+            flow_token = str(uuid.uuid4())[:-2].replace("-", "")
+            self.db_service.save_flow_token(mobile, flow_token)
+            return_message = self.mbs.get_interactive_flow_message(
                 mobile,
-                "",
-                "Your booking is confirmed. Please send hi again to start new booking."
+                "Click below to start booking",
+                self.mbs.get_initial_screen_param(
+                    self.flow_id, flow_token
+                )
             )
         self.api_service.send_message_request(return_message)
 

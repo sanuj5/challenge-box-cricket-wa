@@ -167,3 +167,12 @@ class DBService:
                 f"Removing pending booking for {booking.to_dict().get('mobile')}")
             self.batch.delete(booking.reference)
         self.batch.commit()
+
+    def get_user_future_bookings(self, mobile) -> list[Booking]:
+        today_date = datetime.date.today()
+        future_bookings = self.db.collection("confirmed_bookings").where(
+            filter=FieldFilter("created_ts", ">=", today_date)
+        ).where(
+            filter=FieldFilter("mobile", "==", mobile)
+        ).stream()
+        return Booking.create_booking(future_bookings)
