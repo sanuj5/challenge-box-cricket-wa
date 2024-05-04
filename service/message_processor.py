@@ -1,3 +1,4 @@
+import datetime
 import json
 import uuid
 from abc import abstractmethod
@@ -106,7 +107,9 @@ class InteractiveMessageProcessor(BaseMessageProcessor):
         request_type = InteractiveRequestType(message.interactive.button_reply.id)
         return_message = None
         if request_type == InteractiveRequestType.VIEW_BOOKING:
-            bookings = self.db_service.get_user_future_bookings(mobile)
+            today_date = datetime.date.today()
+            today_date.strftime(self.mbs.date_format)
+            bookings = self.db_service.get_user_future_bookings(mobile, today_date)
             message = ""
             for booking in bookings:
                 message = f"""{message}
