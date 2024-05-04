@@ -57,7 +57,7 @@ _Enjoy the game!_
         body.text = message_body
 
         interactive = im.Interactive()
-        interactive.type = "reply"
+        interactive.type = "button"
         interactive.header = header
         interactive.body = body
         interactive.action = action

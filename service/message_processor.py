@@ -8,7 +8,8 @@ from logger import Logger
 from model.enums import InteractiveRequestType, MessageType
 from model.interactive_flow_message_reply import InteractiveFlowMessageReply, \
     InteractiveFlowReply
-from model.webhook_interactive import Message as InteractiveMessage, Interactive
+from model.webhook_interactive import Message as InteractiveMessage, Interactive, \
+    ButtonReply
 from model.webook_text import Message as TextMessage, Text
 
 
@@ -55,7 +56,10 @@ class BaseMessageProcessor(BaseProcessor):
                 id=param.get("id"),
                 message_from=param.get("from"),
                 timestamp=param.get("timestamp"),
-                interactive=Interactive(**param.get("interactive")),
+                interactive=Interactive(
+                    ButtonReply(**param.get("interactive").get("button_reply")),
+                    param.get("interactive").get("type")
+                ),
                 type=param.get("type")
             )
         if message_type == MessageType.NFM_REPLY:
@@ -99,7 +103,7 @@ class InteractiveMessageProcessor(BaseMessageProcessor):
 
     def process_message(self, message: InteractiveMessage, *args, **kwargs):
         mobile = message.message_from
-        request_type = message.interactive.button_reply.id
+        request_type = message.interactive.button_reply.get("id")
         return_message = None
         if request_type == InteractiveRequestType.VIEW_BOOKING:
             bookings = self.db_service.get_user_future_bookings(mobile)

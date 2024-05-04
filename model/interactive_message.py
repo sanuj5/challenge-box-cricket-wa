@@ -14,7 +14,7 @@ class Button:
     type: str
     reply: Reply
 
-    def __init__(self, type: str = "button", reply: Reply = None) -> None:
+    def __init__(self, type: str = "reply", reply: Reply = None) -> None:
         self.type = type
         self.reply = reply
 
