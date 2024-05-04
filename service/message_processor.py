@@ -111,9 +111,12 @@ class InteractiveMessageProcessor(BaseMessageProcessor):
                 .replace(hour=0, minute=0, second=0, microsecond=0) \
                 - datetime.timedelta(days=1)
             bookings = self.db_service.get_user_future_bookings(mobile, today_date)
-            message = ""
-            for booking in bookings:
-                message = f"""{message}
+            if not bookings or len(bookings) == 0:
+                message = "No upcoming booking found."
+            else:
+                message = ""
+                for booking in bookings:
+                    message = f"""{message}
 Date: {booking.date}
 Slots: {', '.join([self.slots.get(slot).get("title") for slot in booking.slots])}
 Amount: {booking.amount}
