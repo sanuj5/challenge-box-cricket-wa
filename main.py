@@ -149,21 +149,26 @@ class BoxBooking:
         encrypted_flow_data_b64 = request.json.get("encrypted_flow_data")
         encrypted_aes_key_b64 = request.json.get("encrypted_aes_key")
         initial_vector_b64 = request.json.get("initial_vector")
-        decrypted_data, key, iv = self.encryption_service.decrypt_data(
-            encrypted_flow_data_b64,
-            encrypted_aes_key_b64, initial_vector_b64)
-        json_data = json.loads(decrypted_data)
+        try:
+            decrypted_data, key, iv = self.encryption_service.decrypt_data(
+                encrypted_flow_data_b64,
+                encrypted_aes_key_b64, initial_vector_b64)
+            json_data = json.loads(decrypted_data)
+        except Exception as e:
+            Logger.error("Encryption error {}".format(e))
+            raise InvalidStateException("Invalid data provided")
         Logger.info(f"Flow request: {json_data}")
         if json_data.get("action") == "ping":
-            return {
+            response_data = {
                 "version": "3.0",
                 "data": {
                     "status": "active"
                 }
-            }, 200
-        flow_request = FlowRequest(**json_data)
-        response_data = self.flow_factory.process(
-            flow_request, Screen(flow_request.screen))
+            }
+        else:
+            flow_request = FlowRequest(**json_data)
+            response_data = self.flow_factory.process(
+                flow_request, Screen(flow_request.screen))
         response = json.dumps(response_data, indent=4, default=lambda o: o.__dict__)
         # Logger.info(
         #     json.dumps(response_data, indent=None, default=lambda o: o.__dict__))
