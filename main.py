@@ -109,12 +109,13 @@ class BoxBooking:
         request_body = request.json
         Logger.info(request_body)
         if request_body.get("action") == "ping":
-            return {
+            response = {
                 "version": "3.0",
                 "data": {
                     "status": "active"
                 }
             }
+            return json.dumps(response), 200
         elif (request_body.get("entry") and
               request_body.get("entry")[0] and
               request_body.get("entry")[0].get("changes") and
