@@ -107,8 +107,9 @@ class InteractiveMessageProcessor(BaseMessageProcessor):
         request_type = InteractiveRequestType(message.interactive.button_reply.id)
         return_message = None
         if request_type == InteractiveRequestType.VIEW_BOOKING:
-            today_date = datetime.date.today()
-            today_date.strftime(self.mbs.date_format)
+            today_date = datetime.datetime.now()  \
+                .replace(hour=0, minute=0, second=0, microsecond=0) \
+                - datetime.timedelta(days=1)
             bookings = self.db_service.get_user_future_bookings(mobile, today_date)
             message = ""
             for booking in bookings:

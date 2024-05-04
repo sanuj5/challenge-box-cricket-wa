@@ -5,6 +5,7 @@ from firebase_admin import firestore, credentials
 from google.cloud.firestore_v1 import FieldFilter
 
 from logger import Logger
+from message_builder_service import MessageBuilderService
 from model.booking import Booking
 
 
@@ -20,6 +21,7 @@ class DBService:
         # self.app = firebase_admin.initialize_app()
         self.db = firestore.client()
         self.batch = self.db.batch()
+        self.mbs = MessageBuilderService()
 
     def get_all_slots(self) -> (dict, dict):
         docs = self.db.collection("slots").where(
@@ -78,6 +80,7 @@ class DBService:
             "created_ts": datetime.datetime.now(),
             "amount": float(amount),
             "date": date,
+            "actual_date": datetime.datetime.strptime(date, self.mbs.date_format),
             "slots": slots,
             "ttl_ts": datetime.datetime.now() + datetime.timedelta(minutes=10)
         }
@@ -93,6 +96,7 @@ class DBService:
             "created_ts": datetime.datetime.now(),
             "amount": float(existing_booking.get("amount")),
             "date": existing_booking.get("date"),
+            "actual_date": existing_booking.get("actual_date"),
             "slots": existing_booking.get("slots"),
             "cancelled": False,
             "payment_response": payment_response
@@ -170,7 +174,7 @@ class DBService:
 
     def get_user_future_bookings(self, mobile, date) -> list[Booking]:
         future_bookings = self.db.collection("confirmed_bookings").where(
-            filter=FieldFilter("date", ">=", date)
+            filter=FieldFilter("actual_date", ">=", date)
         ).where(
             filter=FieldFilter("mobile", "==", mobile)
         ).stream()
