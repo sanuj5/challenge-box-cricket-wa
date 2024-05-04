@@ -168,12 +168,9 @@ class DBService:
             self.batch.delete(booking.reference)
         self.batch.commit()
 
-    def get_user_future_bookings(self, mobile) -> list[Booking]:
-        today_date = datetime.datetime.now().replace(
-            hour=0, minute=0, second=0, microsecond=0
-        )
+    def get_user_future_bookings(self, mobile, date) -> list[Booking]:
         future_bookings = self.db.collection("confirmed_bookings").where(
-            filter=FieldFilter("created_ts", ">=", today_date)
+            filter=FieldFilter("date", ">=", date)
         ).where(
             filter=FieldFilter("mobile", "==", mobile)
         ).stream()
