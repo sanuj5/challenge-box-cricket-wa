@@ -18,6 +18,7 @@ class BaseProcessor(ABC):
         self.api_service = WhatsappApi(secrets.get("WA_API_TOKEN"),
                                        secrets.get("MOBILE_ID"))
         self.flow_id = secrets.get("FLOW_ID")
+        self.flow_mode = secrets.get("FLOW_MODE") or "draft"
 
     def get_available_slots(self, formatted_date) -> list[dict]:
         today_date = datetime.datetime.now(pytz.timezone('Asia/Kolkata'))

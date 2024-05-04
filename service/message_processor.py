@@ -126,7 +126,7 @@ Amount: {booking.amount}
                 mobile,
                 "Click below to start booking",
                 self.mbs.get_initial_screen_param(
-                    self.flow_id, flow_token
+                    self.flow_id, flow_token, self.flow_mode
                 )
             )
         self.api_service.send_message_request(return_message)

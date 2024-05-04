@@ -112,7 +112,7 @@ _Enjoy the game!_
 
     # https://developers.facebook.com/docs/whatsapp/flows/gettingstarted/sendingaflow
     @staticmethod
-    def get_initial_screen_param(flow_id, flow_token):
+    def get_initial_screen_param(flow_id, flow_token, mode: str = "draft"):
         payload = dict()
         data = dict()
         current_date = datetime.datetime.today()
@@ -122,7 +122,7 @@ _Enjoy the game!_
         payload["screen"] = Screen.DATE_SELECTION.value
         payload["data"] = data
         parameter = ifm.Parameter()
-        parameter.mode = "draft"  # TODO change to publish when ready
+        parameter.mode = mode
         parameter.flow_message_version = "3"
         parameter.flow_token = flow_token
         parameter.flow_cta = "Book New Slot"
