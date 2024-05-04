@@ -103,7 +103,7 @@ class InteractiveMessageProcessor(BaseMessageProcessor):
 
     def process_message(self, message: InteractiveMessage, *args, **kwargs):
         mobile = message.message_from
-        request_type = message.interactive.button_reply.id
+        request_type = InteractiveRequestType(message.interactive.button_reply.id)
         return_message = None
         if request_type == InteractiveRequestType.VIEW_BOOKING:
             bookings = self.db_service.get_user_future_bookings(mobile)
