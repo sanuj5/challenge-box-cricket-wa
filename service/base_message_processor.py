@@ -26,33 +26,20 @@ class BaseProcessor(ABC):
         weekday = date.weekday()
         slots = self.day_wise_slots.get(weekday)
         reserved_slots: dict = self.db_service.get_reserved_slots(formatted_date)
-        evening_slot_booked = None
-        for _, booking in reserved_slots.items():
-            for slot in booking.get("slots"):
-                booked_slot = self.slots.get(slot)
-                if (booked_slot.get("start_hour") >= 18 and
-                        booked_slot.get("preference") == 1):
-                    evening_slot_booked = booked_slot
-                    Logger.info("Evening booked slot: " + str(evening_slot_booked))
-                    continue
+        # evening_slot_booked = None
+        # for _, booking in reserved_slots.items():
+        #     for slot in booking.get("slots"):
+        #         booked_slot = self.slots.get(slot)
+        #         if (booked_slot.get("start_hour") >= 18 and
+        #                 booked_slot.get("preference") == 1):
+        #             evening_slot_booked = booked_slot
+        #             Logger.info("Evening booked slot: " + str(evening_slot_booked))
+        #             continue
 
         response = list()
         current_hour = today_date.hour
 
         for slot in slots:
-            if (evening_slot_booked and slot.get("start_hour") >= 18 and
-                    ((slot.get("preference") == 1 and
-                      slot.get("start_hour") != evening_slot_booked.get("start_hour"))
-                     or
-                     (slot.get("preference") == 2 and
-                      evening_slot_booked.get("start_hour") <= slot.get(
-                                 "start_hour") < evening_slot_booked.get("end_hour"))
-                    )
-            ):
-                continue
-            elif (not evening_slot_booked and slot.get("preference") == 2
-                  and slot.get("start_hour") >= 18):
-                continue
             item = {
                 "id": slot.get("id"),
                 "title": f'{slot.get("title")}',

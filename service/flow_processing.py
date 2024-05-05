@@ -76,12 +76,6 @@ class SlotScreenProcessor(BaseFlowRequestProcessor):
             response['show_error_message'] = True
             response['slots'] = self.get_available_slots(date_selected)
             return FlowResponse(data=response, screen=Screen.SLOT_SELECTION.value)
-        if self.overlapping_slots(slots_selected):
-            response['selected_date'] = date_selected
-            response['slots'] = self.get_available_slots(date_selected)
-            response['error_messages'] = "Can't select slot of same time"
-            response['show_error_message'] = True
-            return FlowResponse(data=response, screen=Screen.SLOT_SELECTION.value)
         slots_title = [self.slots.get(slot).get("title") for slot in slots_selected]
         total_amount = sum(
             [self.slots.get(slot).get("price") for slot in slots_selected])
@@ -92,19 +86,19 @@ class SlotScreenProcessor(BaseFlowRequestProcessor):
         response['token'] = token
         return FlowResponse(data=response, screen=Screen.BOOKING_CONFIRMATION.value)
 
-    def overlapping_slots(self, slots_selected):
-        hours = dict()
-        for slot in slots_selected:
-            c_slot = self.slots.get(slot)
-            start_hour = c_slot.get("start_hour")
-            end_hour = c_slot.get("end_hour")
-            # Below will break when slot range goes across multiple days
-            while start_hour < end_hour:
-                if hours.get(start_hour):
-                    return True
-                hours[start_hour] = True
-                start_hour += 1
-        return False
+    # def overlapping_slots(self, slots_selected):
+    #     hours = dict()
+    #     for slot in slots_selected:
+    #         c_slot = self.slots.get(slot)
+    #         start_hour = c_slot.get("start_hour")
+    #         end_hour = c_slot.get("end_hour")
+    #         # Below will break when slot range goes across multiple days
+    #         while start_hour < end_hour:
+    #             if hours.get(start_hour):
+    #                 return True
+    #             hours[start_hour] = True
+    #             start_hour += 1
+    #     return False
 
 
 class BookingConfirmationProcessor(BaseFlowRequestProcessor):
