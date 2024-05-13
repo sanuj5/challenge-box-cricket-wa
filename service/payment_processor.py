@@ -103,7 +103,7 @@ class PaymentProcessor(BaseProcessor):
                     ", ".join([
                         self.slots.get(slot.strip()).get("title") for slot in existing_booking.get("slots")
                     ]),
-                    existing_booking.get("name"),
+                    "Sanuj",  # existing_booking.get("name"),
                     existing_booking.get("mobile"),
                     str(float(existing_booking.get("amount")))
                 )
