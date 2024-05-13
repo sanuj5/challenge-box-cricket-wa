@@ -53,24 +53,24 @@ class BoxBooking:
             endpoint="process_flow_request",
             methods=["POST"],
         )
-        self.app.add_url_rule(
-            rule="/api/payment",
-            view_func=self.process_payment_response,
-            endpoint="process_payment_response",
-            methods=["POST"],
-        )
+        # self.app.add_url_rule(
+        #     rule="/api/payment",
+        #     view_func=self.process_payment_response,
+        #     endpoint="process_payment_response",
+        #     methods=["POST"],
+        # )
         self.app.add_url_rule(
             rule="/api/razorpay/payment",
             view_func=self.process_razorpay_payment,
             endpoint="process_razorpay_payment",
             methods=["POST"],
         )
-        self.app.add_url_rule(
-            rule="/api/pay",
-            view_func=self.payment_redirect,
-            endpoint="payment_redirect",
-            methods=["GET"],
-        )
+        # self.app.add_url_rule(
+        #     rule="/api/pay",
+        #     view_func=self.payment_redirect,
+        #     endpoint="payment_redirect",
+        #     methods=["GET"],
+        # )
         self.app.add_url_rule(
             rule="/",
             view_func=self.index_page,
@@ -84,16 +84,16 @@ class BoxBooking:
     def index_page(self):
         return render_template('index.html')
 
-    def payment_redirect(self):
-        transaction_id = request.args.get("tx")
-        Logger.info(transaction_id)
-        try:
-            url = self.payment_processor.generate_payment_link(200, transaction_id)
-        except InvalidStateException as e:
-            return str(e), 500
-        if not url:
-            return "Internal Server Error", 500
-        return redirect(url, code=302)
+    # def payment_redirect(self):
+    #     transaction_id = request.args.get("tx")
+    #     Logger.info(transaction_id)
+    #     try:
+    #         url = self.payment_processor.generate_payment_link(200, transaction_id)
+    #     except InvalidStateException as e:
+    #         return str(e), 500
+    #     if not url:
+    #         return "Internal Server Error", 500
+    #     return redirect(url, code=302)
 
     def webhook(self):
         hub_mode = request.args.get("hub.mode")
@@ -120,8 +120,9 @@ class BoxBooking:
               request_body.get("entry")[0] and
               request_body.get("entry")[0].get("changes") and
               request_body.get("entry")[0].get("changes")[0].get("value")
-              ):
-            webhook_message = request_body.get("entry")[0].get("changes")[0].get("value")
+        ):
+            webhook_message = request_body.get("entry")[0].get("changes")[0].get(
+                "value")
             if webhook_message.get("messages"):
                 messages = webhook_message.get("messages")[0]
                 message_type = MessageType(messages.get("type"))
@@ -174,12 +175,12 @@ class BoxBooking:
         #     json.dumps(response_data, indent=None, default=lambda o: o.__dict__))
         return self.encryption_service.encrypt_data(response, key, iv)
 
-    def process_payment_response(self):
-        header = request.headers.get("X-VERIFY")
-        response = request
-        Logger.info(f"{header} \n {response}")
-        self.payment_processor.validate_payment_response(header, response)
-        return "", 200
+    # def process_payment_response(self):
+    #     header = request.headers.get("X-VERIFY")
+    #     response = request
+    #     Logger.info(f"{header} \n {response}")
+    #     self.payment_processor.validate_payment_response(header, response)
+    #     return "", 200
 
     def process_razorpay_payment(self):
         header = request.headers.get("X-Razorpay-Signature")

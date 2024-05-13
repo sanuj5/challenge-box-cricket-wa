@@ -70,12 +70,25 @@ class SlotScreenProcessor(BaseFlowRequestProcessor):
         date = datetime.datetime.strptime(date_selected, self.mbs.date_format)
         slots_selected = message.data.get("slots")
         response = dict()
+        error = False
+
         if not slots_selected or len(slots_selected) == 0:
-            response['selected_date'] = date_selected
+            error = True
             response['error_messages'] = "Please select at least 1 slot"
+
+        booked_slots = self.db_service.get_reserved_slots(date_selected)
+        for slot in slots_selected:
+            if booked_slots.get(slot):
+                error = True
+                response['error_messages'] = f"Slot {slot} already reserved"
+                break
+
+        if error:
+            response['selected_date'] = date_selected
             response['show_error_message'] = True
             response['slots'] = self.get_available_slots(date_selected)
             return FlowResponse(data=response, screen=Screen.SLOT_SELECTION.value)
+
         slots_title = [self.slots.get(slot).get("title") for slot in slots_selected]
         total_amount = sum(
             [self.slots.get(slot).get("price") for slot in slots_selected])
