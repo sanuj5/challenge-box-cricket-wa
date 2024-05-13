@@ -80,7 +80,7 @@ class SlotScreenProcessor(BaseFlowRequestProcessor):
         for slot in slots_selected:
             if booked_slots.get(slot):
                 error = True
-                response['error_messages'] = f"Slot {slot} already reserved"
+                response['error_messages'] = f"Slot {self.slots.get(slot).get("title")} already reserved"
                 break
 
         if error:
