@@ -101,7 +101,7 @@ class PaymentProcessor(BaseProcessor):
                 self.send_payment_notifications(
                     existing_booking.get("date"),
                     ", ".join([
-                        self.slots.get(slot) for slot in existing_booking.get("slots")
+                        self.slots.get(slot.strip()).get("title") for slot in existing_booking.get("slots")
                     ]),
                     existing_booking.get("name"),
                     existing_booking.get("mobile"),
