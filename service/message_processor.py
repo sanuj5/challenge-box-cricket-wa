@@ -102,7 +102,7 @@ class InteractiveMessageProcessor(BaseMessageProcessor):
     def __init__(self, db_service):
         super().__init__(db_service)
 
-    def process_message(self, message: InteractiveMessage, *args, **kwargs):
+    def process_message(self, message, *args, **kwargs):
         mobile = message.message_from
         request_type = InteractiveRequestType(message.interactive.button_reply.id)
         return_message = None

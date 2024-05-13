@@ -180,3 +180,9 @@ class DBService:
             filter=FieldFilter("actual_date", ">=", date)
         ).stream()
         return Booking.create_booking(future_bookings)
+
+    def get_notification_eligible_numbers(self) -> list[str]:
+        mobiles = self.db.collection("booking_notification_numbers").where(
+            filter=FieldFilter("active", "==", True)
+        ).stream()
+        return [mobile.get("number") for mobile in mobiles]
