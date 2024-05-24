@@ -188,5 +188,5 @@ class DBService:
         if new_booking_only:
             mobiles = mobiles.where(
                 filter=FieldFilter("new_booking_only", "==", True)
-            ).stream()
+            )
         return [mobile.get("number") for mobile in mobiles.stream()]
