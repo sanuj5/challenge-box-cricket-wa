@@ -189,4 +189,4 @@ class DBService:
             mobiles = mobiles.where(
                 filter=FieldFilter("new_booking_only", "==", True)
             ).stream()
-        return [mobile.get("number") for mobile in mobiles]
+        return [mobile.get("number") for mobile in mobiles.stream()]
