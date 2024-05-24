@@ -88,7 +88,8 @@ class BoxBooking:
         )
 
     def scheduled_booking_notification(self):
-        return self.notification_processor.send_scheduled_notifications()
+        self.notification_processor.send_scheduled_notifications()
+        return "", 200
 
     def health_check(self):
         return ""
