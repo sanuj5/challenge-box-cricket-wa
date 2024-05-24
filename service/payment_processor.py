@@ -13,7 +13,7 @@ class PaymentProcessor(BaseProcessor):
     def __init__(self, db_service, payment_service):
         super().__init__(db_service)
         self.payment_service: BasePayment = payment_service
-        self.notification_service = NotificationProcessor()
+        self.notification_service = NotificationProcessor(db_service)
 
     def validate_payment_response(self, header, response):
         # TODO get mobile number from response transaction ID
