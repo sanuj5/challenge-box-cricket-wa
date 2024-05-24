@@ -89,7 +89,6 @@ _Enjoy the game!_
 
     @staticmethod
     def get_final_text_message(mobile, _id, body):
-        # TODO read data from booking
         text = tm.Text()
         text.body = body
         text_message = tm.TextMessage()

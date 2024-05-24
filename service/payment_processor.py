@@ -3,16 +3,17 @@ import json
 
 from external.payment import BasePayment
 from model.payment_status import PaymentStatus
-from model.templates import TemplateBuilder as tb
 from service.base_message_processor import BaseProcessor
 from model.exceptions import InvalidStateException
 from logger import Logger
+from service.notification_processor import NotificationProcessor
 
 
 class PaymentProcessor(BaseProcessor):
     def __init__(self, db_service, payment_service):
         super().__init__(db_service)
         self.payment_service: BasePayment = payment_service
+        self.notification_service = NotificationProcessor()
 
     def validate_payment_response(self, header, response):
         # TODO get mobile number from response transaction ID
@@ -98,13 +99,12 @@ class PaymentProcessor(BaseProcessor):
                         token=message.payment.reference_id,
                         message="Booking Confirmed")
                 )
-                self.send_payment_notifications(
+                self.notification_service.send_payment_notifications(
                     existing_booking.get("date"),
                     ", ".join([
                         self.slots.get(slot.strip()).get("title") for slot in existing_booking.get("slots")
                     ]),
-                    "Sanuj",  # existing_booking.get("name"),
-                    existing_booking.get("mobile"),
+                    f"+{existing_booking.get("mobile")}",
                     str(float(existing_booking.get("amount")))
                 )
             else:
@@ -114,20 +114,3 @@ class PaymentProcessor(BaseProcessor):
                 existing_booking,
                 message.status))
         return "", 200
-
-    def send_payment_notifications(self, date, slots, name, booking_number, amount):
-        mobile_numbers = self.db_service.get_notification_eligible_numbers()
-        for mobile_number in mobile_numbers:
-            self.api_service.send_message_request(
-                tb.build(
-                    mobile=mobile_number,
-                    template_name="new_booking_notification",
-                    parameters=[
-                        tb.get_text_parameter(date),
-                        tb.get_text_parameter(slots),
-                        tb.get_text_parameter(name),
-                        tb.get_text_parameter(booking_number),
-                        tb.get_text_parameter(amount),
-                    ]
-                )
-            )

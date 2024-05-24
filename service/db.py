@@ -181,8 +181,12 @@ class DBService:
         ).stream()
         return Booking.create_booking(future_bookings)
 
-    def get_notification_eligible_numbers(self) -> list[str]:
+    def get_notification_eligible_numbers(self, new_booking_only=True) -> list[str]:
         mobiles = self.db.collection("booking_notification_numbers").where(
             filter=FieldFilter("active", "==", True)
-        ).stream()
+        )
+        if new_booking_only:
+            mobiles = mobiles.where(
+                filter=FieldFilter("new_booking_only", "==", True)
+            ).stream()
         return [mobile.get("number") for mobile in mobiles]

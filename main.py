@@ -1,5 +1,5 @@
 import json
-from flask import Flask, request, abort, redirect, render_template
+from flask import Flask, request, abort, render_template
 
 from external.payment import PaymentFactory
 from service.db import DBService
@@ -10,6 +10,7 @@ from model.exceptions import InvalidStateException
 from logger import Logger
 from service.message_processor import MessageFactory, BaseMessageProcessor
 from service.flow_processing import FlowFactory
+from service.notification_processor import NotificationProcessor
 from service.payment_processor import PaymentProcessor
 
 
@@ -27,6 +28,7 @@ class BoxBooking:
         self.flow_factory = FlowFactory(db_service)
         self.message_factory = MessageFactory(db_service)
         self.payment_processor = PaymentProcessor(db_service, payment_service)
+        self.notification_processor = NotificationProcessor(db_service)
 
     def _setup_routes(self):
         self.app.add_url_rule(
@@ -77,6 +79,16 @@ class BoxBooking:
             endpoint="index_page",
             methods=["GET"],
         )
+
+        self.app.add_url_rule(
+            rule="/api/daily_booking_notification",
+            view_func=self.scheduled_booking_notification,
+            endpoint="scheduled_booking_notification",
+            methods=["POST"],
+        )
+
+    def scheduled_booking_notification(self):
+        return self.notification_processor.send_scheduled_notifications()
 
     def health_check(self):
         return ""
