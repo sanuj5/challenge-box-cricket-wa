@@ -91,11 +91,18 @@ class TextMessageProcessor(BaseMessageProcessor):
         if not message:
             raise ValueError("Missing parameter request_body")
         mobile = message.message_from
-        return_message = self.mbs.get_interactive_message(
+        self.api_service.send_message_request(self.mbs.get_interactive_message(
             mobile,
             "Click below to view existing booking or create new booking."
         )
-        self.api_service.send_message_request(return_message)
+        )
+
+
+"""
+This class processes InteractiveMessage response.
+New booking --> Start Flow request for new booking
+View bookings --> Get existing bookings of yesterday, today and all future days 
+"""
 
 
 class InteractiveMessageProcessor(BaseMessageProcessor):
@@ -107,32 +114,47 @@ class InteractiveMessageProcessor(BaseMessageProcessor):
         request_type = InteractiveRequestType(message.interactive.button_reply.id)
         return_message = None
         if request_type == InteractiveRequestType.VIEW_BOOKING:
-            today_date = datetime.datetime.now()  \
-                .replace(hour=0, minute=0, second=0, microsecond=0) \
-                - datetime.timedelta(days=1)
-            bookings = self.db_service.get_user_future_bookings(mobile, today_date)
-            if not bookings or len(bookings) == 0:
-                message = "No upcoming booking found."
-            else:
-                message = ""
-                for booking in bookings:
-                    message = f"""{message}
+            return_message = self.get_view_booking_message(mobile)
+        elif request_type == InteractiveRequestType.NEW_BOOKING:
+            return_message = self.get_new_booking_message(mobile)
+        self.api_service.send_message_request(return_message)
+
+    def get_new_booking_message(self, mobile):
+        flow_token = str(uuid.uuid4())[:-2].replace("-", "")
+        self.db_service.save_flow_token(mobile, flow_token)
+        return_message = self.mbs.get_interactive_flow_message(
+            mobile,
+            "Click below to start new booking",
+            self.mbs.get_initial_screen_param(
+                self.flow_id, flow_token, self.flow_mode
+            )
+        )
+        return return_message
+
+    def get_view_booking_message(self, mobile):
+        today_date = datetime.datetime.now() \
+                         .replace(hour=0, minute=0, second=0, microsecond=0) \
+                     - datetime.timedelta(days=1)
+        bookings = self.db_service.get_user_future_bookings(mobile, today_date)
+        if not bookings or len(bookings) == 0:
+            message = "No upcoming booking found."
+        else:
+            message = ""
+            for booking in bookings:
+                message = f"""{message}
 Date: {booking.date}
 Slots: {', '.join([self.slots.get(slot).get("title") for slot in booking.slots])}
 Amount: {booking.amount}
 """
-            return_message = self.mbs.get_final_text_message(mobile, "", message)
-        elif request_type == InteractiveRequestType.NEW_BOOKING:
-            flow_token = str(uuid.uuid4())[:-2].replace("-", "")
-            self.db_service.save_flow_token(mobile, flow_token)
-            return_message = self.mbs.get_interactive_flow_message(
-                mobile,
-                "Click below to start new booking",
-                self.mbs.get_initial_screen_param(
-                    self.flow_id, flow_token, self.flow_mode
-                )
-            )
-        self.api_service.send_message_request(return_message)
+        return_message = self.mbs.get_final_text_message(mobile, "", message)
+        return return_message
+
+
+"""
+This class processes user message post flow screen confirmation (NFM Reply Message).
+1. A new pending booking will be created once user clicks confirm button
+2. Sends whatsapp message of type PaymentGateway to user
+"""
 
 
 class NfmMessageProcessor(BaseMessageProcessor):
@@ -140,9 +162,9 @@ class NfmMessageProcessor(BaseMessageProcessor):
         super().__init__(db_service)
 
     def process_message(self, message, *args, **kwargs):
+        Logger.info(f"Processing nfm reply message.")
         mobile = message.message_from
         response = json.loads(message.interactive.nfm_reply.get("response_json"))
-        Logger.info(f"nfm reply: {response}")
         amount = response.get("amount")
         token = response.get("token")
         slots_id = response.get("slots")
@@ -153,12 +175,22 @@ class NfmMessageProcessor(BaseMessageProcessor):
             [self.slots.get(slot.strip()).get("price") for slot in slots_id.split(',')])
         Logger.info(f"Pending payment of amount {total_amount}")
         pending_booking_token = self.db_service.get_mobile_token_mapping(token)
+
+        # Token expired below
         if not pending_booking_token or pending_booking_token.get(token) != mobile:
             return_message = self.mbs.get_final_text_message(
                 mobile,
                 "",
                 "Request is invalid or expired. "
-                "Please start the booking again by sending 'Hi'."
+                "Please start the booking again by sending *Hi*."
+            )
+        # Check amount received from user vs amount calculated for selected slots
+        elif amount != total_amount:
+            return_message = self.mbs.get_final_text_message(
+                mobile,
+                "",
+                "Amount does not match."
+                "Please start the booking again by sending *Hi*."
             )
         else:
             self.db_service.create_booking(
@@ -173,24 +205,10 @@ class NfmMessageProcessor(BaseMessageProcessor):
                 message_body=f"""
 Date: {date} 
 Slots: {slots_title}
+Amount: {total_amount}
+Please pay to confirm your booking. 
 
-Please pay to confirm your booking.
+_Once booking is confirmed, it cannot be canceled and amount won't be refunded._
 """
             )
-        #     return_message = self.mbs.get_final_text_message(
-        #         mobile,
-        #         "",
-        #         f"""Almost there for your below booking!
-        #
-        # Date: {date}
-        # Slots: {slots_title}
-        # Amount: ₹ {total_amount}/-
-        #
-        # Please make payment by clicking below link to confirm your booking.
-        #
-        # https://challengecricket.in/api/pay?tx={token}
-        #
-        # If booking is not done in 10 minutes, it will be cancelled.
-        # """
-        #     )
         self.api_service.send_message_request(data=return_message)

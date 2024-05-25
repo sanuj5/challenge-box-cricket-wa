@@ -1,4 +1,5 @@
 import datetime
+import os
 
 import firebase_admin
 from firebase_admin import firestore, credentials
@@ -10,14 +11,14 @@ from model.booking import Booking
 
 
 class DBService:
-    cred = credentials.ApplicationDefault()
-
-    firebase_admin.initialize_app(credential=cred, options={
-        "projectId": "challenge-cricket-409510"
-    })
 
     def __init__(self):
         Logger.info("Initializing firestore client..")
+        cred = credentials.ApplicationDefault()
+
+        firebase_admin.initialize_app(credential=cred, options={
+            "projectId": os.getenv("GOOGLE_CLOUD_PROJECT"),
+        })
         # self.app = firebase_admin.initialize_app()
         self.db = firestore.client()
         self.batch = self.db.batch()
@@ -47,7 +48,7 @@ class DBService:
                 return doc.to_dict()
         return dict()
 
-    def save_flow_token(self, mobile, token):
+    def save_flow_token(self, mobile: str, token: str) -> None:
         _id = self.generate_id(mobile)
         data = {
             "mobile": mobile,
@@ -59,11 +60,11 @@ class DBService:
         Logger.info(f"Token {token} added token successfully for {mobile}")
 
     @staticmethod
-    def generate_id(mobile):
+    def generate_id(mobile: str) -> str:
         current_ts = datetime.datetime.now()
         return f'{mobile}_{current_ts.strftime("%Y%m%d%H%M%S")}'
 
-    def get_mobile_token_mapping(self, token) -> dict:
+    def get_mobile_token_mapping(self, token: str) -> dict:
         tokens = self.db.collection("booking_token").where(
             filter=FieldFilter("token", "==", token)
         ).stream()
@@ -72,7 +73,13 @@ class DBService:
         Logger.info(f"Found mobile for token {token}")
         return {t.to_dict().get("token"): t.to_dict().get("mobile") for t in tokens}
 
-    def create_booking(self, mobile, token, amount, date, slots: list[int]):
+    def create_booking(self,
+                       mobile: str,
+                       token: str,
+                       amount: int,
+                       date: str,
+                       slots: list[int]
+                       ) -> None:
         _id = self.generate_id(mobile)
         data = {
             "mobile": mobile,
@@ -82,13 +89,13 @@ class DBService:
             "date": date,
             "actual_date": datetime.datetime.strptime(date, self.mbs.date_format),
             "slots": slots,
-            "ttl_ts": datetime.datetime.now() + datetime.timedelta(minutes=10)
+            "ttl_ts": datetime.datetime.now() + datetime.timedelta(minutes=5)
         }
         self.db.collection("pending_bookings").document(_id).set(data)
         self.db.collection("pending_bookings_history").document(_id).set(data)
         Logger.info(f"Booking added for {token} and {mobile}")
 
-    def confirm_booking(self, existing_booking, token, payment_response):
+    def confirm_booking(self, existing_booking, token, payment_response) -> None:
         _id = self.generate_id(existing_booking.get("mobile"))
         data = {
             "mobile": existing_booking.get("mobile"),
@@ -105,7 +112,7 @@ class DBService:
         Logger.info(f"Booking confirmed for {existing_booking.id}, {token}, "
                     f"{existing_booking.get('mobile')}")
 
-    def get_pending_booking(self, token):
+    def get_pending_booking(self, token) -> dict:
         bookings = self.db.collection("pending_bookings").where(
             filter=FieldFilter("token", "==", token)
         ).get()
@@ -114,7 +121,7 @@ class DBService:
         else:
             return None
 
-    def cancel_booking(self, token, mobile):
+    def cancel_booking(self, token, mobile) -> None:
         booking = self.db.collection("confirmed_bookings").where(
             filter=FieldFilter("token", "==", token)
         )
@@ -161,7 +168,7 @@ class DBService:
         ).stream()
         return Booking.create_booking(pending_bookings)
 
-    def remove_pending_bookings(self):
+    def remove_pending_bookings(self) -> None:
         current_ts = datetime.datetime.now()
         pending_bookings = self.db.collection("pending_bookings").where(
             filter=FieldFilter("ttl_ts", "<", current_ts)
@@ -182,11 +189,15 @@ class DBService:
         return Booking.create_booking(future_bookings)
 
     def get_notification_eligible_numbers(self, new_booking_only=True) -> list[str]:
-        mobiles = self.db.collection("booking_notification_numbers").where(
-            filter=FieldFilter("active", "==", True)
-        )
+        collection = self.db.collection("booking_notification_numbers").where(
+                filter=FieldFilter("active", "==", True)
+            )
         if new_booking_only:
-            mobiles = mobiles.where(
-                filter=FieldFilter("new_booking_only", "==", True)
+            mobiles = collection.where(
+                filter=FieldFilter("new_booking", "==", True)
+            )
+        else:
+            mobiles = collection.where(
+                filter=FieldFilter("scheduled", "==", True)
             )
         return [mobile.get("number") for mobile in mobiles.stream()]

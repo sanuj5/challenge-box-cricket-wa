@@ -56,24 +56,12 @@ class BoxBooking:
             endpoint="process_flow_request",
             methods=["POST"],
         )
-        # self.app.add_url_rule(
-        #     rule="/api/payment",
-        #     view_func=self.process_payment_response,
-        #     endpoint="process_payment_response",
-        #     methods=["POST"],
-        # )
         self.app.add_url_rule(
             rule="/api/razorpay/payment",
             view_func=self.process_razorpay_payment,
             endpoint="process_razorpay_payment",
             methods=["POST"],
         )
-        # self.app.add_url_rule(
-        #     rule="/api/pay",
-        #     view_func=self.payment_redirect,
-        #     endpoint="payment_redirect",
-        #     methods=["GET"],
-        # )
         self.app.add_url_rule(
             rule="/",
             view_func=self.index_page,
@@ -100,17 +88,6 @@ class BoxBooking:
     def index_page(self):
         return render_template('index.html')
 
-    # def payment_redirect(self):
-    #     transaction_id = request.args.get("tx")
-    #     Logger.info(transaction_id)
-    #     try:
-    #         url = self.payment_processor.generate_payment_link(200, transaction_id)
-    #     except InvalidStateException as e:
-    #         return str(e), 500
-    #     if not url:
-    #         return "Internal Server Error", 500
-    #     return redirect(url, code=302)
-
     def webhook(self):
         hub_mode = request.args.get("hub.mode")
         hub_challenge = request.args.get("hub.challenge")
@@ -122,6 +99,7 @@ class BoxBooking:
         else:
             abort(403)
 
+    # TODO Authentication
     def process_message_request(self):
         request_body = request.json
         Logger.info(request_body)
@@ -133,16 +111,17 @@ class BoxBooking:
                 }
             }
             return json.dumps(response), 200
-        elif (request_body.get("entry") and
-              request_body.get("entry")[0] and
-              request_body.get("entry")[0].get("changes") and
-              request_body.get("entry")[0].get("changes")[0].get("value")
+        if (request_body.get("entry") and
+                request_body.get("entry")[0] and
+                request_body.get("entry")[0].get("changes") and
+                request_body.get("entry")[0].get("changes")[0].get("value")
         ):
             webhook_message = request_body.get("entry")[0].get("changes")[0].get(
                 "value")
             if webhook_message.get("messages"):
                 messages = webhook_message.get("messages")[0]
                 message_type = MessageType(messages.get("type"))
+                # NFM_REPLY
                 if (message_type == MessageType.INTERACTIVE
                         and messages.get("interactive").get("type")
                         == MessageType.NFM_REPLY.value):
@@ -188,17 +167,11 @@ class BoxBooking:
             response_data = self.flow_factory.process(
                 flow_request, Screen(flow_request.screen))
         response = json.dumps(response_data, indent=4, default=lambda o: o.__dict__)
-        # Logger.info(
-        #     json.dumps(response_data, indent=None, default=lambda o: o.__dict__))
         return self.encryption_service.encrypt_data(response, key, iv)
 
-    # def process_payment_response(self):
-    #     header = request.headers.get("X-VERIFY")
-    #     response = request
-    #     Logger.info(f"{header} \n {response}")
-    #     self.payment_processor.validate_payment_response(header, response)
-    #     return "", 200
-
+    """
+    Not used while using Whatapp Payment Gateway API
+    """
     def process_razorpay_payment(self):
         header = request.headers.get("X-Razorpay-Signature")
         response = request.data.decode()
@@ -211,11 +184,4 @@ service = BoxBooking()
 app = service.app
 
 if __name__ == "__main__":
-    # This is used when running locally only. When deploying to Google App
-    # Engine, a webserver process such as Gunicorn will serve the app. This
-    # can be configured by adding an `entrypoint` to app.yaml.
-    # Flask's development server will automatically serve static files in
-    # the "static" directory. See:
-    # http://flask.pocoo.org/docs/1.0/quickstart/#static-files. Once deployed,
-    # App Engine itself will serve those files as configured in app.yaml.
     app.run()

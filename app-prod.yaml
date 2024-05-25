@@ -3,4 +3,4 @@ entrypoint: gunicorn -b :$PORT main:app
 instance_class: F1
 
 env_variables:
-  GOOGLE_CLOUD_PROJECT: "test-challenge-cricket"
+  GOOGLE_CLOUD_PROJECT: "challenge-cricket-409510"

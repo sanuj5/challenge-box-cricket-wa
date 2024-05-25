@@ -12,13 +12,11 @@ class PaymentFactory:
     def get_payment_service(payment_provider: PaymentProvider, secrets):
         match payment_provider:
             case PaymentProvider.RAZORPAY:
-                return RazorpayPayment(key_id=secrets.get("RAZORPAY_KEY_ID"),
-                                       key_secret=secrets.get("RAZORPAY_KEY_SECRET"),
-                                       webhook_secret=secrets.get("RAZORPAY_WEBHOOK_SECRET"))
-            # case payment_provider.PHONEPE:
-            #     return PhonepePayment(merchant_id=secrets.get("MERCHANT_ID"),
-            #                           salt_key=secrets.get("PROD_SALT_KEY"),
-            #                           salt_index=secrets.get("SALT_INDEX"))
+                return RazorpayPayment(
+                    key_id=secrets.get("RAZORPAY_KEY_ID"),
+                    key_secret=secrets.get("RAZORPAY_KEY_SECRET"),
+                    webhook_secret=secrets.get("RAZORPAY_WEBHOOK_SECRET")
+                )
 
 
 class BasePayment(ABC):
@@ -138,7 +136,7 @@ class RazorpayPayment(BasePayment):
         self.client = razorpay.Client(auth=(key_id, key_secret))
         self.client.set_app_details(
             {"title": "CBC_TEST", "version": "1.0"})
-        self.payment_link_expiry_in_minutes = 10
+        self.payment_link_expiry_in_minutes = 5
         self.callback_url = "https://challengecricket.in/api/payment"
 
     def generate_payment_link(self, amount: int, unique_transaction_id, *args,
