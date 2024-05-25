@@ -15,13 +15,14 @@ class WhatsappApi:
             "Authorization": "Bearer {}".format(wa_api_token)
         }
 
-    def send_message_request(self, data, header: dict = None):
+    def send_message_request(self, data, header: dict = None) -> None:
         headers = self.get_headers(header)
         json_data = json.dumps(data, default=lambda o: o.__dict__)
         Logger.info(json_data)
-        requests.post(url=f"{self.base_url}/messages",
-                      json=json.loads(json_data),
-                      headers=headers)
+        result = requests.post(url=f"{self.base_url}/messages",
+                               json=json.loads(json_data),
+                               headers=headers)
+        Logger.info(f"status_code={result.status_code}, response={result.text}")
 
     def get_payment_status(self, token: str):
         url = "{}/payments/{}/{}".format(
@@ -38,8 +39,11 @@ class WhatsappApi:
         else:
             return self.default_headers
 
+
 if __name__ == '__main__':
-    api = WhatsappApi("EAAOXlAJRh9cBOZCSk7kRtRh5UH7ZA0LaeWII2LQdgTgAi01cGYstTWWPqXQ2kEr9Ij6ZBQlRSuaZCP5ZAqcg2TY7ZCVQmQFF6D47OmjK2CHUMmirthFXoPsOjyhInJFgGdJoC2xZAw7eOrym3JdGQwtx1cYIZBVMwpjwjujxRwb15ZAjUDpmRpUDOt7I8UjZBE0RkN", "163821933489146")
+    api = WhatsappApi(
+        "EAAOXlAJRh9cBOZCSk7kRtRh5UH7ZA0LaeWII2LQdgTgAi01cGYstTWWPqXQ2kEr9Ij6ZBQlRSuaZCP5ZAqcg2TY7ZCVQmQFF6D47OmjK2CHUMmirthFXoPsOjyhInJFgGdJoC2xZAw7eOrym3JdGQwtx1cYIZBVMwpjwjujxRwb15ZAjUDpmRpUDOt7I8UjZBE0RkN",
+        "163821933489146")
     # message = MessageBuilderService.get_order_confirmation_message(
     #                 mobile="918390903001",
     #                 token="87a4e4695e854ce6b24a39e85d919f",
