@@ -54,9 +54,9 @@ class NotificationProcessor(BaseProcessor):
         if not bookings or len(bookings) == 0:
             final_message = "No bookings confirmed yet for today."
         else:
-            final_message = "   ------########------   ".join([
-                f"{booking.mobile} --> {', '.join([self.slots.get(slot).get("title") for slot in booking.slots])}"
-                for booking in bookings
+            final_message = "    --------------------------------------------------------------    ".join([
+                f"_*BOOKING {ind+1}:*_ +{booking.mobile} --> {',   '.join([self.slots.get(slot).get("title") for slot in booking.slots])}"
+                for ind, booking in enumerate(bookings)
             ])
         for mobile_number in mobile_numbers:
             self.api_service.send_message_request(
