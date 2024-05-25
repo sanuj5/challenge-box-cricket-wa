@@ -8,14 +8,14 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 class Encryption:
     def __init__(self, secrets):
         self.private_key = base64.b64decode(secrets.get("CBC_CERT_PEM"))
-        # self.private_key = Path(os.path.join(ROOT_DIR, 'cbc-cert.pem')).read_text()
+        self.key_password = secrets.get("CBC_CERT_PW")
 
     def decrypt_data(self, encrypted_flow_data_b64, encrypted_aes_key_b64,
                      initial_vector_b64) -> (str, bytes, bytes):
         encrypted_aes_key = b64decode(encrypted_aes_key_b64)
         private_key = serialization.load_pem_private_key(
-            self.private_key.encode("utf-8"),
-            password=str.encode("ec051078"),
+            self.private_key,
+            password=str.encode(self.key_password),
         )
         aes_key = private_key.decrypt(
             encrypted_aes_key,
