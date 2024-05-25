@@ -1,7 +1,8 @@
 Flask~=2.2.5
 gunicorn
 requests~=2.31.0
-cryptography~=38.0.3
+cryptography
 firebase_admin
 python-dateutil~=2.8.2
+pytz
 razorpay
