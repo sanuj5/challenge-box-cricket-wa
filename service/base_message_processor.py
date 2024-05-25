@@ -4,7 +4,6 @@ from abc import ABC
 import pytz
 
 from external.whatsapp_api import WhatsappApi
-from logger import Logger
 from message_builder_service import MessageBuilderService
 from service.db import DBService
 
@@ -14,11 +13,11 @@ class BaseProcessor(ABC):
         self.db_service: DBService = db_service
         self.slots, self.day_wise_slots = self.db_service.get_all_slots()
         self.mbs = MessageBuilderService()
-        secrets = self.db_service.get_all_secrets()
-        self.api_service = WhatsappApi(secrets.get("WA_API_TOKEN"),
-                                       secrets.get("MOBILE_ID"))
-        self.flow_id = secrets.get("FLOW_ID")
-        self.flow_mode = secrets.get("FLOW_MODE") or "draft"
+        self.secrets = self.db_service.get_all_secrets()
+        self.api_service = WhatsappApi(self.secrets.get("WA_API_TOKEN"),
+                                       self.secrets.get("MOBILE_ID"))
+        self.flow_id = self.secrets.get("FLOW_ID")
+        self.flow_mode = self.secrets.get("FLOW_MODE") or "draft"
 
     def get_available_slots(self, formatted_date) -> list[dict]:
         today_date = datetime.datetime.now(pytz.timezone('Asia/Kolkata'))

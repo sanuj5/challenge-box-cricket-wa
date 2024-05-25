@@ -18,12 +18,13 @@ class BoxBooking:
 
     def __init__(self):
         db_service = DBService()
+        self.secrets = db_service.get_all_secrets()
         self.app = Flask(__name__)
         self._setup_routes()
-        self.encryption_service = Encryption()
+        self.encryption_service = Encryption(secrets=self.secrets)
         payment_service = PaymentFactory.get_payment_service(
             payment_provider=PaymentProvider.RAZORPAY,
-            secrets=db_service.get_all_secrets()
+            secrets=self.secrets
         )
         self.flow_factory = FlowFactory(db_service)
         self.message_factory = MessageFactory(db_service)
@@ -88,8 +89,10 @@ class BoxBooking:
         )
 
     def scheduled_booking_notification(self):
+        if self.secrets.get("JOB_KEY_SECRET") != request.headers.get("X-Auth-Token"):
+            return abort(401)
         self.notification_processor.send_scheduled_notifications()
-        return "", 200
+        return "OK", 200
 
     def health_check(self):
         return ""
@@ -113,7 +116,8 @@ class BoxBooking:
         hub_challenge = request.args.get("hub.challenge")
         hub_verify_token = request.args.get("hub.verify_token")
 
-        if hub_mode == "subscribe" and hub_verify_token == "dc6bf63a-2b58-40b6-87b8-096b5e4e8479":
+        if (hub_mode == "subscribe"
+                and hub_verify_token == self.secrets.get("WA_WEBHOOK_TOKEN")):
             return hub_challenge
         else:
             abort(403)

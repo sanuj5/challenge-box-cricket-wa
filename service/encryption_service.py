@@ -1,3 +1,4 @@
+import base64
 import os
 from base64 import b64decode, b64encode
 from pathlib import Path
@@ -5,12 +6,11 @@ from pathlib import Path
 from cryptography.hazmat.primitives import serialization, asymmetric, hashes
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
-from util import ROOT_DIR
-
 
 class Encryption:
-    def __init__(self):
-        self.private_key = Path(os.path.join(ROOT_DIR, 'cbc-cert.pem')).read_text()
+    def __init__(self, secrets):
+        self.private_key = base64.b64decode(secrets.get("CBC_CERT_PEM"))
+        # self.private_key = Path(os.path.join(ROOT_DIR, 'cbc-cert.pem')).read_text()
 
     def decrypt_data(self, encrypted_flow_data_b64, encrypted_aes_key_b64,
                      initial_vector_b64) -> (str, bytes, bytes):
