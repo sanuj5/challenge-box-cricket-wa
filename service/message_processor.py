@@ -160,6 +160,7 @@ This class processes user message post flow screen confirmation (NFM Reply Messa
 class NfmMessageProcessor(BaseMessageProcessor):
     def __init__(self, db_service):
         super().__init__(db_service)
+        self.amount_offset = self.secrets.get("AMOUNT_OFFSET") or 100
 
     def process_message(self, message, *args, **kwargs):
         Logger.info(f"Processing nfm reply message.")
@@ -200,8 +201,8 @@ class NfmMessageProcessor(BaseMessageProcessor):
             return_message = self.mbs.get_interactive_payment_message_gw(
                 mobile=mobile,
                 payment_amount=total_amount,
-                slots=[slot.strip() for slot in slots_id.split(",")],
                 reference_id=token,
+                amount_offset=self.amount_offset,
                 message_body=f"""
 Date: {date} 
 Slots: {slots_title}

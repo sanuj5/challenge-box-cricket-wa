@@ -30,7 +30,6 @@ _Enjoy the game!_
     @staticmethod
     def get_interactive_message(mobile: str,
                                 message_body: str) -> im.InteractiveMessage:
-
         buttons = list()
         buttons.append(
             im.Button(reply=im.Reply(
@@ -162,12 +161,14 @@ _Enjoy the game!_
         return message
 
     @staticmethod
-    def get_interactive_payment_message_gw(mobile: str,
-                                           message_body: str,
-                                           payment_amount: int,
-                                           slots: list,
-                                           reference_id: str) -> ipm_gw.InteractivePaymentMessage:
-        total_amount = ipm_gw.TotalAmount(value=payment_amount // 10)  # TODO
+    def get_interactive_payment_message_gw(
+            mobile: str,
+            message_body: str,
+            payment_amount: int,
+            reference_id: str,
+            amount_offset: int) -> ipm_gw.InteractivePaymentMessage:
+
+        total_amount = ipm_gw.TotalAmount(value=payment_amount, offset=amount_offset)
         tax_discount = ipm_gw.Tax()
 
         item = ipm_gw.Item()
