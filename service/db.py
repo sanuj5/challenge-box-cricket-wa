@@ -13,11 +13,12 @@ from model.booking import Booking
 class DBService:
 
     def __init__(self):
-        Logger.info("Initializing firestore client..")
+        project = os.getenv("GOOGLE_CLOUD_PROJECT")
+        Logger.info("Initializing firestore client for project {}".format(project))
         cred = credentials.ApplicationDefault()
 
         firebase_admin.initialize_app(credential=cred, options={
-            "projectId": os.getenv("GOOGLE_CLOUD_PROJECT"),
+            "projectId": project,
         })
         # self.app = firebase_admin.initialize_app()
         self.db = firestore.client()
