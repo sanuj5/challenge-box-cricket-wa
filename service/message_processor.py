@@ -125,7 +125,7 @@ class InteractiveMessageProcessor(BaseMessageProcessor):
         if pending_booking:
             return self.mbs.get_interactive_message(
                 mobile,
-                "Previous booking still in progress. Please complete it or wait for some time to create new booking request."
+                "Previous booking still in progress. If you have already made the payment, wait for some time till we confirm your payment."
             )
         flow_token = str(uuid.uuid4())[:-2].replace("-", "")
         self.db_service.save_flow_token(mobile, flow_token)
