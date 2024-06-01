@@ -125,6 +125,7 @@ class DBService:
             )
         all_pending_bookings = bookings.get()
         Logger.info(f"Found {len(all_pending_bookings)} pending bookings for {mobile}")
+        Logger.info(f"Bookings {all_pending_bookings[0]}")
         if all_pending_bookings and len(all_pending_bookings) > 0:
             return all_pending_bookings[0]
         else:
