@@ -35,6 +35,10 @@ class BaseFlowRequestProcessor(BaseProcessor):
     def process_flow_request(self, message, *args, **kwargs) -> FlowResponse:
         pass
 
+    def exists_pending_booking(self, token):
+        mobile = self.db_service.get_mobile_token_mapping(token).get(token)
+        return self.db_service.get_pending_booking(mobile=mobile)
+
 
 class DateScreenProcessor(BaseFlowRequestProcessor):
 
@@ -50,8 +54,10 @@ class DateScreenProcessor(BaseFlowRequestProcessor):
         date = datetime.datetime.fromtimestamp(float(date_selected) / 1000,
                                                tz=pytz.timezone("Asia/Kolkata"))
         formatted_date = f'{date.strftime(self.mbs.date_format)}'
-        # Remove all pending bookings
-        self.db_service.remove_pending_bookings()
+
+        if self.exists_pending_booking(message.flow_token):
+            response['success'] = "false"
+            return FlowResponse(data=response, screen=Screen.SUCCESS.value)
         response['slots'] = self.get_available_slots(formatted_date)
         response['selected_date'] = formatted_date
         response['error_messages'] = ""
@@ -73,7 +79,9 @@ class SlotScreenProcessor(BaseFlowRequestProcessor):
         slots_selected = message.data.get("slots")
         response = dict()
         error = False
-
+        if self.exists_pending_booking(message.flow_token):
+            response['success'] = "false"
+            return FlowResponse(data=response, screen=Screen.SUCCESS.value)
         if not slots_selected or len(slots_selected) == 0:
             error = True
             response['error_messages'] = "Please select at least 1 slot"
@@ -131,8 +139,12 @@ class BookingConfirmationProcessor(BaseFlowRequestProcessor):
         slots = message.data.get("slots").split(",")
         amount = message.data.get("amount")
         response = dict()
+        if self.exists_pending_booking(message.flow_token):
+            response['success'] = "false"
+            return FlowResponse(data=response, screen=Screen.SUCCESS.value)
         response['selected_date'] = date_selected
         response['slots'] = message.data.get("slots")
         response['amount'] = amount
         response['token'] = token
+        response['success'] = "true"
         return FlowResponse(data=response, screen=Screen.SUCCESS.value)

@@ -172,6 +172,14 @@ class NfmMessageProcessor(BaseMessageProcessor):
         Logger.info(f"Processing nfm reply message.")
         mobile = message.message_from
         response = json.loads(message.interactive.nfm_reply.get("response_json"))
+        success = response.get("success")
+        if success == "false":
+            return_message = self.mbs.get_final_text_message(
+                mobile=mobile,
+                body=f"You already have another booking in progress. Please complete it or wait for some time to complete it."
+            )
+            self.api_service.send_message_request(data=return_message)
+            return
         amount = re.findall(r'\d+', response.get("amount"))[0]
         token = response.get("token")
         slots_id = response.get("slots")
