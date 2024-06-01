@@ -92,11 +92,20 @@ class TextMessageProcessor(BaseMessageProcessor):
         if not message:
             raise ValueError("Missing parameter request_body")
         mobile = message.message_from
-        self.api_service.send_message_request(self.mbs.get_interactive_message(
-            mobile,
-            "Click below to view existing booking or create new booking."
-        )
-        )
+        if self.secrets.get('UNDER_MAINTENANCE'):
+            self.api_service.send_message_request(
+                self.mbs.get_final_text_message(
+                    mobile=mobile,
+                    body=self.secrets.get(
+                        'UNDER_MAINTENANCE_MESSAGE') or "System Under Maintenance. Please try later."
+                )
+            )
+        else:
+            self.api_service.send_message_request(self.mbs.get_interactive_message(
+                mobile,
+                "Click below to view existing booking or create new booking."
+            )
+            )
 
 
 """
