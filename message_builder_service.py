@@ -174,11 +174,11 @@ _Enjoy the game!_
         item = ipm_gw.Item()
         item.amount = total_amount
         item.quantity = 1
-        expiry_time = datetime.datetime.now() + datetime.timedelta(minutes=10)
+        expiry_time = datetime.datetime.now() + datetime.timedelta(minutes=5)
 
         expiration = ipm_gw.Expiration(
             timestamp=str(int(time.mktime(expiry_time.timetuple()))),
-            description="Payment not completed within 10 minutes, hence expired!!"
+            description="Payment not completed within 5 minutes, hence expired!!"
         )
 
         order = ipm_gw.Order()
