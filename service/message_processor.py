@@ -1,5 +1,6 @@
 import datetime
 import json
+import re
 import uuid
 from abc import abstractmethod
 
@@ -166,7 +167,7 @@ class NfmMessageProcessor(BaseMessageProcessor):
         Logger.info(f"Processing nfm reply message.")
         mobile = message.message_from
         response = json.loads(message.interactive.nfm_reply.get("response_json"))
-        amount = response.get("amount")
+        amount = re.findall(r'\d+', response.get("amount"))[0]
         token = response.get("token")
         slots_id = response.get("slots")
         date = response.get("selected_date")
