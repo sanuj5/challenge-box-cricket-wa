@@ -96,6 +96,7 @@ class TextMessageProcessor(BaseMessageProcessor):
             self.api_service.send_message_request(
                 self.mbs.get_final_text_message(
                     mobile=mobile,
+                    id=str(uuid.uuid4()),
                     body=self.secrets.get(
                         'UNDER_MAINTENANCE_MESSAGE') or "System Under Maintenance. Please try later."
                 )
