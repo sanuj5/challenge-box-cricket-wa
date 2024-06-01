@@ -175,7 +175,7 @@ class NfmMessageProcessor(BaseMessageProcessor):
                                  for slot in slots_id.split(',')])
         total_amount = sum(
             [self.slots.get(slot.strip()).get("price") for slot in slots_id.split(',')])
-        Logger.info(f"Pending payment of amount {total_amount}")
+        Logger.info(f"Pending payment amount {total_amount}, actual amount {amount}")
         pending_booking_token = self.db_service.get_mobile_token_mapping(token)
 
         # Token expired below
