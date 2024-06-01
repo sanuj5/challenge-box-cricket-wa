@@ -123,8 +123,9 @@ class DBService:
             bookings.where(
                 filter=FieldFilter("mobile", "==", mobile)
             )
-        if bookings and len(bookings.get()) > 0:
-            return bookings[0]
+        all_pending_bookings = bookings.get()
+        if all_pending_bookings and len(all_pending_bookings) > 0:
+            return all_pending_bookings[0]
         else:
             return None
 
