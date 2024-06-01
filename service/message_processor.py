@@ -121,16 +121,21 @@ class InteractiveMessageProcessor(BaseMessageProcessor):
         self.api_service.send_message_request(return_message)
 
     def get_new_booking_message(self, mobile):
+        pending_booking = self.db_service.get_pending_booking(mobile=mobile)
+        if pending_booking:
+            return self.mbs.get_interactive_message(
+                mobile,
+                "Previous booking still in progress. Please complete it or wait for some time to create new booking request."
+            )
         flow_token = str(uuid.uuid4())[:-2].replace("-", "")
         self.db_service.save_flow_token(mobile, flow_token)
-        return_message = self.mbs.get_interactive_flow_message(
+        return self.mbs.get_interactive_flow_message(
             mobile,
             "Click below to start new booking",
             self.mbs.get_initial_screen_param(
                 self.flow_id, flow_token, self.flow_mode
             )
         )
-        return return_message
 
     def get_view_booking_message(self, mobile):
         today_date = datetime.datetime.now() \

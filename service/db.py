@@ -113,11 +113,17 @@ class DBService:
         Logger.info(f"Booking confirmed for {existing_booking.id}, {token}, "
                     f"{existing_booking.get('mobile')}")
 
-    def get_pending_booking(self, token) -> dict:
-        bookings = self.db.collection("pending_bookings").where(
-            filter=FieldFilter("token", "==", token)
-        ).get()
-        if bookings and len(bookings) > 0:
+    def get_pending_booking(self, token=None, mobile=None) -> dict:
+        bookings = self.db.collection("pending_bookings")
+        if token:
+            bookings.where(
+                filter=FieldFilter("token", "==", token)
+            )
+        if mobile:
+            bookings.where(
+                filter=FieldFilter("mobile", "==", mobile)
+            )
+        if bookings and len(bookings.get()) > 0:
             return bookings[0]
         else:
             return None

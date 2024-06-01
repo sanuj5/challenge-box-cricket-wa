@@ -17,8 +17,8 @@ from service.payment_processor import PaymentProcessor
 class BoxBooking:
 
     def __init__(self):
-        db_service = DBService()
-        self.secrets = db_service.get_all_secrets()
+        self.db_service = DBService()
+        self.secrets = self.db_service.get_all_secrets()
         self.app = Flask(__name__)
         self._setup_routes()
         self.encryption_service = Encryption(secrets=self.secrets)
@@ -26,10 +26,10 @@ class BoxBooking:
             payment_provider=PaymentProvider.RAZORPAY,
             secrets=self.secrets
         )
-        self.flow_factory = FlowFactory(db_service)
-        self.message_factory = MessageFactory(db_service)
-        self.payment_processor = PaymentProcessor(db_service, payment_service)
-        self.notification_processor = NotificationProcessor(db_service)
+        self.flow_factory = FlowFactory(self.db_service)
+        self.message_factory = MessageFactory(self.db_service)
+        self.payment_processor = PaymentProcessor(self.db_service, payment_service)
+        self.notification_processor = NotificationProcessor(self.db_service)
 
     def _setup_routes(self):
         self.app.add_url_rule(
@@ -75,6 +75,19 @@ class BoxBooking:
             endpoint="scheduled_booking_notification",
             methods=["POST"],
         )
+
+        self.app.add_url_rule(
+            rule="/api/remove_pending_bookings",
+            view_func=self.remove_pending_bookings,
+            endpoint="remove_pending_bookings",
+            methods=["POST"],
+        )
+
+    def remove_pending_bookings(self):
+        if self.secrets.get("JOB_KEY_SECRET") != request.headers.get("X-Auth-Token"):
+            return abort(401)
+        self.db_service.remove_pending_bookings()
+        return "OK", 200
 
     def scheduled_booking_notification(self):
         if self.secrets.get("JOB_KEY_SECRET") != request.headers.get("X-Auth-Token"):
