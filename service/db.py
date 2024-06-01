@@ -124,6 +124,7 @@ class DBService:
                 filter=FieldFilter("mobile", "==", mobile)
             )
         all_pending_bookings = bookings.get()
+        Logger.info(f"Found {len(all_pending_bookings)} pending bookings for {mobile}")
         if all_pending_bookings and len(all_pending_bookings) > 0:
             return all_pending_bookings[0]
         else:
