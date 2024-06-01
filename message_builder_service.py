@@ -174,7 +174,7 @@ _Enjoy the game!_
         item = ipm_gw.Item()
         item.amount = total_amount
         item.quantity = 1
-        expiry_time = datetime.datetime.now() + datetime.timedelta(minutes=5)
+        expiry_time = datetime.datetime.now() + datetime.timedelta(minutes=6)
 
         expiration = ipm_gw.Expiration(
             timestamp=str(int(time.mktime(expiry_time.timetuple()))),

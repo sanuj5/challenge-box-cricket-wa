@@ -90,7 +90,7 @@ class DBService:
             "date": date,
             "actual_date": datetime.datetime.strptime(date, self.mbs.date_format),
             "slots": slots,
-            "ttl_ts": datetime.datetime.now() + datetime.timedelta(minutes=6)
+            "ttl_ts": datetime.datetime.now() + datetime.timedelta(minutes=7)
         }
         self.db.collection("pending_bookings").document(_id).set(data)
         self.db.collection("pending_bookings_history").document(_id).set(data)
