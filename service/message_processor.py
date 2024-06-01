@@ -187,7 +187,7 @@ class NfmMessageProcessor(BaseMessageProcessor):
                 "Please start the booking again by sending *Hi*."
             )
         # Check amount received from user vs amount calculated for selected slots
-        elif amount != total_amount:
+        elif int(amount) != total_amount:
             return_message = self.mbs.get_final_text_message(
                 mobile,
                 "",
