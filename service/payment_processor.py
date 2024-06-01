@@ -25,7 +25,7 @@ class PaymentProcessor(BaseProcessor):
                 json.loads(response).get("response"))
             Logger.info(response_string)
             existing_booking = self.db_service.get_pending_booking(
-                validated_response.get("order_id"))
+                token=validated_response.get("order_id"))
             if validated_response.get("success"):
                 amount = validated_response.get("amount")
                 # TODO validate amount
@@ -64,7 +64,7 @@ class PaymentProcessor(BaseProcessor):
         self.db_service.remove_pending_bookings()
         if not self.db_service.get_mobile_token_mapping(transaction_id):
             raise InvalidStateException("Invalid transaction token")
-        elif not self.db_service.get_pending_booking(transaction_id):
+        elif not self.db_service.get_pending_booking(token=transaction_id):
             raise InvalidStateException("<h1>This payment link is expired. "
                                         "Please start new booking from WhatsApp.</h1>")
         else:
@@ -75,7 +75,7 @@ class PaymentProcessor(BaseProcessor):
     def validate_status(self, message: PaymentStatus):
         Logger.info(f"Payment Status {message}")
         existing_booking = self.db_service.get_pending_booking(
-            message.payment.reference_id
+            token=message.payment.reference_id
         )
         if message.status == "captured":
             wa_payment_status = self.api_service.get_payment_status(

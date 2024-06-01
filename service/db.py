@@ -116,17 +116,17 @@ class DBService:
     def get_pending_booking(self, token=None, mobile=None) -> dict:
         bookings = self.db.collection("pending_bookings")
         if token:
-            bookings.where(
+            bookings = bookings.where(
                 filter=FieldFilter("token", "==", token)
             )
         if mobile:
-            bookings.where(
+            bookings = bookings.where(
                 filter=FieldFilter("mobile", "==", mobile)
             )
         all_pending_bookings = bookings.get()
-        Logger.info(f"Found {len(all_pending_bookings)} pending bookings for {mobile}")
-        Logger.info(f"Bookings {all_pending_bookings[0].to_dict()}")
         if all_pending_bookings and len(all_pending_bookings) > 0:
+            Logger.info(
+                f"Pending booking {all_pending_bookings[0].to_dict()} for {mobile}")
             return all_pending_bookings[0]
         else:
             return None
