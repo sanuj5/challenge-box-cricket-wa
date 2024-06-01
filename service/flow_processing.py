@@ -68,6 +68,8 @@ class SlotScreenProcessor(BaseFlowRequestProcessor):
         date_selected = message.data.get("selected_date")
         token = message.flow_token
         date = datetime.datetime.strptime(date_selected, self.mbs.date_format)
+        today_date = datetime.datetime.now(pytz.timezone('Asia/Kolkata'))
+        current_hour = today_date.hour
         slots_selected = message.data.get("slots")
         response = dict()
         error = False
@@ -78,9 +80,13 @@ class SlotScreenProcessor(BaseFlowRequestProcessor):
 
         booked_slots = self.db_service.get_reserved_slots(date_selected)
         for slot in slots_selected:
-            if booked_slots.get(slot):
+            slot_details = self.slots.get(slot)
+            if booked_slots.get(slot) or (
+                    (today_date.date() == date.date()
+                     and slot_details.get("start_hour") <= current_hour)):
                 error = True
-                response['error_messages'] = f"Slot {self.slots.get(slot).get("title")} is unavailable. Please select different slot."
+                response[
+                    'error_messages'] = f"Slot {self.slots.get(slot).get("title")} is unavailable. Please select different slot."
                 break
 
         if error:
