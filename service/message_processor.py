@@ -201,9 +201,9 @@ class NfmMessageProcessor(BaseMessageProcessor):
             )
             return_message = self.mbs.get_interactive_payment_message_gw(
                 mobile=mobile,
-                payment_amount=total_amount * self.amount_offset,  # TODO
+                payment_amount=total_amount * self.amount_offset,
                 reference_id=token,
-                amount_offset=1,  # TODO
+                amount_offset=100,
                 message_body=f"""
 Date: {date} 
 Slots: {slots_title}
