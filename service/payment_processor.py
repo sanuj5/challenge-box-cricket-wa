@@ -77,7 +77,7 @@ class PaymentProcessor(BaseProcessor):
         existing_booking = self.db_service.get_pending_booking(
             message.payment.reference_id
         )
-        if existing_booking and message.status == "captured":
+        if message.status == "captured":
             wa_payment_status = self.api_service.get_payment_status(
                 message.payment.reference_id)
             # razorpay_payment_status = self.payment_service.get_payment(
@@ -87,28 +87,39 @@ class PaymentProcessor(BaseProcessor):
                     and wa_payment_status.get("payments")[0]
                     and wa_payment_status.get("payments")[0].get("status") == "CAPTURED"
             ):
-                self.db_service.confirm_booking(existing_booking,
-                                                message.payment.reference_id,
-                                                json.dumps(message,
-                                                           default=lambda o: o.__dict__
-                                                           )
-                                                )
-                self.api_service.send_message_request(
-                    self.mbs.get_order_confirmation_message(
-                        mobile=message.recipient_id,
-                        token=message.payment.reference_id,
-                        message="Booking Confirmed")
-                )
-                self.notification_service.send_payment_notifications(
-                    existing_booking.get("date"),
-                    ", ".join([
-                        self.slots.get(slot.strip()).get("title") for slot in existing_booking.get("slots")
-                    ]),
-                    f"+{existing_booking.get("mobile")}",
-                    str(float(existing_booking.get("amount")))
-                )
+                if not existing_booking:
+                    # TODO refund the amount
+                    Logger.error(
+                        "Existing booking does not exist for {}".format(
+                            wa_payment_status,
+                            ))
+                    pass
+                else:
+                    self.db_service.confirm_booking(existing_booking,
+                                                    message.payment.reference_id,
+                                                    json.dumps(message,
+                                                               default=lambda
+                                                                   o: o.__dict__
+                                                               )
+                                                    )
+                    self.api_service.send_message_request(
+                        self.mbs.get_order_confirmation_message(
+                            mobile=message.recipient_id,
+                            token=message.payment.reference_id,
+                            message="Booking Confirmed")
+                    )
+                    self.notification_service.send_payment_notifications(
+                        existing_booking.get("date"),
+                        ", ".join([
+                            self.slots.get(slot.strip()).get("title") for slot in
+                            existing_booking.get("slots")
+                        ]),
+                        f"+{existing_booking.get("mobile")}",
+                        str(float(existing_booking.get("amount")))
+                    )
             else:
-                Logger.error("Payment Status is invalid {}".format(wa_payment_status))
+                Logger.error("Payment Status is invalid {} {}".format(wa_payment_status,
+                                                                      existing_booking))
         else:
             Logger.error("Payment Status is invalid {} {}".format(
                 existing_booking,
