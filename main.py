@@ -83,10 +83,23 @@ class BoxBooking:
             methods=["POST"],
         )
 
+        self.app.add_url_rule(
+            rule="/api/upcoming_booking_notification",
+            view_func=self.upcoming_booking_notification,
+            endpoint="upcoming_booking_notification",
+            methods=["POST"],
+        )
+
     def remove_pending_bookings(self):
         if self.secrets.get("JOB_KEY_SECRET") != request.headers.get("X-Auth-Token"):
             return abort(401)
         self.db_service.remove_pending_bookings()
+        return "OK", 200
+
+    def upcoming_booking_notification(self):
+        if self.secrets.get("JOB_KEY_SECRET") != request.headers.get("X-Auth-Token"):
+            return abort(401)
+        self.notification_processor.send_upcoming_booking_notification()
         return "OK", 200
 
     def scheduled_booking_notification(self):
@@ -133,6 +146,7 @@ class BoxBooking:
                 "value")
             if webhook_message.get("messages"):
                 messages = webhook_message.get("messages")[0]
+                contact = webhook_message.get("contacts")[0] if webhook_message.get("contacts") else None
                 message_type = MessageType(messages.get("type"))
                 # NFM_REPLY
                 if (message_type == MessageType.INTERACTIVE
@@ -141,7 +155,11 @@ class BoxBooking:
                     message_type = MessageType.NFM_REPLY
                 parsed_message = BaseMessageProcessor.parse_message(messages,
                                                                     message_type)
-                return self.message_factory.process(parsed_message, message_type)
+                return self.message_factory.process(
+                    parsed_message,
+                    message_type,
+                    contact=contact
+                )
             elif webhook_message.get("statuses"):
                 messages = webhook_message.get("statuses")[0]
                 message_type = MessageType(messages.get("type"))
@@ -155,42 +173,46 @@ class BoxBooking:
                 Logger.debug("Message type not yet handled")
         return "Message type not supported", 200
 
-    def process_flow_request(self):
-        encrypted_flow_data_b64 = request.json.get("encrypted_flow_data")
-        encrypted_aes_key_b64 = request.json.get("encrypted_aes_key")
-        initial_vector_b64 = request.json.get("initial_vector")
-        try:
-            decrypted_data, key, iv = self.encryption_service.decrypt_data(
-                encrypted_flow_data_b64,
-                encrypted_aes_key_b64, initial_vector_b64)
-            json_data = json.loads(decrypted_data)
-        except Exception as e:
-            Logger.error("Encryption error {}".format(e))
-            raise InvalidStateException("Invalid data provided")
-        Logger.info(f"Flow request: {json_data}")
-        if json_data.get("action") == "ping":
-            response_data = {
-                "version": "3.0",
-                "data": {
-                    "status": "active"
-                }
-            }
-        else:
-            flow_request = FlowRequest(**json_data)
-            response_data = self.flow_factory.process(
-                flow_request, Screen(flow_request.screen))
-        response = json.dumps(response_data, indent=4, default=lambda o: o.__dict__)
-        return self.encryption_service.encrypt_data(response, key, iv)
 
-    """
-    Not used while using Whatapp Payment Gateway API
-    """
-    def process_razorpay_payment(self):
-        header = request.headers.get("X-Razorpay-Signature")
-        response = request.data.decode()
-        Logger.info(f"{header} \n {response}")
-        self.payment_processor.validate_payment_response(header, response)
-        return "", 200
+def process_flow_request(self):
+    encrypted_flow_data_b64 = request.json.get("encrypted_flow_data")
+    encrypted_aes_key_b64 = request.json.get("encrypted_aes_key")
+    initial_vector_b64 = request.json.get("initial_vector")
+    try:
+        decrypted_data, key, iv = self.encryption_service.decrypt_data(
+            encrypted_flow_data_b64,
+            encrypted_aes_key_b64, initial_vector_b64)
+        json_data = json.loads(decrypted_data)
+    except Exception as e:
+        Logger.error("Encryption error {}".format(e))
+        raise InvalidStateException("Invalid data provided")
+    Logger.info(f"Flow request: {json_data}")
+    if json_data.get("action") == "ping":
+        response_data = {
+            "version": "3.0",
+            "data": {
+                "status": "active"
+            }
+        }
+    else:
+        flow_request = FlowRequest(**json_data)
+        response_data = self.flow_factory.process(
+            flow_request, Screen(flow_request.screen))
+    response = json.dumps(response_data, indent=4, default=lambda o: o.__dict__)
+    return self.encryption_service.encrypt_data(response, key, iv)
+
+
+"""
+Not used while using Whatapp Payment Gateway API
+"""
+
+
+def process_razorpay_payment(self):
+    header = request.headers.get("X-Razorpay-Signature")
+    response = request.data.decode()
+    Logger.info(f"{header} \n {response}")
+    self.payment_processor.validate_payment_response(header, response)
+    return "", 200
 
 
 service = BoxBooking()

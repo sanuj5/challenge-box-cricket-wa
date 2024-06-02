@@ -21,7 +21,7 @@ class MessageFactory:
         self.interactive_message_processor = InteractiveMessageProcessor(db_service)
         self.nfm_reply_processor = NfmMessageProcessor(db_service)
 
-    def process(self, message, message_type: MessageType):
+    def process(self, message, message_type: MessageType, *args, **kwargs):
         match message_type:
             case MessageType.TEXT:
                 message_service = self.text_message_processor
@@ -31,7 +31,7 @@ class MessageFactory:
                 message_service = self.nfm_reply_processor
             case _:
                 return "Message type not supported", 200
-        message_service.process_message(message)
+        message_service.process_message(message, *args, **kwargs)
         return "", 200
 
 
@@ -92,6 +92,10 @@ class TextMessageProcessor(BaseMessageProcessor):
         if not message:
             raise ValueError("Missing parameter request_body")
         mobile = message.message_from
+        contact = kwargs.get("contact")
+        name = (contact and contact.get("profile") and contact.get("profile").get("name")) or "User"
+        self.db_service.update_user_details(mobile, name)
+
         if self.secrets.get('UNDER_MAINTENANCE'):
             self.api_service.send_message_request(
                 self.mbs.get_final_text_message(

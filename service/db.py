@@ -211,3 +211,13 @@ class DBService:
                 filter=FieldFilter("scheduled", "==", True)
             )
         return [mobile.get("number") for mobile in mobiles.stream()]
+
+    def update_user_details(self, mobile, name):
+        _id = mobile
+        data = {
+            "mobile": mobile,
+            "name": name,
+            "last_updated_ts": datetime.datetime.now()
+        }
+        self.db.collection("users").document(_id).set(data)
+

@@ -2,6 +2,7 @@ import datetime
 
 import pytz
 
+from logger import Logger
 from service.base_message_processor import BaseProcessor
 from model.templates import TemplateBuilder as tb
 
@@ -69,3 +70,15 @@ class NotificationProcessor(BaseProcessor):
                     ]
                 )
             )
+
+    def send_upcoming_booking_notification(self):
+        today_date = datetime.datetime.now(pytz.timezone('Asia/Kolkata'))
+        formatted_date = today_date.strftime(self.mbs.date_format)
+        hour = today_date.hour + 1
+        bookings = self.db_service.get_confirmed_bookings(formatted_date)
+
+        for booking in bookings:
+            if self.slots.get(booking.slots.sort()[0]).get("start_hour") == hour:
+                Logger.info(f"Sending notification for upcoming booking {booking}")
+                self.api_service.send_message_request()
+        pass
