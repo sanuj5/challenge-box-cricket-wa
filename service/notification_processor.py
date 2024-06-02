@@ -81,4 +81,3 @@ class NotificationProcessor(BaseProcessor):
             if self.slots.get(booking.slots.sort()[0]).get("start_hour") == hour:
                 Logger.info(f"Sending notification for upcoming booking {booking}")
                 self.api_service.send_message_request()
-        pass
