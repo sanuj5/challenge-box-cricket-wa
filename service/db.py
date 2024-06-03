@@ -89,7 +89,7 @@ class DBService:
             "amount": float(amount),
             "date": date,
             "actual_date": datetime.datetime.strptime(date, self.mbs.date_format),
-            "slots": slots,
+            "slots": sorted(slots),
             "ttl_ts": datetime.datetime.now() + datetime.timedelta(minutes=7)
         }
         self.db.collection("pending_bookings").document(_id).set(data)
@@ -105,7 +105,7 @@ class DBService:
             "amount": float(existing_booking.get("amount")),
             "date": existing_booking.get("date"),
             "actual_date": existing_booking.get("actual_date"),
-            "slots": existing_booking.get("slots"),
+            "slots": sorted(existing_booking.get("slots")),
             "cancelled": False,
             "payment_response": payment_response
         }
