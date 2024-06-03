@@ -92,7 +92,7 @@ class PaymentProcessor(BaseProcessor):
                     Logger.error(
                         "Existing booking does not exist for {}".format(
                             wa_payment_status,
-                            ))
+                        ))
                     pass
                 else:
                     self.db_service.confirm_booking(existing_booking,
@@ -106,7 +106,14 @@ class PaymentProcessor(BaseProcessor):
                         self.mbs.get_order_confirmation_message(
                             mobile=message.recipient_id,
                             token=message.payment.reference_id,
-                            message="Booking Confirmed")
+                            message=f"""
+
+*Your booking is confirmed.*
+
+Date: {existing_booking.get("date")}
+Slots" {", ".join([self.slots.get(slot.strip()).get("title") for slot in existing_booking.get("slots")])}
+""")
+
                     )
                     self.notification_service.send_payment_notifications(
                         existing_booking.get("date"),

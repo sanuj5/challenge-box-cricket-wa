@@ -35,7 +35,7 @@ class NotificationProcessor(BaseProcessor):
                     parameters=[
                         tb.get_text_parameter(date),
                         tb.get_text_parameter(slots),
-                        tb.get_text_parameter(booking_number),
+                        tb.get_text_parameter(f"{booking_number}, {self.db_service.get_user_details(booking_number) or ""}"),
                         tb.get_text_parameter(amount),
                     ]
                 )
@@ -56,7 +56,7 @@ class NotificationProcessor(BaseProcessor):
             final_message = "No bookings confirmed yet for today."
         else:
             final_message = "    --------------------------------------------------------------    ".join([
-                f"_*BOOKING {ind+1}:*_ +{booking.mobile} --> {',   '.join([self.slots.get(slot).get("title") for slot in booking.slots])}"
+                f"_*BOOKING {ind+1}:*_ +{booking.mobile}, {self.db_service.get_user_details(booking.mobile) or ""} --> {',   '.join([self.slots.get(slot).get("title") for slot in booking.slots])}"
                 for ind, booking in enumerate(bookings)
             ])
         for mobile_number in mobile_numbers:
@@ -76,8 +76,19 @@ class NotificationProcessor(BaseProcessor):
         formatted_date = today_date.strftime(self.mbs.date_format)
         hour = today_date.hour + 1
         bookings = self.db_service.get_confirmed_bookings(formatted_date)
-
         for booking in bookings:
             if self.slots.get(booking.slots.sort()[0]).get("start_hour") == hour:
+                name = self.db_service.get_user_details(booking.mobile)
+                hour_12_format = datetime.datetime.strptime(str(hour), "%H").strftime("%I:%M %p")
                 Logger.info(f"Sending notification for upcoming booking {booking}")
-                self.api_service.send_message_request()
+                self.api_service.send_message_request(
+                    tb.build(
+                        mobile=booking.mobile,
+                        template_name="upcoming_booking_notification",
+                        parameters=[
+                            tb.get_text_parameter(name),
+                            tb.get_text_parameter(f"{hour_12_format}")
+
+                        ]
+                    )
+                )

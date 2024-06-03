@@ -221,3 +221,8 @@ class DBService:
         }
         self.db.collection("users").document(_id).set(data)
 
+    def get_user_details(self, mobile) -> str:
+        user = self.db.collection("users").where(
+            filter=FieldFilter("mobile", "==", mobile)
+        ).stream()
+        return user.get("name")

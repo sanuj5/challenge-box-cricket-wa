@@ -93,7 +93,7 @@ class TextMessageProcessor(BaseMessageProcessor):
             raise ValueError("Missing parameter request_body")
         mobile = message.message_from
         contact = kwargs.get("contact")
-        name = (contact and contact.get("profile") and contact.get("profile").get("name")) or "User"
+        name = (contact and contact.get("profile") and contact.get("profile").get("name")) or ""
         self.db_service.update_user_details(mobile, name)
 
         if self.secrets.get('UNDER_MAINTENANCE'):
@@ -108,7 +108,7 @@ class TextMessageProcessor(BaseMessageProcessor):
         else:
             self.api_service.send_message_request(self.mbs.get_interactive_message(
                 mobile,
-                "Click below to view existing booking or create new booking."
+                f"Hi {name}, click below to view existing booking or create new booking."
             )
             )
 

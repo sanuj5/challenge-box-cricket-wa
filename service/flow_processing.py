@@ -1,5 +1,6 @@
 import datetime
 from abc import abstractmethod
+from functools import cmp_to_key
 
 import pytz
 
@@ -103,7 +104,8 @@ class SlotScreenProcessor(BaseFlowRequestProcessor):
             response['slots'] = self.get_available_slots(date_selected)
             return FlowResponse(data=response, screen=Screen.SLOT_SELECTION.value)
 
-        slots_title = [self.slots.get(slot).get("title") for slot in slots_selected]
+        sorted_array = sorted([self.slots.get(slot) for slot in slots_selected], key=cmp_to_key(lambda x, y: x.get("sort_order") - y.get("sort_order")))
+        slots_title = [self.slots.get(slot).get("title") for slot in sorted_array]
         total_amount = sum(
             [self.slots.get(slot).get("price") for slot in slots_selected])
         response['selected_date'] = f"{date_selected}"
