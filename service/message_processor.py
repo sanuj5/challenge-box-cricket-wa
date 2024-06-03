@@ -199,7 +199,7 @@ class NfmMessageProcessor(BaseMessageProcessor):
         slots_id = response.get("slots")
         date = response.get("selected_date")
         slots_title = ", ".join([self.slots.get(slot.strip()).get("title")
-                                 for slot in slots_id.split(',')])
+                                 for slot in sorted(slots_id.split(','))])
         total_amount = sum(
             [self.slots.get(slot.strip()).get("price") for slot in slots_id.split(',')])
         Logger.info(f"Pending payment amount {total_amount}, actual amount {amount}")

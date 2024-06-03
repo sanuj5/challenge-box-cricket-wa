@@ -118,7 +118,7 @@ class PaymentProcessor(BaseProcessor):
 *Your booking is confirmed.*
 
 Date: {existing_booking.get("date")}
-Slots" {", ".join([self.slots.get(slot.strip()).get("title") for slot in existing_booking.get("slots")])}
+Slots: {", ".join([self.slots.get(slot.strip()).get("title") for slot in existing_booking.get("slots")])}
 """)
 
                     )
