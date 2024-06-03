@@ -109,13 +109,14 @@ class PaymentProcessor(BaseProcessor):
                                                                    o: o.__dict__
                                                                )
                                                     )
+                    name = self.db_service.get_user_details(mobile=message.recipient_id) or ""
                     self.api_service.send_message_request(
                         self.mbs.get_order_confirmation_message(
                             mobile=message.recipient_id,
                             token=message.payment.reference_id,
                             message=f"""
 
-*Your booking is confirmed.*
+*Hi {name}, your booking is confirmed.*
 
 Date: {existing_booking.get("date")}
 Slots: {", ".join([self.slots.get(slot.strip()).get("title") for slot in existing_booking.get("slots")])}
