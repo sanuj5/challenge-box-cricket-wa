@@ -199,7 +199,7 @@ class NfmMessageProcessor(BaseMessageProcessor):
         token = response.get("token")
         slots_id = response.get("slots")
         date = response.get("selected_date")
-        sorted_array = sorted([self.slots.get(slot) for slot in slots_id],
+        sorted_array = sorted([self.slots.get(slot.strip()) for slot in slots_id.split(',')],
                               key=cmp_to_key(lambda x, y: x.get("sort_order") - y.get(
                                   "sort_order")))
         slots_title = ", ".join([slot.get("title") for slot in sorted_array])
