@@ -233,4 +233,4 @@ class DBService:
         user = self.db.collection("users").where(
             filter=FieldFilter("mobile", "==", mobile)
         ).get()
-        return user[0].to_dict().get("name")
+        return user[0].to_dict().get("name") if user else None

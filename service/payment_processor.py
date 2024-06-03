@@ -128,7 +128,7 @@ Slots" {", ".join([self.slots.get(slot.strip()).get("title") for slot in existin
                             self.slots.get(slot.strip()).get("title") for slot in
                             existing_booking.get("slots")
                         ]),
-                        f"+{existing_booking.get("mobile")}",
+                        f"{existing_booking.get("mobile")}",
                         str(float(existing_booking.get("amount")))
                     )
             else:

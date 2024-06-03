@@ -35,7 +35,7 @@ class NotificationProcessor(BaseProcessor):
                     parameters=[
                         tb.get_text_parameter(date),
                         tb.get_text_parameter(slots),
-                        tb.get_text_parameter(f"{booking_number}, {self.db_service.get_user_details(booking_number) or ""}"),
+                        tb.get_text_parameter(f"+{booking_number}, {self.db_service.get_user_details(booking_number) or ""}"),
                         tb.get_text_parameter(amount),
                     ]
                 )
