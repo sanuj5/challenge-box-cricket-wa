@@ -3,6 +3,7 @@ import json
 import re
 import uuid
 from abc import abstractmethod
+from functools import cmp_to_key
 
 from model.payment_status import Payment, PaymentStatus
 from service.base_message_processor import BaseProcessor
@@ -198,8 +199,10 @@ class NfmMessageProcessor(BaseMessageProcessor):
         token = response.get("token")
         slots_id = response.get("slots")
         date = response.get("selected_date")
-        slots_title = ", ".join([self.slots.get(slot.strip()).get("title")
-                                 for slot in sorted(slots_id.split(','))])
+        sorted_array = sorted([self.slots.get(slot) for slot in slots_id],
+                              key=cmp_to_key(lambda x, y: x.get("sort_order") - y.get(
+                                  "sort_order")))
+        slots_title = ", ".join([slot.get("title") for slot in sorted_array])
         total_amount = sum(
             [self.slots.get(slot.strip()).get("price") for slot in slots_id.split(',')])
         Logger.info(f"Pending payment amount {total_amount}, actual amount {amount}")
