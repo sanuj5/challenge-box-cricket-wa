@@ -88,7 +88,7 @@ class TemplateBuilder:
         components = []
         if header:
             components.append(Component("header", parameters))
-        components.append(Component("body", parameters))
+        components.append(Component("body", header))
 
         language = Language("EN")
 
