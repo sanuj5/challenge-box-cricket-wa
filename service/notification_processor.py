@@ -77,7 +77,8 @@ class NotificationProcessor(BaseProcessor):
         hour = today_date.hour + 1
         bookings = self.db_service.get_confirmed_bookings(formatted_date)
         for booking in bookings:
-            if self.slots.get(booking.slots.sort()[0]).get("start_hour") == hour:
+            first_slot = sorted(booking.slots)[0]
+            if self.slots.get(first_slot).get("start_hour") == hour:
                 name = self.db_service.get_user_details(booking.mobile)
                 hour_12_format = datetime.datetime.strptime(str(hour), "%H").strftime("%I:%M %p")
                 Logger.info(f"Sending notification for upcoming booking {booking}")
