@@ -90,6 +90,9 @@ class NotificationProcessor(BaseProcessor):
                             tb.get_text_parameter(name),
                             tb.get_text_parameter(f"{hour_12_format}")
 
+                        ],
+                        header=[
+                            tb.get_image_parameter("https://storage.googleapis.com/static_contentx/IMG_1435.PNG")
                         ]
                     )
                 )

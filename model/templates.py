@@ -3,6 +3,24 @@ from typing import List
 
 
 @dataclass
+class Image:
+    link: str
+
+    def __init__(self, link: str):
+        self.link = link
+
+
+@dataclass
+class ImageParameter:
+    type: str
+    image: Image
+
+    def __init__(self, type: str, image: Image):
+        self.type = type
+        self.image = image
+
+
+@dataclass
 class Parameter:
     type: str
     text: str
@@ -66,9 +84,11 @@ class TemplateMessage:
 class TemplateBuilder:
 
     @staticmethod
-    def build(mobile, template_name, parameters) -> TemplateMessage:
-
-        components = [Component("body", parameters)]
+    def build(mobile, template_name, parameters, header=None) -> TemplateMessage:
+        components = []
+        if header:
+            components.append(Component("header", parameters))
+        components.append(Component("body", parameters))
 
         language = Language("EN")
 
@@ -89,3 +109,7 @@ class TemplateBuilder:
     @staticmethod
     def get_text_parameter(text_value: str) -> Parameter:
         return Parameter("text", text_value)
+
+    @staticmethod
+    def get_image_parameter(link: str) -> ImageParameter:
+        return ImageParameter("image", Image(link))
