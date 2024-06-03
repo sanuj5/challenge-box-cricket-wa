@@ -77,6 +77,9 @@ class PaymentProcessor(BaseProcessor):
         existing_booking = self.db_service.get_pending_booking(
             token=message.payment.reference_id
         )
+        confirmed_booking = self.db_service.get_confirmed_booking_by_token(
+            token=message.payment.reference_id
+        )
         if message.status == "captured":
             wa_payment_status = self.api_service.get_payment_status(
                 message.payment.reference_id)
@@ -93,7 +96,11 @@ class PaymentProcessor(BaseProcessor):
                         "Existing booking does not exist for {}".format(
                             wa_payment_status,
                         ))
-                    pass
+                elif confirmed_booking:
+                    Logger.error(
+                        "Booking already is confirmed {}".format(
+                            wa_payment_status,
+                        ))
                 else:
                     self.db_service.confirm_booking(existing_booking,
                                                     message.payment.reference_id,

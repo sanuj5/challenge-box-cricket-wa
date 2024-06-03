@@ -170,6 +170,14 @@ class DBService:
         ).stream()
         return Booking.create_booking(confirmed_bookings)
 
+    def get_confirmed_booking_by_token(self, token) -> list[Booking]:
+        confirmed_bookings = self.db.collection("confirmed_bookings").where(
+            filter=FieldFilter("token", "==", token)
+        ).where(
+            filter=FieldFilter("cancelled", "==", False)
+        ).stream()
+        return Booking.create_booking(confirmed_bookings)
+
     def get_pending_bookings(self, date) -> list[Booking]:
         pending_bookings = self.db.collection("pending_bookings").where(
             filter=FieldFilter("date", "==", date)
