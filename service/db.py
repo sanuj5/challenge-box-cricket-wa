@@ -110,6 +110,7 @@ class DBService:
             "payment_response": payment_response
         }
         self.db.collection("confirmed_bookings").document(_id).set(data)
+        self.db.collection("pending_bookings").document(existing_booking.id).delete()
         Logger.info(f"Booking confirmed for {existing_booking.id}, {token}, "
                     f"{existing_booking.get('mobile')}")
 
