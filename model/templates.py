@@ -87,8 +87,8 @@ class TemplateBuilder:
     def build(mobile, template_name, parameters, header=None) -> TemplateMessage:
         components = []
         if header:
-            components.append(Component("header", parameters))
-        components.append(Component("body", header))
+            components.append(Component("header", header))
+        components.append(Component("body", parameters))
 
         language = Language("EN")
 
