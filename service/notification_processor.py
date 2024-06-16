@@ -35,7 +35,8 @@ class NotificationProcessor(BaseProcessor):
                     parameters=[
                         tb.get_text_parameter(date),
                         tb.get_text_parameter(slots),
-                        tb.get_text_parameter(f"+{booking_number}, {self.db_service.get_user_details(booking_number) or ""}"),
+                        tb.get_text_parameter(
+                            f"+{booking_number}, {self.db_service.get_user_details(booking_number) or ""}"),
                         tb.get_text_parameter(amount),
                     ]
                 )
@@ -55,10 +56,11 @@ class NotificationProcessor(BaseProcessor):
         if not bookings or len(bookings) == 0:
             final_message = "No bookings confirmed yet for today."
         else:
-            final_message = "    --------------------------------------------------------------    ".join([
-                f"_*BOOKING {ind+1}:*_ +{booking.mobile}, {self.db_service.get_user_details(booking.mobile) or ""} --> {',   '.join([self.slots.get(slot).get("title") for slot in booking.slots])}"
-                for ind, booking in enumerate(bookings)
-            ])
+            final_message = "    --------------------------------------------------------------    ".join(
+                [
+                    f"_*BOOKING {ind + 1}:*_ +{booking.mobile}, {self.db_service.get_user_details(booking.mobile) or ""} --> {',   '.join([self.slots.get(slot).get("title") for slot in booking.slots])}"
+                    for ind, booking in enumerate(bookings)
+                ])
         for mobile_number in mobile_numbers:
             self.api_service.send_message_request(
                 tb.build(
@@ -80,19 +82,23 @@ class NotificationProcessor(BaseProcessor):
             first_slot = sorted(booking.slots)[0]
             if self.slots.get(first_slot).get("start_hour") == hour:
                 name = self.db_service.get_user_details(booking.mobile)
-                hour_12_format = datetime.datetime.strptime(str(hour), "%H").strftime("%I:%M %p")
+                hour_12_format = datetime.datetime.strptime(str(hour), "%H").strftime(
+                    "%I:%M %p")
                 Logger.info(f"Sending notification for upcoming booking {booking}")
                 self.api_service.send_message_request(
                     tb.build(
                         mobile=booking.mobile,
-                        template_name="upcoming_booking_notification",
+                        template_name=self.secrets.get(
+                            "TEMPLATE_NAME_UPCOMING_BOOKING_NOTIFICATION"
+                        ),
                         parameters=[
                             tb.get_text_parameter(name),
                             tb.get_text_parameter(f"{hour_12_format}")
 
                         ],
-                        header=[
-                            tb.get_image_parameter("https://storage.googleapis.com/static_contentx/IMG_1435.PNG")
+                        header=[tb.get_image_parameter(self.secrets.get(
+                                "IMAGE_URL_UPCOMING_BOOKING_NOTIFICATION")
+                        )
                         ]
                     )
                 )

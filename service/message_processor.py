@@ -207,6 +207,17 @@ class NfmMessageProcessor(BaseMessageProcessor):
             [self.slots.get(slot.strip()).get("price") for slot in slots_id.split(',')])
         Logger.info(f"Pending payment amount {total_amount}, actual amount {amount}")
         pending_booking_token = self.db_service.get_mobile_token_mapping(token)
+        confirmed_bookings = self.db_service.get_confirmed_bookings(date)
+        for booking in confirmed_bookings:
+            for slot in slots_id.split(','):
+                if slot.strip() in booking.slots:
+                    return_message = self.mbs.get_final_text_message(
+                        mobile=mobile,
+                        body=f"Sorry. One of the slot is already booked. Please start new booking."
+                    )
+                    self.api_service.send_message_request(data=return_message)
+                    return
+
 
         # Token expired below
         if not pending_booking_token or pending_booking_token.get(token) != mobile:
@@ -240,7 +251,7 @@ Slots: {slots_title}
 Amount: {total_amount}
 Please pay to confirm your booking. 
 
-_Once booking is confirmed, it cannot be canceled and amount won't be refunded._
+_Once a booking is confirmed, it cannot be canceled, and no refund will be offered in case of No-Show._
 """
             )
         self.api_service.send_message_request(data=return_message)
