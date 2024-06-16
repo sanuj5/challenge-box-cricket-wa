@@ -45,9 +45,8 @@ class BaseProcessor(ABC):
                 "description": f'₹ {slot.get("price")}',
                 "enabled": True
             }
-            if reserved_slots.get(slot.get("id")):
-                item["enabled"] = False
-            if (today_date.date() == date.date()
+            if reserved_slots.get(slot.get("id")) or (
+                    today_date.date() == date.date()
                     and slot.get("start_hour") <= current_hour):
                 item["enabled"] = False
             response.append(item)

@@ -101,6 +101,12 @@ class PaymentProcessor(BaseProcessor):
                         "Booking already is confirmed {}".format(
                             wa_payment_status,
                         ))
+                elif self.check_if_slot_unavailable(existing_booking.get("date"),
+                                                    existing_booking.get("slots")):
+                    Logger.error(
+                        "Slot was booked while confirming this booking {}".format(
+                            wa_payment_status,
+                        ))
                 else:
                     self.db_service.confirm_booking(existing_booking,
                                                     message.payment.reference_id,
@@ -109,7 +115,8 @@ class PaymentProcessor(BaseProcessor):
                                                                    o: o.__dict__
                                                                )
                                                     )
-                    name = self.db_service.get_user_details(mobile=message.recipient_id) or ""
+                    name = self.db_service.get_user_details(
+                        mobile=message.recipient_id) or ""
                     self.api_service.send_message_request(
                         self.mbs.get_order_confirmation_message(
                             mobile=message.recipient_id,
@@ -140,3 +147,11 @@ Slots: {", ".join([self.slots.get(slot.strip()).get("title") for slot in existin
                 existing_booking,
                 message.status))
         return "", 200
+
+    def check_if_slot_unavailable(self, date: str, slots: list) -> bool:
+        confirmed_booking_for_today = self.db_service.get_confirmed_bookings(date)
+        for booking in confirmed_booking_for_today:
+            for slot in booking.slots:
+                if slot.strip() in slots:
+                    return False
+        return True

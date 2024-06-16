@@ -61,9 +61,12 @@ class DBService:
         Logger.info(f"Token {token} added token successfully for {mobile}")
 
     @staticmethod
-    def generate_id(mobile: str) -> str:
+    def generate_id(mobile: str, date: datetime.datetime = None) -> str:
         current_ts = datetime.datetime.now()
-        return f'{mobile}_{current_ts.strftime("%Y%m%d%H%M%S")}'
+        if date:
+            return f'{mobile}_{date.strftime("%Y%m%d")}_{current_ts.strftime("%Y%m%d%H%M%S")}'
+        else:
+            return f'{mobile}_{current_ts.strftime("%Y%m%d%H%M%S")}'
 
     def get_mobile_token_mapping(self, token: str) -> dict:
         tokens = self.db.collection("booking_token").where(
@@ -81,7 +84,9 @@ class DBService:
                        date: str,
                        slots: list[int]
                        ) -> None:
-        _id = self.generate_id(mobile)
+        _id = self.generate_id(mobile,
+                               datetime.datetime.strptime(date, self.mbs.date_format)
+                               )
         data = {
             "mobile": mobile,
             "token": token,
@@ -97,7 +102,8 @@ class DBService:
         Logger.info(f"Booking added for {token} and {mobile}")
 
     def confirm_booking(self, existing_booking, token, payment_response) -> None:
-        _id = self.generate_id(existing_booking.get("mobile"))
+        _id = self.generate_id(existing_booking.get("mobile"),
+                               existing_booking.get("actual_date"))
         data = {
             "mobile": existing_booking.get("mobile"),
             "token": token,
