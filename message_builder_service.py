@@ -1,5 +1,6 @@
 import time
 import datetime
+import uuid
 
 from dateutil.relativedelta import relativedelta
 
@@ -87,7 +88,7 @@ _Enjoy the game!_
         return message
 
     @staticmethod
-    def get_final_text_message(mobile, _id, body):
+    def get_final_text_message(mobile=None, _id=str(uuid.uuid4()), body=None):
         text = tm.Text()
         text.body = body
         text_message = tm.TextMessage()
