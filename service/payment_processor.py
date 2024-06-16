@@ -153,5 +153,5 @@ Slots: {", ".join([self.slots.get(slot.strip()).get("title") for slot in existin
         for booking in confirmed_booking_for_today:
             for slot in booking.slots:
                 if slot.strip() in slots:
-                    return False
-        return True
+                    return True
+        return False
