@@ -44,6 +44,19 @@ class BaseMessageProcessor(BaseProcessor):
     def process_message(self, message, *args, **kwargs):
         pass
 
+    def is_under_maintenance(self, mobile) -> bool:
+        if self.secrets.get('UNDER_MAINTENANCE') and mobile != "+918390903001":
+            self.api_service.send_message_request(
+                self.mbs.get_final_text_message(
+                    mobile=mobile,
+                    _id=str(uuid.uuid4()),
+                    body=self.secrets.get(
+                        'UNDER_MAINTENANCE_MESSAGE') or "System Under Maintenance. Please try later."
+                )
+            )
+            return True
+        return False
+
     @staticmethod
     def parse_message(param, message_type):
         if message_type == MessageType.TEXT:
@@ -97,21 +110,13 @@ class TextMessageProcessor(BaseMessageProcessor):
         name = (contact and contact.get("profile") and contact.get("profile").get("name")) or ""
         self.db_service.update_user_details(mobile, name)
 
-        if self.secrets.get('UNDER_MAINTENANCE'):
-            self.api_service.send_message_request(
-                self.mbs.get_final_text_message(
-                    mobile=mobile,
-                    _id=str(uuid.uuid4()),
-                    body=self.secrets.get(
-                        'UNDER_MAINTENANCE_MESSAGE') or "System Under Maintenance. Please try later."
-                )
-            )
-        else:
-            self.api_service.send_message_request(self.mbs.get_interactive_message(
-                mobile,
-                f"Hi {name}, click below to view existing booking or create new booking."
-            )
-            )
+        if self.is_under_maintenance(mobile):
+            return
+        self.api_service.send_message_request(self.mbs.get_interactive_message(
+            mobile,
+            f"Hi {name}, click below to view existing booking or create new booking."
+        )
+        )
 
 
 """
@@ -127,6 +132,8 @@ class InteractiveMessageProcessor(BaseMessageProcessor):
 
     def process_message(self, message, *args, **kwargs):
         mobile = message.message_from
+        if self.is_under_maintenance(mobile):
+            return
         request_type = InteractiveRequestType(message.interactive.button_reply.id)
         return_message = None
         if request_type == InteractiveRequestType.VIEW_BOOKING:
@@ -186,6 +193,8 @@ class NfmMessageProcessor(BaseMessageProcessor):
     def process_message(self, message, *args, **kwargs):
         Logger.info(f"Processing nfm reply message.")
         mobile = message.message_from
+        if self.is_under_maintenance(mobile):
+            return
         response = json.loads(message.interactive.nfm_reply.get("response_json"))
         success = response.get("success")
         if success == "false":
@@ -217,7 +226,6 @@ class NfmMessageProcessor(BaseMessageProcessor):
                     )
                     self.api_service.send_message_request(data=return_message)
                     return
-
 
         # Token expired below
         if not pending_booking_token or pending_booking_token.get(token) != mobile:
