@@ -25,29 +25,17 @@ class BaseProcessor(ABC):
         weekday = date.weekday()
         slots = self.day_wise_slots.get(weekday)
         reserved_slots: dict = self.db_service.get_reserved_slots(formatted_date)
-        # evening_slot_booked = None
-        # for _, booking in reserved_slots.items():
-        #     for slot in booking.get("slots"):
-        #         booked_slot = self.slots.get(slot)
-        #         if (booked_slot.get("start_hour") >= 18 and
-        #                 booked_slot.get("preference") == 1):
-        #             evening_slot_booked = booked_slot
-        #             Logger.info("Evening booked slot: " + str(evening_slot_booked))
-        #             continue
-
         response = list()
         current_hour = today_date.hour
-
         for slot in slots:
-            item = {
-                "id": slot.get("id"),
-                "title": f'{slot.get("title")}',
-                "description": f'₹ {slot.get("price")}',
-                "enabled": True
-            }
-            if reserved_slots.get(slot.get("id")) or (
+            if not reserved_slots.get(slot.get("id")) and not (
                     today_date.date() == date.date()
                     and slot.get("start_hour") <= current_hour):
-                item["enabled"] = False
-            response.append(item)
+                item = {
+                    "id": slot.get("id"),
+                    "title": f'{slot.get("title")}',
+                    "description": f'₹ {slot.get("price")}',
+                    "enabled": True
+                }
+                response.append(item)
         return response
