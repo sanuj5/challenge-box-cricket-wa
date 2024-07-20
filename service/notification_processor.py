@@ -58,7 +58,7 @@ class NotificationProcessor(BaseProcessor):
         else:
             final_message = "    --------------------------------------------------------------    ".join(
                 [
-                    f"_*BOOKING {ind + 1}:*_ +{booking.mobile}, {self.db_service.get_user_details(booking.mobile) or ""} --> {',   '.join([self.slots.get(slot).get("title") for slot in booking.slots])}"
+                    f"_*BOOKING {ind + 1}:*_ +{booking.mobile}, {self.db_service.get_user_details(booking.mobile) or ""} --> {',   '.join([self.slots.get(slot).get("title") for slot in booking.slots.sort()])}"
                     for ind, booking in enumerate(bookings)
                 ])
         for mobile_number in mobile_numbers:
