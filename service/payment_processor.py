@@ -126,16 +126,19 @@ class PaymentProcessor(BaseProcessor):
 *Hi {name}, your booking is confirmed.*
 
 Date: {existing_booking.get("date")}
-Slots: {", ".join([self.slots.get(slot.strip()).get("title") for slot in existing_booking.get("slots")])}
+Slots: {", ".join([slot.get("title") for slot in sorted(
+                            [self.slots.get(slot) for slot in
+                             existing_booking.get("slots")],
+                            key=lambda x: x.get("sort_order"))])}
 """)
 
                     )
                     self.notification_service.send_payment_notifications(
                         existing_booking.get("date"),
-                        ", ".join([
-                            self.slots.get(slot.strip()).get("title") for slot in
-                            existing_booking.get("slots")
-                        ]),
+                        ", ".join([slot.get("title") for slot in sorted(
+                            [self.slots.get(slot) for slot in
+                             existing_booking.get("slots")],
+                            key=lambda x: x.get("sort_order"))]),
                         f"{existing_booking.get("mobile")}",
                         str(float(existing_booking.get("amount")))
                     )
