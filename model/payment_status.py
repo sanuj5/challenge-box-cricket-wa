@@ -1,3 +1,6 @@
+import json
+
+
 class Amount:
     value: int
     offset: int
@@ -40,6 +43,9 @@ class Payment:
         self.currency = currency
         self.transaction = transaction
 
+    def __str__(self):
+        return json.dumps(self, default=lambda o: o.__dict__)
+
 
 class PaymentStatus:
     id: str
@@ -59,4 +65,4 @@ class PaymentStatus:
         self.payment = payment
 
     def __str__(self):
-        return self.__dict__
+        return json.dumps(self, default=lambda o: o.__dict__)

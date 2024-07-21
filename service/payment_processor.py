@@ -2,7 +2,7 @@ import base64
 import json
 
 from external.payment import BasePayment
-from model.payment_status import PaymentStatus, Payment
+from model.payment_status import PaymentStatus, Payment, Amount
 from service.base_message_processor import BaseProcessor
 from model.exceptions import InvalidStateException
 from logger import Logger
@@ -41,7 +41,10 @@ class PaymentProcessor(BaseProcessor):
                     status=payment_payload.get("status"),
                     payment=Payment(
                         reference_id=order_payload.get("receipt"),
-                        amount=order_payload.get("amount_paid"),
+                        amount=Amount(
+                            order_payload.get("amount_paid"),
+                            self.secrets.get("AMOUNT_OFFSET")
+                        ),
                         currency=order_payload.get("currency")
                     ),
                     recipient_id=mapping.get("mobile"),
