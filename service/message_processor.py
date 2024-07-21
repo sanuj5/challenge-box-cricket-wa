@@ -45,7 +45,7 @@ class BaseMessageProcessor(BaseProcessor):
         pass
 
     def is_under_maintenance(self, mobile) -> bool:
-        if self.secrets.get('UNDER_MAINTENANCE') and mobile != "+918390903001":
+        if self.secrets.get('UNDER_MAINTENANCE') and mobile != "918390903001":
             self.api_service.send_message_request(
                 self.mbs.get_final_text_message(
                     mobile=mobile,
