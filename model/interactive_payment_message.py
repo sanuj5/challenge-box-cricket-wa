@@ -143,7 +143,6 @@ class Parameters:
     reference_id: str
     type: str
     payment_type: str
-    payment_settings: List[PaymentSetting]
     currency: str
     total_amount: TotalAmount
     order: Order
@@ -151,14 +150,12 @@ class Parameters:
     def __init__(self, reference_id: str = "",
                  type: str = "digital-goods",
                  payment_type: str = "upi",
-                 payment_settings: List[PaymentSetting] = None,
                  currency: str = "INR",
                  total_amount: TotalAmount = None,
                  order: Order = None) -> None:
         self.reference_id = reference_id
         self.type = type
         self.payment_type = payment_type
-        self.payment_settings = payment_settings
         self.currency = currency
         self.total_amount = total_amount
         self.order = order

@@ -123,10 +123,12 @@ _Enjoy the game!_
     @staticmethod
     def get_interactive_payment_message(mobile: str,
                                         message_body: str,
-                                        payment_uri: str,
                                         payment_amount: int,
                                         amount_offset: int,
-                                        reference_id: str) -> ipm.InteractivePaymentMessage:
+                                        reference_id: str,
+                                        payment_uri: str = None,
+                                        payment_configuration: str = None,
+                                        ) -> ipm.InteractivePaymentMessage:
         total_amount = ipm.TotalAmount(value=payment_amount, offset=amount_offset)
         tax_discount = ipm.Tax()
 
@@ -142,9 +144,12 @@ _Enjoy the game!_
         parameters = ipm.Parameters()
         parameters.total_amount = total_amount
         parameters.order = order
-        parameters.payment_settings = [
-            ipm.PaymentSetting(payment_link=ipm.PaymentLink(payment_uri))
-        ]
+        if payment_uri:
+            parameters.payment_settings = [
+                ipm.PaymentSetting(payment_link=ipm.PaymentLink(payment_uri))
+            ]
+        else:
+            parameters.payment_configuration = payment_configuration
         parameters.reference_id = reference_id
 
         action = ipm.Action(name="review_and_pay", parameters=parameters)
