@@ -37,7 +37,7 @@ class PaymentProcessor(BaseProcessor):
                 return
             self.validate_status(
                 PaymentStatus(
-                    id=response_dict['status'],
+                    id=order_payload.get("receipt"),
                     status=payment_payload.get("status"),
                     payment=Payment(
                         reference_id=order_payload.get("receipt"),
