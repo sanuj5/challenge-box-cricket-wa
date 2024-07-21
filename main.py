@@ -66,7 +66,7 @@ class BoxBooking:
             rule="/api/razorpay/callback",
             view_func=self.process_razorpay_callback,
             endpoint="process_razorpay_callback",
-            methods=["POST"],
+            methods=["GET"],
         )
         self.app.add_url_rule(
             rule="/",
