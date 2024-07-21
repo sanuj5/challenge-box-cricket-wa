@@ -21,9 +21,12 @@ class PaymentProcessor(BaseProcessor):
         Logger.info(f"Response validation {validate_request}")
         if validate_request:
             response_dict = json.loads(response)
-            payment_payload = response_dict.get("jsonPayload").get("payload").get(
+            if response_dict.get('event') != "order.paid":
+                Logger.info(f"Ignoring other event {response_dict.get('event')}")
+                return
+            payment_payload = response_dict.get("payload").get(
                 "payment").get("entity")
-            order_payload = response_dict.get("jsonPayload").get("payload").get(
+            order_payload = response_dict.get("payload").get(
                 "order").get("entity")
             mapping = self.db_service.get_mobile_token_mapping(
                 order_payload.get("receipt")
@@ -42,8 +45,7 @@ class PaymentProcessor(BaseProcessor):
                         currency=order_payload.get("currency")
                     ),
                     recipient_id=mapping.get("mobile"),
-                    timestamp=response_dict.get("jsonPayload").get("payload").get(
-                        "created_at"),
+                    timestamp=response_dict.get("payload").get("created_at"),
                     type="payment_link"
                 )
             )
