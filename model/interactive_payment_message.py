@@ -55,8 +55,8 @@ class ImporterAddress:
 
     def __init__(self, address_line1: str = "The Challenge Cricket Academy",
                  address_line2: str = "Jitodia", city: str = "Anand",
-                 zone_code: str = "", postal_code: int = "388001",
-                 country_code: str = "") -> None:
+                 zone_code: str = "GJ", postal_code: int = "388001",
+                 country_code: str = "IN") -> None:
         self.address_line1 = address_line1
         self.address_line2 = address_line2
         self.city = city
