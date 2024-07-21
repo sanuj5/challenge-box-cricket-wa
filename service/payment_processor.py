@@ -2,7 +2,7 @@ import base64
 import json
 
 from external.payment import BasePayment
-from model.payment_status import PaymentStatus
+from model.payment_status import PaymentStatus, Payment
 from service.base_message_processor import BaseProcessor
 from model.exceptions import InvalidStateException
 from logger import Logger
@@ -17,48 +17,36 @@ class PaymentProcessor(BaseProcessor):
 
     def validate_payment_response(self, header, response):
         # TODO get mobile number from response transaction ID
-        validated_response = self.payment_service.validate_response(header, response)
-        Logger.info(f"Response validation {validated_response}")
-        existing_booking = dict()
-        if validated_response:
-            response_string = base64.b64decode(
-                json.loads(response).get("response"))
-            Logger.info(response_string)
-            existing_booking = self.db_service.get_pending_booking(
-                token=validated_response.get("order_id"))
-            if validated_response.get("success"):
-                amount = validated_response.get("amount")
-                # TODO validate amount
-                self.db_service.confirm_booking(
-                    existing_booking,
-                    validated_response.get("order_id"),
-                    validated_response.get("original_response")
-                )
-                return_message = self.mbs.get_final_text_message(
-                    existing_booking.get("mobile"),
-                    "",
-                    f"""Awesome, your booking is confirmed!!! 
-
-    Date: {existing_booking.get("date")}
-    Slots: {", ".join([self.slots.get(slot.strip()).get("title") for slot in existing_booking.get("slots")])}
-    Amount paid: {existing_booking.get("amount")}         
-
-    Happy Cricketing!!!           
-    """
-                )
-            else:
-                return_message = self.mbs.get_final_text_message(
-                    existing_booking.get("mobile"),
-                    "",
-                    "Your payment is timed out. Please start new booking."
-                )
-        else:
-            return_message = self.mbs.get_final_text_message(
-                existing_booking.get("mobile"),
-                "",
-                "Some error has occurred while processing your request."
+        validate_request = self.payment_service.validate_response(header, response)
+        Logger.info(f"Response validation {validate_request}")
+        if validate_request:
+            response_dict = json.loads(response)
+            payment_payload = response_dict.get("jsonPayload").get("payload").get(
+                "payment").get("entity")
+            order_payload = response_dict.get("jsonPayload").get("payload").get(
+                "order").get("entity")
+            mapping = self.db_service.get_mobile_token_mapping(
+                order_payload.get("receipt")
             )
-        self.api_service.send_message_request(return_message)
+            if mapping is None:
+                Logger.error(
+                    f"No mobile token mapping found for toke {order_payload.get('receipt')}")
+                return
+            self.validate_status(
+                PaymentStatus(
+                    id=response_dict['status'],
+                    status=payment_payload.get("status"),
+                    payment=Payment(
+                        reference_id=order_payload.get("receipt"),
+                        amount=order_payload.get("amount_paid"),
+                        currency=order_payload.get("currency")
+                    ),
+                    recipient_id=mapping.get("mobile"),
+                    timestamp=response_dict.get("jsonPayload").get("payload").get(
+                        "created_at"),
+                    type="payment_link"
+                )
+            )
 
     def generate_payment_link(self, amount, transaction_id):
         self.db_service.remove_pending_bookings()
@@ -80,48 +68,58 @@ class PaymentProcessor(BaseProcessor):
         confirmed_booking = self.db_service.get_confirmed_booking_by_token(
             token=message.payment.reference_id
         )
+        success = False
         if message.status == "captured":
-            wa_payment_status = self.api_service.get_payment_status(
-                message.payment.reference_id)
-            # razorpay_payment_status = self.payment_service.get_payment(
-            #     message.payment.reference_id)
-            if (
-                    wa_payment_status.get("payments")
-                    and wa_payment_status.get("payments")[0]
-                    and wa_payment_status.get("payments")[0].get("status") == "CAPTURED"
-            ):
-                if not existing_booking:
-                    # TODO refund the amount
-                    Logger.error(
-                        "Existing booking does not exist for {}".format(
-                            wa_payment_status,
-                        ))
-                elif confirmed_booking:
-                    Logger.error(
-                        "Booking already is confirmed {}".format(
-                            wa_payment_status,
-                        ))
-                elif self.check_if_slot_unavailable(existing_booking.get("date"),
-                                                    existing_booking.get("slots")):
-                    Logger.error(
-                        "Slot was booked while confirming this booking {}".format(
-                            wa_payment_status,
-                        ))
+            if message.type == "payment_link":
+                success = True
+            else:
+                wa_payment_status = self.api_service.get_payment_status(
+                    message.payment.reference_id)
+                # razorpay_payment_status = self.payment_service.get_payment(
+                #     message.payment.reference_id)
+                if (
+                        wa_payment_status.get("payments")
+                        and wa_payment_status.get("payments")[0]
+                        and wa_payment_status.get("payments")[0].get("status") == "CAPTURED"
+                ):
+                    success = True
                 else:
-                    self.db_service.confirm_booking(existing_booking,
-                                                    message.payment.reference_id,
-                                                    json.dumps(message,
-                                                               default=lambda
-                                                                   o: o.__dict__
-                                                               )
-                                                    )
-                    name = self.db_service.get_user_details(
-                        mobile=message.recipient_id) or ""
-                    self.api_service.send_message_request(
-                        self.mbs.get_order_confirmation_message(
-                            mobile=message.recipient_id,
-                            token=message.payment.reference_id,
-                            message=f"""
+                    Logger.error(
+                        "Payment Status is invalid {} {}".format(wa_payment_status,
+                                                                 existing_booking))
+        if success:
+            if not existing_booking:
+                # TODO refund the amount
+                Logger.error(
+                    "Existing booking does not exist for {}".format(
+                        message,
+                    ))
+            elif confirmed_booking:
+                Logger.error(
+                    "Booking already is confirmed {}".format(
+                        message,
+                    ))
+            elif self.check_if_slot_unavailable(existing_booking.get("date"),
+                                                existing_booking.get("slots")):
+                Logger.error(
+                    "Slot was booked while confirming this booking {}".format(
+                        message,
+                    ))
+            else:
+                self.db_service.confirm_booking(existing_booking,
+                                                message.payment.reference_id,
+                                                json.dumps(message,
+                                                           default=lambda
+                                                               o: o.__dict__
+                                                           )
+                                                )
+                name = self.db_service.get_user_details(
+                    mobile=message.recipient_id) or ""
+                self.api_service.send_message_request(
+                    self.mbs.get_order_confirmation_message(
+                        mobile=message.recipient_id,
+                        token=message.payment.reference_id,
+                        message=f"""
 
 *Hi {name}, your booking is confirmed.*
 
@@ -132,19 +130,16 @@ Slots: {", ".join([slot.get("title") for slot in sorted(
                             key=lambda x: x.get("sort_order"))])}
 """)
 
-                    )
-                    self.notification_service.send_payment_notifications(
-                        existing_booking.get("date"),
-                        ", ".join([slot.get("title") for slot in sorted(
-                            [self.slots.get(slot) for slot in
-                             existing_booking.get("slots")],
-                            key=lambda x: x.get("sort_order"))]),
-                        f"{existing_booking.get("mobile")}",
-                        str(float(existing_booking.get("amount")))
-                    )
-            else:
-                Logger.error("Payment Status is invalid {} {}".format(wa_payment_status,
-                                                                      existing_booking))
+                )
+                self.notification_service.send_payment_notifications(
+                    existing_booking.get("date"),
+                    ", ".join([slot.get("title") for slot in sorted(
+                        [self.slots.get(slot) for slot in
+                         existing_booking.get("slots")],
+                        key=lambda x: x.get("sort_order"))]),
+                    f"{existing_booking.get("mobile")}",
+                    str(float(existing_booking.get("amount")))
+                )
         else:
             Logger.error("Payment Status is invalid {} {}".format(
                 existing_booking,

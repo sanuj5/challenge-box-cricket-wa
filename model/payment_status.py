@@ -34,7 +34,7 @@ class Payment:
     transaction: Transaction
 
     def __init__(self, reference_id: str, amount: Amount, currency: str,
-                 transaction: Transaction) -> None:
+                 transaction: Transaction = None) -> None:
         self.reference_id = reference_id
         self.amount = amount
         self.currency = currency
@@ -57,3 +57,6 @@ class PaymentStatus:
         self.recipient_id = recipient_id
         self.type = type
         self.payment = payment
+
+    def __str__(self):
+        return self.__dict__

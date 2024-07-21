@@ -10,13 +10,12 @@ from model.enums import PaymentProvider
 class PaymentFactory:
     @staticmethod
     def get_payment_service(payment_provider: PaymentProvider, secrets):
-        match payment_provider:
-            case PaymentProvider.RAZORPAY:
-                return RazorpayPayment(
-                    key_id=secrets.get("RAZORPAY_KEY_ID"),
-                    key_secret=secrets.get("RAZORPAY_KEY_SECRET"),
-                    webhook_secret=secrets.get("RAZORPAY_WEBHOOK_SECRET")
-                )
+        if payment_provider == PaymentProvider.RAZORPAY:
+            return RazorpayPayment(
+                key_id=secrets.get("RAZORPAY_KEY_ID"),
+                key_secret=secrets.get("RAZORPAY_KEY_SECRET"),
+                webhook_secret=secrets.get("RAZORPAY_WEBHOOK_SECRET")
+            )
 
 
 class BasePayment(ABC):
@@ -135,8 +134,8 @@ class RazorpayPayment(BasePayment):
         self.webhook_secret = kwargs.get("webhook_secret")
         self.client = razorpay.Client(auth=(key_id, key_secret))
         self.client.set_app_details(
-            {"title": "CBC_TEST", "version": "1.0"})
-        self.payment_link_expiry_in_minutes = 5
+            {"title": "CBC", "version": "1.0"})
+        self.payment_link_expiry_in_minutes = 16
         self.callback_url = "https://challengecricket.in/api/payment"
 
     def generate_payment_link(self, amount: int, unique_transaction_id, *args,
@@ -170,8 +169,6 @@ class RazorpayPayment(BasePayment):
             return None
         return {
             "success": True,
-            "amount": 1,
-            "order_id": "xxx",
             "original_response": response
         }
 
