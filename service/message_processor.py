@@ -5,6 +5,7 @@ import uuid
 from abc import abstractmethod
 from functools import cmp_to_key
 
+from external.payment import BasePayment
 from model.payment_status import Payment, PaymentStatus
 from service.base_message_processor import BaseProcessor
 from logger import Logger
@@ -17,10 +18,10 @@ from model.webook_text import Message as TextMessage, Text
 
 
 class MessageFactory:
-    def __init__(self, db_service):
+    def __init__(self, db_service, payment_service):
         self.text_message_processor = TextMessageProcessor(db_service)
         self.interactive_message_processor = InteractiveMessageProcessor(db_service)
-        self.nfm_reply_processor = NfmMessageProcessor(db_service)
+        self.nfm_reply_processor = NfmMessageProcessor(db_service, payment_service)
 
     def process(self, message, message_type: MessageType, *args, **kwargs):
         match message_type:
@@ -186,9 +187,10 @@ This class processes user message post flow screen confirmation (NFM Reply Messa
 
 
 class NfmMessageProcessor(BaseMessageProcessor):
-    def __init__(self, db_service):
+    def __init__(self, db_service, payment_service):
         super().__init__(db_service)
         self.amount_offset = self.secrets.get("AMOUNT_OFFSET") or 100
+        self.payment_service: BasePayment = payment_service
 
     def process_message(self, message, *args, **kwargs):
         Logger.info(f"Processing nfm reply message.")
@@ -249,14 +251,9 @@ class NfmMessageProcessor(BaseMessageProcessor):
                 [slot.strip() for slot in slots_id.split(",")]
             )
             if mobile and mobile == "918390903001":
-                Logger.info(f"Setting amount to {amount} for number {mobile}")
+                Logger.info(f"Setting amount to {amount} for test number {mobile}")
                 total_amount = total_amount / 1000
-            return_message = self.mbs.get_interactive_payment_message_gw(
-                mobile=mobile,
-                payment_amount=total_amount * self.amount_offset,
-                reference_id=token,
-                amount_offset=100,
-                message_body=f"""
+            payment_message = f"""
 Date: {date} 
 Slots: {slots_title}
 Amount: {total_amount}
@@ -264,5 +261,26 @@ Please pay to confirm your booking.
 
 _Once a booking is confirmed, it cannot be canceled, and no refund will be offered in case of No-Show._
 """
-            )
+            if self.secrets.get("PAYMENT_TYPE") == "PAYMENT_GATEWAY":
+                return_message = self.mbs.get_interactive_payment_message_gw(
+                    mobile=mobile,
+                    payment_amount=total_amount * self.amount_offset,
+                    reference_id=token,
+                    amount_offset=100,
+                    message_body=payment_message
+                )
+            else:
+                payment_link = self.payment_service.generate_payment_link(
+                    amount=total_amount * self.amount_offset,
+                    unique_transaction_id=token,
+                    customer=mobile
+                )
+                return_message = self.mbs.get_interactive_payment_message(
+                    mobile=mobile,
+                    payment_amount=total_amount * self.amount_offset,
+                    reference_id=token,
+                    amount_offset=100,
+                    message_body=payment_message,
+                    payment_uri=payment_link
+                )
         self.api_service.send_message_request(data=return_message)

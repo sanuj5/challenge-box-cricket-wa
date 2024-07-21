@@ -27,7 +27,7 @@ class BoxBooking:
             secrets=self.secrets
         )
         self.flow_factory = FlowFactory(self.db_service)
-        self.message_factory = MessageFactory(self.db_service)
+        self.message_factory = MessageFactory(self.db_service, payment_service)
         self.payment_processor = PaymentProcessor(self.db_service, payment_service)
         self.notification_processor = NotificationProcessor(self.db_service)
 

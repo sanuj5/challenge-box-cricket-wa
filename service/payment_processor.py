@@ -47,8 +47,8 @@ class PaymentProcessor(BaseProcessor):
                         ),
                         currency=order_payload.get("currency")
                     ),
-                    recipient_id=mapping.get("mobile"),
-                    timestamp=response_dict.get("payload").get("created_at"),
+                    recipient_id=mapping.get(order_payload.get("receipt")),
+                    timestamp=response_dict.get("created_at"),
                     type="payment_link"
                 )
             )

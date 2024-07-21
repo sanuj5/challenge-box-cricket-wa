@@ -159,12 +159,16 @@ class RazorpayPayment(BasePayment):
             "expire_by": int(expire_by.timestamp())
         })
         Logger.info(link)
-        return link
+        return link.get("short_url")
 
     def validate_response(self, header, response, *args, **kwargs) -> dict:
-        result = self.client.utility.verify_webhook_signature(
-            response, header, self.webhook_secret
-        )
+        try:
+            result = self.client.utility.verify_webhook_signature(
+                response, header, self.webhook_secret
+            )
+        except Exception as e:
+            Logger.error(f"Validation failed. exception={e}, response={response}")
+            result = None
         if not result:
             return None
         return {
