@@ -58,6 +58,17 @@ class BaseMessageProcessor(BaseProcessor):
             return True
         return False
 
+    def validate_country(self, mobile) -> bool:
+        if mobile and mobile.startsWith("91"):
+            return True
+        self.api_service.send_message_request(
+            self.mbs.get_final_text_message(
+                mobile=mobile,
+                _id=str(uuid.uuid4()),
+                body="Yikes! We are currently not serving this country."
+            )
+        )
+
     @staticmethod
     def parse_message(param, message_type):
         if message_type == MessageType.TEXT:

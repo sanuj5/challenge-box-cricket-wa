@@ -157,8 +157,8 @@ class RazorpayPayment(BasePayment):
             "customer": customer,
             "reminder_enable": False,
             "notes": notes,
-            "callback_url": self.callback_url,
-            "callback_method": "get",
+            # "callback_url": self.callback_url,
+            # "callback_method": "get",
             "reference_id": unique_transaction_id,
             "expire_by": int(expire_by.timestamp())
         })
