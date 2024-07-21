@@ -63,6 +63,12 @@ class BoxBooking:
             methods=["POST"],
         )
         self.app.add_url_rule(
+            rule="/api/razorpay/callback",
+            view_func=self.process_razorpay_callback,
+            endpoint="process_razorpay_callback",
+            methods=["POST"],
+        )
+        self.app.add_url_rule(
             rule="/",
             view_func=self.index_page,
             endpoint="index_page",
@@ -146,7 +152,8 @@ class BoxBooking:
                 "value")
             if webhook_message.get("messages"):
                 messages = webhook_message.get("messages")[0]
-                contact = webhook_message.get("contacts")[0] if webhook_message.get("contacts") else None
+                contact = webhook_message.get("contacts")[0] if webhook_message.get(
+                    "contacts") else None
                 message_type = MessageType(messages.get("type"))
                 # NFM_REPLY
                 if (message_type == MessageType.INTERACTIVE
@@ -172,7 +179,6 @@ class BoxBooking:
             else:
                 Logger.debug("Message type not yet handled")
         return "Message type not supported", 200
-
 
     def process_flow_request(self):
         encrypted_flow_data_b64 = request.json.get("encrypted_flow_data")
@@ -201,11 +207,9 @@ class BoxBooking:
         response = json.dumps(response_data, indent=4, default=lambda o: o.__dict__)
         return self.encryption_service.encrypt_data(response, key, iv)
 
-
     """
     Not used while using Whatapp Payment Gateway API
     """
-
 
     def process_razorpay_payment(self):
         header = request.headers.get("X-Razorpay-Signature")
@@ -213,6 +217,25 @@ class BoxBooking:
         Logger.info(f"{header} \n {response}")
         self.payment_processor.validate_payment_response(header, response)
         return "", 200
+
+    def process_razorpay_callback(self):
+        params = request.args
+        Logger.info(f"Callback params {params}")
+        payment_link_id = params.get("razorpay_payment_link_id")
+        payment_link_reference_id = params.get("razorpay_payment_link_reference_id")
+        payment_link_status = params.get("razorpay_payment_link_status")
+        razorpay_payment_id = params.get("razorpay_payment_id")
+        razorpay_signature = params.get("razorpay_signature")
+        if self.payment_processor.verify_payment_link_signature(
+            payment_link_id,
+            payment_link_reference_id,
+            payment_link_status,
+            razorpay_payment_id,
+            razorpay_signature
+        ):
+            return "Payment successful", 200
+        else:
+            return "Payment Validation Error. Please reach out to challengecricketacademy@gmail.com for further assistance", 200
 
 
 service = BoxBooking()

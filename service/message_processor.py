@@ -252,7 +252,7 @@ class NfmMessageProcessor(BaseMessageProcessor):
             )
             if mobile and mobile == "918390903001":
                 Logger.info(f"Setting amount to {amount} for test number {mobile}")
-                total_amount = total_amount / 1000
+                total_amount = total_amount // 1000
             payment_message = f"""
 Date: {date} 
 Slots: {slots_title}
@@ -271,7 +271,7 @@ _Once a booking is confirmed, it cannot be canceled, and no refund will be offer
                 )
             else:
                 payment_link = self.payment_service.generate_payment_link(
-                    amount=total_amount,
+                    amount=total_amount * self.amount_offset,
                     unique_transaction_id=token
                 )
                 return_message = self.mbs.get_interactive_payment_message(

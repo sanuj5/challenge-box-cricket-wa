@@ -158,3 +158,19 @@ Slots: {", ".join([slot.get("title") for slot in sorted(
                 if slot.strip() in slots:
                     return True
         return False
+
+    def verify_payment_link_signature(
+            self,
+            payment_link_id,
+            payment_link_reference_id,
+            payment_link_status,
+            razorpay_payment_id,
+            razorpay_signature
+    ) -> bool:
+        return self.payment_service.verify_payment_link_signature(
+            payment_link_id=payment_link_id,
+            payment_link_reference_id=payment_link_reference_id,
+            payment_link_status=payment_link_status,
+            razorpay_payment_id=razorpay_payment_id,
+            razorpay_signature=razorpay_signature
+        )

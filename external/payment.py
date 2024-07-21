@@ -44,6 +44,10 @@ class BasePayment(ABC):
     def get_payment(self, token):
         pass
 
+    @abstractmethod
+    def verify_payment_link_signature(self, *args, **kwargs):
+        pass
+
 
 # class PhonepePayment(BasePayment):
 #     def __init__(self, **kwargs):
@@ -136,7 +140,7 @@ class RazorpayPayment(BasePayment):
         self.client.set_app_details(
             {"title": "CBC", "version": "1.0"})
         self.payment_link_expiry_in_minutes = 16
-        self.callback_url = "https://challengecricket.in/api/payment"
+        self.callback_url = "https://challengecricket.in/api/razorpay/callback"
 
     def generate_payment_link(self, amount: int, unique_transaction_id, *args,
                               **kwargs) -> str:
@@ -146,10 +150,10 @@ class RazorpayPayment(BasePayment):
         customer = kwargs.get('customer', None)
         notes = kwargs.get('customer', {"booking": "CBC"})
         link = self.client.payment_link.create({
-            "amount": amount * 100,  # Amount in paisa
+            "amount": amount,  # Amount in paisa
             "currency": "INR",
             "accept_partial": False,
-            "description": "Test",
+            "description": "Box Cricket Booking",
             "customer": customer,
             "reminder_enable": False,
             "notes": notes,
@@ -185,3 +189,17 @@ class RazorpayPayment(BasePayment):
 
     def get_payment(self, token):
         return self.client.payment.fetch(token)
+
+    def verify_payment_link_signature(self, *args, **kwargs) -> bool:
+        try:
+            self.client.utility.verify_payment_link_signature({
+                'payment_link_id': kwargs.get("payment_link_id"),
+                'payment_link_reference_id': kwargs.get("payment_link_reference_id"),
+                'payment_link_status': kwargs.get("payment_link_status"),
+                'razorpay_payment_id': kwargs.get("razorpay_payment_id"),
+                'razorpay_signature': kwargs.get("razorpay_signature")
+            })
+        except Exception as e:
+            Logger.error(f"Verification failed. exception={e}, response={kwargs}")
+            return False
+        return True
