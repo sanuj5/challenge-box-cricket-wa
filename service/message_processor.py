@@ -278,7 +278,7 @@ _Once a booking is confirmed, it cannot be canceled, and no refund will be offer
                     mobile=mobile,
                     payment_amount=total_amount * self.amount_offset,
                     reference_id=token,
-                    amount_offset=100,
+                    amount_offset=1,
                     message_body=payment_message,
                     payment_uri=payment_link
                 )
