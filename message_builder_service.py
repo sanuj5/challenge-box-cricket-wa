@@ -128,7 +128,7 @@ _Enjoy the game!_
                                         amount_offset: int,
                                         reference_id: str) -> ipm.InteractivePaymentMessage:
         total_amount = ipm.TotalAmount(value=payment_amount, offset=amount_offset)
-        tax_discount = ipm.Discount()
+        tax_discount = ipm.Tax()
 
         item = ipm.Item()
         item.amount = total_amount
