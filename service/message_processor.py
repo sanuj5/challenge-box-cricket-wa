@@ -271,14 +271,14 @@ _Once a booking is confirmed, it cannot be canceled, and no refund will be offer
                 )
             else:
                 payment_link = self.payment_service.generate_payment_link(
-                    amount=total_amount * self.amount_offset,
+                    amount=total_amount,
                     unique_transaction_id=token
                 )
                 return_message = self.mbs.get_interactive_payment_message(
                     mobile=mobile,
                     payment_amount=total_amount * self.amount_offset,
                     reference_id=token,
-                    amount_offset=1,
+                    amount_offset=self.amount_offset,
                     message_body=payment_message,
                     payment_uri=payment_link
                 )
