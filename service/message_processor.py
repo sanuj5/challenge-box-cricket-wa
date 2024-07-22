@@ -186,7 +186,7 @@ class InteractiveMessageProcessor(BaseMessageProcessor):
             for booking in bookings:
                 message = f"""{message}
 Date: {booking.date}
-Slots: {', '.join([self.slots.get(slot).get("title") for slot in booking.slots])}
+Slots: {', '.join([slot.get("title") for slot in sorted([self.slots.get(slot) for slot in booking.slots],key = lambda x: x.get("sort_order"))])}
 Amount: {booking.amount}
 """
         return_message = self.mbs.get_final_text_message(mobile, "", message)
