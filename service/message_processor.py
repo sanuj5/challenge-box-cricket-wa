@@ -291,6 +291,22 @@ _Once a booking is confirmed, it cannot be canceled, and no refund will be offer
                         "WA_UPI_PAYMENT_CONFIGURATION_NAME"
                     )
                 )
+            elif self.secrets.get("PAYMENT_TYPE") == "DIRECT_PAYMENT_LINK":
+                payment_link = self.payment_service.generate_payment_link(
+                    amount=total_amount * self.amount_offset,
+                    unique_transaction_id=token
+                )
+
+                payment_message = f"""
+{payment_message}
+
+Pay by clicking this link: 
+{payment_link}
+"""
+                return_message = self.mbs.get_final_text_message(
+                    mobile=mobile,
+                    body=payment_message
+                )
             else:
                 payment_link = self.payment_service.generate_payment_link(
                     amount=total_amount * self.amount_offset,
