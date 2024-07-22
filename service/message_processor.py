@@ -46,7 +46,10 @@ class BaseMessageProcessor(BaseProcessor):
         pass
 
     def is_under_maintenance(self, mobile) -> bool:
-        if self.secrets.get('UNDER_MAINTENANCE') and mobile != "918390903001":
+        if (
+                self.secrets.get('UNDER_MAINTENANCE')
+                and mobile not in self.secrets.get("CBC_TEST_NUMBERS")
+        ):
             self.api_service.send_message_request(
                 self.mbs.get_final_text_message(
                     mobile=mobile,
@@ -261,7 +264,7 @@ class NfmMessageProcessor(BaseMessageProcessor):
                 mobile, token, total_amount, date,
                 [slot.strip() for slot in slots_id.split(",")]
             )
-            if mobile and mobile == "918390903001":
+            if mobile and mobile in self.secrets.get("CBC_TEST_NUMBERS"):
                 Logger.info(f"Setting amount to {amount} for test number {mobile}")
                 total_amount = total_amount // 1000
             payment_message = f"""
