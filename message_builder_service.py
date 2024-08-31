@@ -105,7 +105,7 @@ _Enjoy the game!_
         payload = dict()
         data = dict()
         current_date = datetime.datetime.today()
-        max_date = current_date + relativedelta(months=+2)
+        max_date = current_date + relativedelta(days=+27)
         data["min_date"] = str(int(time.mktime(current_date.timetuple()) * 1000))
         data["max_date"] = str(int(time.mktime(max_date.timetuple()) * 1000))
         payload["screen"] = Screen.DATE_SELECTION.value
