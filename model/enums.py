@@ -77,4 +77,4 @@ class PaymentProvider(enum.Enum):
 
 
 class Constants(enum.Enum):
-    PAYMENT_CONFIGURATION = "cbc_razropay_20240721"
+    PAYMENT_CONFIGURATION = "cbc_razorpay_20240829"
