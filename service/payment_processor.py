@@ -16,7 +16,6 @@ class PaymentProcessor(BaseProcessor):
         self.notification_service = NotificationProcessor(db_service)
 
     def validate_payment_response(self, header, response):
-        # TODO get mobile number from response transaction ID
         validate_request = self.payment_service.validate_response(header, response)
         Logger.info(f"Response validation {validate_request}")
         if validate_request:
