@@ -69,6 +69,8 @@ class DBService:
             return f'{mobile}_{current_ts.strftime("%Y%m%d%H%M%S")}'
 
     def get_mobile_token_mapping(self, token: str) -> dict:
+        if not token:
+            return None
         tokens = self.db.collection("booking_token").where(
             filter=FieldFilter("token", "==", token)
         ).stream()
