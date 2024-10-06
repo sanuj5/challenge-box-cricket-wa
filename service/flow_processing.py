@@ -92,7 +92,8 @@ class SlotScreenProcessor(BaseFlowRequestProcessor):
             slot_details = self.slots.get(slot)
             if booked_slots.get(slot) or (
                     (today_date.date() == date.date()
-                     and slot_details.get("start_hour") <= current_hour)):
+                     and slot_details.get("start_hour") <= current_hour
+                     and slot_details.get("start_hour") > 4)):
                 error = True
                 response[
                     'error_messages'] = f"Slot {self.slots.get(slot).get("title")} is unavailable. Please select different slot."
