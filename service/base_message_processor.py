@@ -47,7 +47,9 @@ class BaseProcessor(ABC):
             }
             if reserved_slots.get(slot.get("id")) or (
                     today_date.date() == date.date()
-                    and slot.get("start_hour") <= current_hour):
+                    and slot.get("start_hour") <= current_hour
+                    and slot.get("start_hour") > 4
+            ):
                 item["enabled"] = False
             response.append(item)
         return response
