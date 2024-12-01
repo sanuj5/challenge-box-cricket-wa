@@ -32,7 +32,7 @@ class MessageFactory:
                 message_service = self.interactive_message_processor
             case MessageType.NFM_REPLY:
                 token = json.loads(
-                    message.interactive.nfm_reply.get("response_json")).get("token")
+                    message.interactive.nfm_reply.get("response_json")).get("flow_token")
                 if token.startswith("TT-"):
                     message_service = self.tournament_nfm_replay_processor
                 else:
