@@ -70,7 +70,7 @@ _Enjoy the game!_
         buttons = list()
         buttons.append(
             im.Button(reply=im.Reply(
-                id=InteractiveRequestType.TOURNAMENT_REGISTRATION.value, title="Register For Box Cricket Tournament"
+                id=InteractiveRequestType.TOURNAMENT_REGISTRATION.value, title="Box Tournament"
             ))
         )
         buttons.append(
