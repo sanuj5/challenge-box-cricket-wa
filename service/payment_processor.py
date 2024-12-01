@@ -170,10 +170,11 @@ Slots: {", ".join([slot.get("title") for slot in sorted(
             )
             name = self.db_service.get_user_details(
                 mobile=message.recipient_id) or ""
-            amount = message.payment.amount.value
-            team_name = self.db_service.get_tournament_registration(
+            registraion = self.db_service.get_tournament_registration(
                 message.payment.reference_id
-            ).get("team_name")
+            )
+            amount = registraion.get("amount")
+            team_name = registraion.get("team_name")
             self.api_service.send_message_request(
                 self.mbs.get_order_confirmation_message(
                     mobile=message.recipient_id,
