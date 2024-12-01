@@ -386,7 +386,7 @@ class TournamentNfmMessageProcessor(BaseMessageProcessor):
             return
         response = json.loads(message.interactive.nfm_reply.get("response_json"))
         success = response.get("success")
-        token = response.get("token")
+        token = response.get("flow_token")
         existing_registration = self.db_service.get_tournament_registration(token)
         if success == "false" or (
                 existing_registration and existing_registration.get("payment_successful")
