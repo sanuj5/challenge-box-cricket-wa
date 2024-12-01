@@ -22,6 +22,7 @@ class MessageFactory:
         self.text_message_processor = TextMessageProcessor(db_service)
         self.interactive_message_processor = InteractiveMessageProcessor(db_service)
         self.nfm_reply_processor = NfmMessageProcessor(db_service, payment_service)
+        self.tournament_nfm_replay_processor = TournamentNfmMessageProcessor(db_service, payment_service)
 
     def process(self, message, message_type: MessageType, *args, **kwargs):
         match message_type:
@@ -30,7 +31,12 @@ class MessageFactory:
             case MessageType.INTERACTIVE:
                 message_service = self.interactive_message_processor
             case MessageType.NFM_REPLY:
-                message_service = self.nfm_reply_processor
+                token = json.loads(
+                    message.interactive.nfm_reply.get("response_json")).get("token")
+                if token.startswith("TT-"):
+                    message_service = self.tournament_nfm_replay_processor
+                else:
+                    message_service = self.nfm_reply_processor
             case _:
                 return "Message type not supported", 200
         message_service.process_message(message, *args, **kwargs)
@@ -112,6 +118,63 @@ class BaseMessageProcessor(BaseProcessor):
                 payment=Payment(**param.get("payment"))
             )
 
+    def get_payment_message(self,
+                            mobile,
+                            payment_message,
+                            token,
+                            total_amount,
+                            amount_offset,
+                            payment_service):
+        if self.secrets.get("PAYMENT_TYPE") == "PAYMENT_GATEWAY":
+            return_message = self.mbs.get_interactive_payment_message_gw(
+                mobile=mobile,
+                payment_amount=total_amount * amount_offset,
+                reference_id=token,
+                amount_offset=100,
+                message_body=payment_message
+            )
+        elif self.secrets.get("PAYMENT_TYPE") == "PAYMENT_GATEWAY_UPI":
+            return_message = self.mbs.get_interactive_payment_message(
+                mobile=mobile,
+                payment_amount=total_amount * amount_offset,
+                reference_id=token,
+                amount_offset=amount_offset,
+                message_body=payment_message,
+                payment_configuration=self.secrets.get(
+                    "WA_UPI_PAYMENT_CONFIGURATION_NAME"
+                )
+            )
+        elif self.secrets.get("PAYMENT_TYPE") == "DIRECT_PAYMENT_LINK":
+            payment_link = payment_service.generate_payment_link(
+                amount=total_amount * amount_offset,
+                unique_transaction_id=token
+            )
+
+            payment_message = f"""
+{payment_message}
+
+Pay by clicking this link: 
+{payment_link}
+"""
+            return_message = self.mbs.get_final_text_message(
+                mobile=mobile,
+                body=payment_message
+            )
+        else:
+            payment_link = payment_service.generate_payment_link(
+                amount=total_amount * amount_offset,
+                unique_transaction_id=token
+            )
+            return_message = self.mbs.get_interactive_payment_message(
+                mobile=mobile,
+                payment_amount=total_amount * amount_offset,
+                reference_id=token,
+                amount_offset=amount_offset,
+                message_body=payment_message,
+                payment_uri=payment_link
+            )
+        return return_message
+
 
 class TextMessageProcessor(BaseMessageProcessor):
     def __init__(self, db_service):
@@ -127,10 +190,17 @@ class TextMessageProcessor(BaseMessageProcessor):
 
         if self.is_under_maintenance(mobile):
             return
-        self.api_service.send_message_request(self.mbs.get_interactive_message(
-            mobile,
-            f"Hi {name}, click below to view existing booking or create new booking."
-        )
+        self.api_service.send_message_request(
+            self.mbs.get_interactive_message(
+                mobile,
+                f"Hi {name}, click below to view existing booking or create new booking."
+            )
+            if not self.secrets.get('ENABLE_TOURNAMENT_REGISTRATION')
+            else
+            self.mbs.get_interactive_message_with_tournament(
+                mobile,
+                f"Hi {name}, click below to register for tournament, view existing booking or create new booking."
+            )
         )
 
 
@@ -138,6 +208,7 @@ class TextMessageProcessor(BaseMessageProcessor):
 This class processes InteractiveMessage response.
 New booking --> Start Flow request for new booking
 View bookings --> Get existing bookings of yesterday, today and all future days 
+Tournament registration --> Start Flow request for tournament
 """
 
 
@@ -155,6 +226,8 @@ class InteractiveMessageProcessor(BaseMessageProcessor):
             return_message = self.get_view_booking_message(mobile)
         elif request_type == InteractiveRequestType.NEW_BOOKING:
             return_message = self.get_new_booking_message(mobile)
+        elif request_type == InteractiveRequestType.TOURNAMENT_REGISTRATION:
+            return_message = self.get_tournament_registration_message(mobile)
         self.api_service.send_message_request(return_message)
 
     def get_new_booking_message(self, mobile):
@@ -191,6 +264,18 @@ Amount: {booking.amount}
 """
         return_message = self.mbs.get_final_text_message(mobile, "", message)
         return return_message
+
+    def get_tournament_registration_message(self, mobile):
+        flow_token = f'TT-{str(uuid.uuid4())[:-2].replace("-", "")}'
+        self.db_service.save_flow_token(mobile, flow_token)
+        return self.mbs.get_interactive_flow_message(
+            mobile,
+            "Click below to register your team for box cricket tournament",
+            self.mbs.get_tournament_initial_screen_param(
+                self.tournament_flow_id, flow_token
+                # , self.flow_mode  TODO
+            )
+        )
 
 
 """
@@ -275,52 +360,72 @@ Please pay to confirm your booking.
 
 _Once a booking is confirmed, it cannot be canceled, and no refund will be offered in case of No-Show._
 """
-            if self.secrets.get("PAYMENT_TYPE") == "PAYMENT_GATEWAY":
-                return_message = self.mbs.get_interactive_payment_message_gw(
-                    mobile=mobile,
-                    payment_amount=total_amount * self.amount_offset,
-                    reference_id=token,
-                    amount_offset=100,
-                    message_body=payment_message
-                )
-            elif self.secrets.get("PAYMENT_TYPE") == "PAYMENT_GATEWAY_UPI":
-                return_message = self.mbs.get_interactive_payment_message(
-                    mobile=mobile,
-                    payment_amount=total_amount * self.amount_offset,
-                    reference_id=token,
-                    amount_offset=self.amount_offset,
-                    message_body=payment_message,
-                    payment_configuration=self.secrets.get(
-                        "WA_UPI_PAYMENT_CONFIGURATION_NAME"
-                    )
-                )
-            elif self.secrets.get("PAYMENT_TYPE") == "DIRECT_PAYMENT_LINK":
-                payment_link = self.payment_service.generate_payment_link(
-                    amount=total_amount * self.amount_offset,
-                    unique_transaction_id=token
-                )
+            return_message = self.get_payment_message(
+                mobile, payment_message, token, total_amount, self.amount_offset, self.payment_service
+            )
+        self.api_service.send_message_request(data=return_message)
 
-                payment_message = f"""
-{payment_message}
 
-Pay by clicking this link: 
-{payment_link}
 """
-                return_message = self.mbs.get_final_text_message(
-                    mobile=mobile,
-                    body=payment_message
-                )
-            else:
-                payment_link = self.payment_service.generate_payment_link(
-                    amount=total_amount * self.amount_offset,
-                    unique_transaction_id=token
-                )
-                return_message = self.mbs.get_interactive_payment_message(
-                    mobile=mobile,
-                    payment_amount=total_amount * self.amount_offset,
-                    reference_id=token,
-                    amount_offset=self.amount_offset,
-                    message_body=payment_message,
-                    payment_uri=payment_link
-                )
+This class processes user message post flow screen confirmation (NFM Reply Message).
+1. A new pending booking will be created once user clicks confirm button
+2. Sends whatsapp message of type PaymentGateway to user
+"""
+
+
+class TournamentNfmMessageProcessor(BaseMessageProcessor):
+    def __init__(self, db_service, payment_service):
+        super().__init__(db_service)
+        self.amount_offset = self.secrets.get("AMOUNT_OFFSET") or 100
+        self.payment_service: BasePayment = payment_service
+
+    def process_message(self, message, *args, **kwargs):
+        Logger.info(f"Processing nfm reply message.")
+        mobile = message.message_from
+        if self.is_under_maintenance(mobile):
+            return
+        response = json.loads(message.interactive.nfm_reply.get("response_json"))
+        success = response.get("success")
+        token = response.get("token")
+        existing_registration = self.db_service.get_tournament_registration(token)
+        if success == "false" or (
+                existing_registration and existing_registration.get("payment_successful")
+        ):
+            return_message = self.mbs.get_final_text_message(
+                mobile=mobile,
+                body=f"You have already registered or have another registration in progress. Please complete it or wait for status to be reflected."
+            )
+            self.api_service.send_message_request(data=return_message)
+            return
+        amount = re.findall(r'\d+', response.get("amount"))[0]
+
+        team_name = response.get("team_name")
+        total_amount = self.db_service.get_tournament_amount()
+        Logger.info(f"Pending payment amount {total_amount}, actual amount {amount}")
+        # Check amount received from user vs amount set for tournament
+        if int(amount) != total_amount:
+            return_message = self.mbs.get_final_text_message(
+                mobile,
+                "",
+                "Amount does not match."
+                "Please start the registration again by sending *Hi*."
+            )
+        else:
+            self.db_service.create_tournament_registration(
+                mobile, token, total_amount, team_name
+            )
+            if mobile and mobile in self.secrets.get("CBC_TEST_NUMBERS"):
+                Logger.info(f"Setting amount to {amount} for test number {mobile}")
+                total_amount = amount // 1000
+            payment_message = f"""
+Team Name: {team_name}
+Amount: {amount}
+Please pay to confirm your registration. 
+
+_Once a registration is confirmed, it cannot be canceled, and no refund will be offered in case of No-Show._
+"""
+            return_message = self.get_payment_message(
+                mobile, payment_message, token, total_amount, self.amount_offset,
+                self.payment_service
+            )
         self.api_service.send_message_request(data=return_message)

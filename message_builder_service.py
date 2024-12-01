@@ -65,6 +65,47 @@ _Enjoy the game!_
         return message
 
     @staticmethod
+    def get_interactive_message_with_tournament(mobile: str,
+                                message_body: str) -> im.InteractiveMessage:
+        buttons = list()
+        buttons.append(
+            im.Button(reply=im.Reply(
+                id=InteractiveRequestType.TOURNAMENT_REGISTRATION.value, title="Register For Box Cricket Tournament"
+            ))
+        )
+        buttons.append(
+            im.Button(reply=im.Reply(
+                id=InteractiveRequestType.NEW_BOOKING.value, title="New Booking"
+            ))
+        )
+        buttons.append(
+            im.Button(reply=im.Reply(
+                id=InteractiveRequestType.VIEW_BOOKING.value, title="View Bookings"
+            ))
+        )
+        # buttons.append(
+        #     im.Button(reply=im.Reply(id="CANCEL_BOOKING", title="Cancel Bookings"))
+        # )
+
+        action = im.Action()
+        action.buttons = buttons
+
+        body = im.Body()
+        body.text = message_body
+
+        interactive = im.Interactive()
+        interactive.type = "button"
+        interactive.body = body
+        interactive.action = action
+
+        message = im.InteractiveMessage()
+        message.to = mobile
+        message.type = "interactive"
+        message.messaging_product = "whatsapp"
+        message.interactive = interactive
+        return message
+
+    @staticmethod
     def get_interactive_flow_message(mobile: str,
                                      message_body: str,
                                      parameters: ifm.Parameter) -> ifm.InteractiveFlowMessage:
@@ -115,6 +156,23 @@ _Enjoy the game!_
         parameter.flow_message_version = "3"
         parameter.flow_token = flow_token
         parameter.flow_cta = "Book New Slot"
+        parameter.flow_id = flow_id
+        parameter.flow_action = "navigate"
+        parameter.flow_action_payload = payload
+        return parameter
+
+    @staticmethod
+    def get_tournament_initial_screen_param(flow_id, flow_token, mode: str = "draft"):
+        payload = dict()
+        data = dict()
+        data["tournament_details"] = "Tournament Details and Rules"
+        payload["screen"] = Screen.TOURNAMENT_DETAILS_AND_RULES.value
+        payload["data"] = data
+        parameter = ifm.Parameter()
+        parameter.mode = mode
+        parameter.flow_message_version = "3"
+        parameter.flow_token = flow_token
+        parameter.flow_cta = "CBC Tournament Registration"
         parameter.flow_id = flow_id
         parameter.flow_action = "navigate"
         parameter.flow_action_payload = payload

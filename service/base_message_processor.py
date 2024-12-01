@@ -17,6 +17,7 @@ class BaseProcessor(ABC):
         self.api_service = WhatsappApi(self.secrets.get("WA_API_TOKEN"),
                                        self.secrets.get("MOBILE_ID"))
         self.flow_id = self.secrets.get("FLOW_ID")
+        self.tournament_flow_id = self.secrets.get("TOURNAMENT_FLOW_ID")
         self.flow_mode = self.secrets.get("FLOW_MODE") or "draft"
 
     def get_available_slots(self, formatted_date) -> list[dict]:

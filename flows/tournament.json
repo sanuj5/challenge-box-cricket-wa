@@ -2,27 +2,23 @@
   "version": "3.1",
   "data_api_version": "3.0",
   "routing_model": {
-    "DATE_SELECTION": [
-      "SLOT_SELECTION"
+    "TOURNAMENT_DETAILS_AND_RULES": [
+      "TOURNAMENT_TEAM_REGISTRATION"
     ],
-    "SLOT_SELECTION": [
-      "BOOKING_CONFIRMATION"
+    "TOURNAMENT_TEAM_REGISTRATION": [
+      "TOURNAMENT_BOOKING_CONFIRMATION"
     ],
-    "BOOKING_CONFIRMATION": [
+    "TOURNAMENT_BOOKING_CONFIRMATION": [
       "TERMS_AND_CONDITIONS"
     ]
   },
   "screens": [
     {
-      "id": "DATE_SELECTION",
+      "id": "TOURNAMENT_DETAILS_AND_RULES",
       "data": {
-        "min_date": {
+        "tournament_details": {
           "type": "string",
-          "__example__": "1696892400000"
-        },
-        "max_date": {
-          "type": "string",
-          "__example__": "1760050800000"
+          "__example__": "Challenge Cricket Academy"
         }
       },
       "layout": {
@@ -32,63 +28,32 @@
             "type": "Form",
             "name": "form",
             "children": [
-                {
-                "type": "TextHeading",
-                "text": "Select date"
-              },
               {
-                "type": "DatePicker",
-                "name": "date",
-                "label": "Date",
-                "min-date": "${data.min_date}",
-                "max-date": "${data.max_date}",
-                "required": true
-              },
-              {
-                "type": "Footer",
-                "label": "Continue",
-                "on-click-action": {
-                  "name": "data_exchange",
-                  "payload": {
-                    "selected_date": "${form.date}"
-                  }
-                }
+                "type": "TextBody",
+                "text": "${data.tournament_details}"
               }
             ]
+          },
+          {
+            "type": "Footer",
+            "label": "Continue",
+            "on-click-action": {
+              "name": "navigate",
+              "payload": {},
+              "next": {
+                "type": "screen",
+                "name": "TOURNAMENT_TEAM_REGISTRATION"
+              }
+            }
           }
         ]
       },
-      "title": "CBC Booking",
-      "terminal": true
+      "title": "CBC Tournament Registration"
     },
     {
-      "id": "SLOT_SELECTION",
-      "title": "CBC Booking",
+      "id": "TOURNAMENT_TEAM_REGISTRATION",
+      "title": "CBC Tournament Registration",
       "data": {
-          "slots": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "title": {
-                "type": "string"
-              }
-            }
-          },
-          "__example__": [
-              {
-                  "id": "slot5",
-                  "title": "5 AM - 6 AM"
-              }
-            ]
-        },
-        "selected_date": {
-          "type": "string",
-          "__example__": "01 Dec 2023"
-        },
         "error_messages": {
           "type": "string",
           "__example__": ""
@@ -107,23 +72,13 @@
             "children": [
               {
                 "type": "TextHeading",
-                "text": "Select one or more slots."
+                "text": "Provide your team name"
               },
               {
-                "type": "TextBody",
-                "text": "${data.selected_date}"
-              },
-              {
-                "type": "CheckboxGroup",
-                "required": true,
-                "name": "slot",
-                "data-source": "${data.slots}"
-              },
-              {
-                "type": "TextCaption",
-                "text": "${data.error_messages}",
-                "font-weight": "bold_italic",
-                "visible": "${data.show_error_message}"
+                "type": "TextInput",
+                "label": "Team Name",
+                "name": "team_name",
+                "required": true
               },
               {
                 "type": "Footer",
@@ -131,8 +86,7 @@
                 "on-click-action": {
                   "name": "data_exchange",
                   "payload": {
-                    "slots": "${form.slot}",
-                    "selected_date": "${data.selected_date}"
+                    "team_name": "${form.team_name}"
                   }
                 }
               }
@@ -142,21 +96,13 @@
       }
     },
     {
-      "id": "BOOKING_CONFIRMATION",
-      "title": "Booking confirmation",
+      "id": "TOURNAMENT_BOOKING_CONFIRMATION",
+      "title": "CBC Tournament Registration",
       "terminal": true,
       "data": {
-        "selected_date": {
+        "team_name": {
           "type": "string",
-          "__example__": "01 Dec 2023"
-        },
-        "slots_title": {
-          "type": "string",
-          "__example__": "5 AM - 6 AM, 6 AM - 7 AM"
-        },
-        "slots": {
-          "type": "string",
-          "__example__": "0-1, 0-2"
+          "__example__": "Challenge Cricket Academy"
         },
         "amount": {
           "type": "string",
@@ -176,23 +122,15 @@
             "children": [
               {
                 "type": "TextSubheading",
-                "text": "Review your booking and confirm."
+                "text": "Review your registration details and confirm."
               },
               {
                 "type": "TextBody",
-                "text": "Date"
+                "text": "Team Name"
               },
               {
                 "type": "TextCaption",
-                "text": "${data.selected_date}"
-              },
-              {
-                "type": "TextBody",
-                "text": "Slots"
-              },
-              {
-                "type": "TextCaption",
-                "text": "${data.slots_title}"
+                "text": "${data.team_name}"
               },
               {
                 "type": "TextBody",
@@ -223,8 +161,7 @@
                 "on-click-action": {
                   "name": "complete",
                   "payload": {
-                    "slots": "${data.slots}",
-                    "selected_date": "${data.selected_date}",
+                    "team_name": "${data.team_name}",
                     "amount": "${data.amount}",
                     "token": "${data.token}"
                   }
