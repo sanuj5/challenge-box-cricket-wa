@@ -251,6 +251,7 @@ class DBService:
     def create_tournament_registration(self, mobile, token, amount, team_name) -> None:
         _id = self.generate_id(mobile)
         data = {
+            "id": _id,
             "mobile": mobile,
             "token": token,
             "created_ts": datetime.datetime.now(),
@@ -264,7 +265,7 @@ class DBService:
     def confirm_tournament_payment(self, mobile, token, payment_response) -> None:
         registration = self.get_tournament_registration(token)
         self.db.collection("tournament_registrations").document(
-            registration.get("_id")
+            registration.get("id")
         ).update({
             "payment_successful": True,
             "payment_response": payment_response
