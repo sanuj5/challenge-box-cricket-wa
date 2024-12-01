@@ -83,7 +83,7 @@ class TournamentRegistrationProcessor(BaseFlowRequestProcessor):
         response['error_messages'] = ""
         response['show_error_message'] = False
         response['team_name'] = team_name
-        response['amount'] = amount
+        response['amount'] = f"₹ {amount}/-"
         return FlowResponse(data=response, screen=Screen.TOURNAMENT_BOOKING_CONFIRMATION.value)
 
 class SlotScreenProcessor(BaseFlowRequestProcessor):
