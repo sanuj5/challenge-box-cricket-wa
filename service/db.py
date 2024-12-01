@@ -274,5 +274,5 @@ class DBService:
     def get_tournament_registration(self, token) -> dict:
         collection = self.db.collection("tournament_registrations").where(
             filter=FieldFilter("token", "==", token)
-        )
-        return collection.document().get()[0].to_dict()
+        ).get()
+        return collection[0].to_dict() if collection and len(collection) > 0 else None
