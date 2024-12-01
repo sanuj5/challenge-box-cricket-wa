@@ -416,7 +416,7 @@ class TournamentNfmMessageProcessor(BaseMessageProcessor):
             )
             if mobile and mobile in self.secrets.get("CBC_TEST_NUMBERS"):
                 Logger.info(f"Setting amount to {amount} for test number {mobile}")
-                total_amount = amount // 1000
+                total_amount = total_amount // 1000
             payment_message = f"""
 Team Name: {team_name}
 Amount: {amount}
