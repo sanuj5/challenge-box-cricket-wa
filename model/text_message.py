@@ -21,3 +21,4 @@ class TextMessage:
         self.to = to
         self.type = type
         self.text = text
+        self.preview_url = False

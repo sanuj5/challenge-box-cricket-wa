@@ -4,22 +4,25 @@ from model.enums import Month, Day
 
 @dataclass
 class Booking:
-    def __init__(self, month: Month = None, day: Day = None, slot=None):
-        self.month: Month = month
-        self.day: Day = day
-        self.slot = slot
+    def __init__(self, date, slots, amount, mobile, token):
+        self.date = date
+        self.slots = slots
+        self.amount = amount
+        self.mobile = mobile
+        self.token = token
 
     @staticmethod
-    def create_booking(selected_id: str):
-        booking = Booking()
-        _id = selected_id.split("_")
-        if len(_id) > 0:
-            booking.month = _id[0]
-        if len(_id) > 1:
-            booking.day = _id[1]
-        if len(_id) > 2:
-            slots = _id[2:]
-            if _id[-1] == 'cs' or _id[-1] == 'as':
-                slots = slots[:-1]
-            booking.slot = slots
-        return booking
+    def create_booking(confirmed_bookings):
+        bookings: list[Booking] = list()
+        for booking in confirmed_bookings:
+            b: dict = booking.to_dict()
+            bookings.append(
+                Booking(
+                    date=b.get("date"),
+                    slots=b.get("slots"),
+                    amount=b.get("amount"),
+                    token=b.get("token"),
+                    mobile=b.get("mobile")
+                )
+            )
+        return bookings

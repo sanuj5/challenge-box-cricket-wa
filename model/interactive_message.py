@@ -1,38 +1,32 @@
 from dataclasses import dataclass
-from typing import List
 
 
-@dataclass
-class Row:
+class Reply:
     id: str
     title: str
-    description: str
 
-    def __init__(self, id: str = None, title: str = None,
-                 description: str = "") -> None:
+    def __init__(self, id: str, title: str):
         self.id = id
         self.title = title
-        self.description = description
-
 
 @dataclass
-class Section:
-    title: str
-    rows: List[Row]
+class Button:
+    type: str
+    reply: Reply
 
-    def __init__(self, title: str = None, rows: List[Row] = None) -> None:
-        self.title = title
-        self.rows = rows
+    def __init__(self, type: str = "reply", reply: Reply = None) -> None:
+        self.type = type
+        self.reply = reply
+
+
 
 
 @dataclass
 class Action:
-    button: str
-    sections: List[Section]
+    buttons: list[Button]
 
-    def __init__(self, button: str = None, sections: List[Section] = None) -> None:
-        self.button = button
-        self.sections = sections
+    def __init__(self, buttons: list[Button] = None) -> None:
+        self.buttons = buttons
 
 
 @dataclass

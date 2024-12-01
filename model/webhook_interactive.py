@@ -21,36 +21,34 @@ class Contact:
 
 
 @dataclass
-class ListReply:
+class ButtonReply:
     id: str
     title: str
-    description: str
 
-    def __init__(self, id: str, title: str, description: str) -> None:
+    def __init__(self, id: str, title: str) -> None:
         self.id = id
         self.title = title
-        self.description = description
 
 
 @dataclass
 class Interactive:
-    list_reply: ListReply
+    button_reply: ButtonReply
     type: str
 
-    def __init__(self, list_reply: ListReply, type: str) -> None:
-        self.list_reply = list_reply
+    def __init__(self, button_reply: ButtonReply, type: str) -> None:
+        self.button_reply = button_reply
         self.type = type
 
 
 @dataclass
 class Message:
-    message_from: int
+    message_from: str
     id: str
     timestamp: str
     interactive: Interactive
     type: str
 
-    def __init__(self, message_from: int, id: str, timestamp: str,
+    def __init__(self, message_from: str, id: str, timestamp: str,
                  interactive: Interactive, type: str) -> None:
         self.message_from = message_from
         self.id = id

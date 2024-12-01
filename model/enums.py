@@ -2,12 +2,9 @@ import enum
 
 
 class InteractiveRequestType(enum.Enum):
-    GOTO_MAIN = 0
-    MONTH_SELECTED = 1
-    DATE_SELECTED = 2
-    SLOT_SELECTED = 3
-    ADDITIONAL_SLOT = 4
-    CONFIRMED = 5
+    VIEW_BOOKING = "VIEW_BOOKING"
+    NEW_BOOKING = "NEW_BOOKING"
+    CANCEL_BOOKING = "CANCEL_BOOKING"
 
 
 class Day(enum.Enum):
@@ -56,3 +53,28 @@ class Slot(enum.Enum):
     S22 = "10 PM - 11 PM"
     S23 = "11 PM - 12 PM"
     S24 = "12 PM - 1 AM"
+
+
+class Screen(enum.Enum):
+    DATE_SELECTION = "DATE_SELECTION"
+    SLOT_SELECTION = "SLOT_SELECTION"
+    BOOKING_CONFIRMATION = "BOOKING_CONFIRMATION"
+    PAYMENT_CONFIRMATION = "PAYMENT_CONFIRMATION"
+    SUCCESS = "SUCCESS"
+
+
+class MessageType(enum.Enum):
+    INTERACTIVE = "interactive"
+    TEXT = "text"
+    NFM_REPLY = "nfm_reply"
+    PAYMENT = "payment"
+    NONE = None
+
+
+class PaymentProvider(enum.Enum):
+    PHONEPE = "phone_pe"
+    RAZORPAY = "razor_pay"
+
+
+class Constants(enum.Enum):
+    PAYMENT_CONFIGURATION = "cbc_razorpay_20240829"
