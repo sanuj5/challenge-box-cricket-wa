@@ -269,8 +269,8 @@ Amount: {booking.amount}
         existing_registration = self.db_service.get_tournament_registration(mobile=mobile)
         if existing_registration and existing_registration.get("payment_successful"):
             return self.mbs.get_final_text_message(
-                mobile,
-                f"""
+                mobile=mobile,
+                body=f"""
 You have already registered your team {existing_registration.get('team_name')}.
 
 For additional team, please register using different mobile number.
