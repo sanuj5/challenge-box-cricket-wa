@@ -189,6 +189,7 @@ Practice hard and go for the win.
             )
             self.notification_service.send_tournament_registration_notification(
                 name,
+                message.recipient_id,
                 team_name,
                 amount
             )
