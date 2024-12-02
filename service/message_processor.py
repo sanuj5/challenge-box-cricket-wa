@@ -266,7 +266,7 @@ Amount: {booking.amount}
         return return_message
 
     def get_tournament_registration_message(self, mobile):
-        existing_registration = self.db_service.get_tournament_registration(mobile=mobile)
+        existing_registration = self.db_service.get_tournament_registration(mobile=mobile, confirmed=True)
         if existing_registration and existing_registration.get("payment_successful"):
             return self.mbs.get_final_text_message(
                 mobile=mobile,
