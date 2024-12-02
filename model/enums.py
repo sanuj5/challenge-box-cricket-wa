@@ -84,23 +84,19 @@ class Constants(enum.Enum):
     PAYMENT_CONFIGURATION = "cbc_razorpay_20240829"
     TOURNAMENT_REGISTRATION_DETAILS = "Challenge Cricket Academy"
     TOURNAMENT_REGISTRATION_DETAILS2 = """
-* ** Tournament Details ** *
+*** Tournament Details ***
 
-Tournament Starts from **5 January 2025**
+  Tournament Starts from **5 January 2025**
 
-Winner Prize **₹ 25,000/-**
+  Winner Prize **₹ 25,000/-**
 
-Runners up Prize **₹ 11,000/-**
+  Runners up Prize **₹ 11,000/-**
 
-Entry Fees **₹ 2500/-**
+  Entry Fees **₹ 2500/-**
   
+*  THE TOURNAMENT WILL BE CHALLENGED ON A KNOCKOUT SYSTEM. *  
   
-  
-  
-  
-* ** Rules and Regulations ** *
-
-**THE TOURNAMENT WILL BE CHALLENGED ON A KNOCKOUT SYSTEM.**
+*** Rules and Regulations ***
 
 ** 1. Match format: **
 - 8 overs, 7 players a side
