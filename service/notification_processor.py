@@ -102,3 +102,23 @@ class NotificationProcessor(BaseProcessor):
                         ]
                     )
                 )
+
+    """
+    Send tournament registration notification immediately 
+    """
+
+    def send_tournament_registration_notification(self, name, mobile, team_name, amount):
+        mobile_numbers = self.db_service.get_notification_eligible_numbers()
+        for mobile_number in mobile_numbers:
+            self.api_service.send_message_request(
+                tb.build(
+                    mobile=mobile_number,
+                    template_name="tournament_registration_notification",
+                    parameters=[
+                        tb.get_text_parameter(name),
+                        tb.get_text_parameter(f"+{mobile}"),
+                        tb.get_text_parameter(team_name),
+                        tb.get_text_parameter(amount),
+                    ]
+                )
+            )
