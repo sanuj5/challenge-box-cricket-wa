@@ -116,7 +116,7 @@ class NotificationProcessor(BaseProcessor):
                     template_name="tournament_registration_notification",
                     parameters=[
                         tb.get_text_parameter(name),
-                        f"+{tb.get_text_parameter(mobile)}",
+                        tb.get_text_parameter(f"+{mobile}"),
                         tb.get_text_parameter(team_name),
                         tb.get_text_parameter(amount),
                     ]
