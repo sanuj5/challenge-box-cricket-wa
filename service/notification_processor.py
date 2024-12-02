@@ -107,7 +107,7 @@ class NotificationProcessor(BaseProcessor):
     Send tournament registration notification immediately 
     """
 
-    def send_tournament_registration_notification(self, name, team_name, amount, mobile):
+    def send_tournament_registration_notification(self, name, mobile, team_name, amount):
         mobile_numbers = self.db_service.get_notification_eligible_numbers()
         for mobile_number in mobile_numbers:
             self.api_service.send_message_request(
