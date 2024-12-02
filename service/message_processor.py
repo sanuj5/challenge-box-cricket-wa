@@ -282,8 +282,7 @@ For additional team, please register using different mobile number.
             mobile,
             "Click below to register your team for box cricket tournament",
             self.mbs.get_tournament_initial_screen_param(
-                self.tournament_flow_id, flow_token
-                # , self.flow_mode  TODO
+                self.tournament_flow_id, flow_token, self.flow_mode
             )
         )
 
