@@ -29,7 +29,7 @@
             "name": "form",
             "children": [
               {
-                "type": "TextBody",
+                "type": "RichText",
                 "text": "${data.tournament_details}"
               }
             ]

@@ -181,7 +181,7 @@ Slots: {", ".join([slot.get("title") for slot in sorted(
                     token=message.payment.reference_id,
                     message=f"""
 
-*Congratulations {name}, You have successfully enrolled your team Challenge Cricket Academy for upcoming box cricket tournament. Total amount you paid: ₹ {amount}/-.*
+Congratulations *{name}*, You have successfully enrolled your team *{team_name}* for upcoming box cricket tournament. Total amount you paid: *₹ {amount}/-.*
 
 Practice hard and go for the win.
 """)

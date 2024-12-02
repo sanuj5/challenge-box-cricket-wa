@@ -266,6 +266,16 @@ Amount: {booking.amount}
         return return_message
 
     def get_tournament_registration_message(self, mobile):
+        existing_registration = self.db_service.get_tournament_registration(mobile=mobile)
+        if existing_registration and existing_registration.get("payment_successful"):
+            return self.mbs.get_final_text_message(
+                mobile,
+                f"""
+You have already registered your team {existing_registration.get('team_name')}.
+
+For additional team, please register using different mobile number.
+"""
+            )
         flow_token = f'TT-{str(uuid.uuid4())[:-2].replace("-", "")}'
         self.db_service.save_flow_token(mobile, flow_token)
         return self.mbs.get_interactive_flow_message(

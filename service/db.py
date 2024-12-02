@@ -272,8 +272,15 @@ class DBService:
         })
         Logger.info(f"New registration confirmed for {token}, {mobile}")
 
-    def get_tournament_registration(self, token) -> dict:
-        collection = self.db.collection("tournament_registrations").where(
-            filter=FieldFilter("token", "==", token)
-        ).get()
+    def get_tournament_registration(self, token=None, mobile=None) -> dict:
+        collection = self.db.collection("tournament_registrations")
+        if token:
+            collection= collection.where(
+                filter=FieldFilter("token", "==", token)
+            )
+        if mobile:
+            collection = collection.where(
+                filter=FieldFilter("mobile", "==", mobile)
+            )
+        collection = collection.get()
         return collection[0].to_dict() if collection and len(collection) > 0 else None

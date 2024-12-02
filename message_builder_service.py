@@ -10,7 +10,7 @@ import model.interactive_payment_message_gw as ipm_gw
 import model.interactive_flow_message as ifm
 import model.text_message as tm
 import model.order_confirmation as oc
-from model.enums import Screen, InteractiveRequestType
+from model.enums import Screen, InteractiveRequestType, Constants
 
 
 class MessageBuilderService:
@@ -165,7 +165,7 @@ _Enjoy the game!_
     def get_tournament_initial_screen_param(flow_id, flow_token, mode: str = "draft"):
         payload = dict()
         data = dict()
-        data["tournament_details"] = "Tournament Details and Rules"
+        data["tournament_details"] = Constants.TOURNAMENT_REGISTRATION_DETAILS
         payload["screen"] = Screen.TOURNAMENT_DETAILS_AND_RULES.value
         payload["data"] = data
         parameter = ifm.Parameter()
