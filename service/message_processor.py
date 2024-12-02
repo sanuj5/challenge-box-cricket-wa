@@ -397,8 +397,11 @@ class TournamentNfmMessageProcessor(BaseMessageProcessor):
         success = response.get("success")
         token = response.get("flow_token")
         existing_registration = self.db_service.get_tournament_registration(token)
+        existing_registration_mobile = self.db_service.get_tournament_registration(mobile=mobile, confirmed=True)
         if success == "false" or (
                 existing_registration and existing_registration.get("payment_successful")
+        ) or (
+                existing_registration_mobile and existing_registration_mobile.get("payment_successful")
         ):
             return_message = self.mbs.get_final_text_message(
                 mobile=mobile,
