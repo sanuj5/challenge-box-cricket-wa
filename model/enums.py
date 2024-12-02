@@ -34,26 +34,26 @@ class Month(enum.Enum):
 
 
 class Slot(enum.Enum):
-    S5 = "5 AM - 6 AM"
-    S6 = "6 AM - 7 AM"
-    S7 = "7 AM - 8 AM"
-    S8 = "8 AM - 9 AM"
-    S9 = "9 AM - 10 AM"
-    S10 = "10 AM - 11 AM"
-    S11 = "11 AM - 12 PM"
-    S12 = "12 PM - 1 PM"
-    S13 = "1 PM - 2 PM"
-    S14 = "2 PM - 3 PM"
-    S15 = "3 PM - 4 PM"
-    S16 = "4 PM - 5 PM"
-    S17 = "5 PM - 6 PM"
-    S18 = "6 PM - 7 PM"
-    S19 = "7 PM - 8 PM"
-    S20 = "8 PM - 9 PM"
-    S21 = "9 PM - 10 PM"
-    S22 = "10 PM - 11 PM"
-    S23 = "11 PM - 12 PM"
-    S24 = "12 PM - 1 AM"
+    S5 = "5 AM- 6 AM"
+    S6 = "6 AM- 7 AM"
+    S7 = "7 AM- 8 AM"
+    S8 = "8 AM- 9 AM"
+    S9 = "9 AM- 10 AM"
+    S10 = "10 AM- 11 AM"
+    S11 = "11 AM- 12 PM"
+    S12 = "12 PM- 1 PM"
+    S13 = "1 PM- 2 PM"
+    S14 = "2 PM- 3 PM"
+    S15 = "3 PM- 4 PM"
+    S16 = "4 PM- 5 PM"
+    S17 = "5 PM- 6 PM"
+    S18 = "6 PM- 7 PM"
+    S19 = "7 PM- 8 PM"
+    S20 = "8 PM- 9 PM"
+    S21 = "9 PM- 10 PM"
+    S22 = "10 PM- 11 PM"
+    S23 = "11 PM- 12 PM"
+    S24 = "12 PM- 1 AM"
 
 
 class Screen(enum.Enum):
@@ -86,13 +86,13 @@ class Constants(enum.Enum):
     TOURNAMENT_REGISTRATION_DETAILS2 = """
 *** Tournament Details ***
 
-Tournament Start from *5 January 2025*
+Tournament Start from **5 January 2025**
 
-Winner Prize *₹ 25000/-*
+Winner Prize **₹ 25000/-**
 
-Runners up Prize *₹ 11000/-*
+Runners up Prize **₹ 11000/-**
 
-Entry Fees *₹ 2500/-*
+Entry Fees **₹ 2500/-**
 
 
 
@@ -101,40 +101,39 @@ Entry Fees *₹ 2500/-*
 ** THE TOURNAMENT WILL BE CHALLENGED ON A KNOCKOUT SYSTEM. **
 
 ** 1. Match format: **
- - 8 overs, 7 players a side
+- 8 overs, 7 players a side
 
 ** 2. Over per bowler limit: **
- - Only 2 bowler can bowl max 2 Overs, rest get to bowl only 1 over.
+- Only 2 bowler can bowl max 2 Overs, rest get to bowl only 1 over.
 
 ** 3. Bowling rules: **
- - Only standing throw bowling allowed
- - Bowling speed will be measured by speed gun. Bowling limit is 75 KMPH and this limit is subject to change before match based on calibration of gun.
- - Any ball tracked with speed more than 75 KMPH will be considered *NO* ball. No warnings will be given.
- - Speed Gun will be operated by committe member of tournament and results will be available to committe member only. In any circustance, tracking result or access to gun won't be provided to any team.
- - If gun is not available for speend tracking due to any technical reason, umpire decision will be considered final for speed limit.
+- Only standing throw bowling allowed
+- Bowling speed will be measured by speed gun. Bowling limit is *75 KMPH* and this limit is subject to change before match based on calibration of gun.
+- Any ball tracked with speed more than *75 KMPH* will be considered *NO* ball. No warnings will be given.
+- Speed Gun will be operated by committe member of tournament and results will be available to committe member only. In any circustance, tracking result or access to gun won't be provided to any team.
+- If gun is not available for speend tracking due to any technical reason, umpire decision will be considered final for speed limit.
 
 ** 4. Batting rules : **
- - Fours : Fly through net will be considered as boundary 4 runs
- - Sixes : Only direct shot will be considered as boundary 6 runs
+- Fours : Fly through net will be considered as boundary 4 runs
+- Sixes : Only direct shot will be considered as boundary 6 runs
 
 ** 5. Scoring will be done on the application Cric Heroes. **
 
 ** 6. Fielding Rules: **
- - There will be an over of batting power play
- - Only 1 player will be allowed in the boundary
- - line for power play
- - Wicket keeper is not mandatory
- - Catches: Direct catches, no rebounds. For roof rebounds, ball in play but not a catch
+- First 2 overs will be for batting power play 
+- Only 1 player will be allowed in the boundary line for power play
+- Wicket keeper is not mandatory
+- Catches: Direct catches, no rebounds. For roof rebounds, ball in play but not a catch
 
 ** 7. LBW:  **
- - No LBW outs, foot deflections may result in leg byes/byes.
+- No LBW outs, foot deflections may result in leg byes/byes.
 
 ** 8. No Ball: **
- - No Free Hits will be given in any condition.
+- No Free Hits will be given in any condition.
 
 ** 9. Tie: **
- - In case of Tie, Super Over will be played
+- In case of Tie, Super Over will be played
 
 ** 10. Final Decision **
- - All decisions of the committee of the tournament shall be final and binding on all the participating members. The committee reserves the right to amend the rules at any point of time before/during the tournament in the spirit of the tournament.    
+- All decisions of the committee of the tournament shall be final and binding on all the participating members. The committee reserves the right to amend the rules at any point of time before/during the tournament in the spirit of the tournament.    
 """
