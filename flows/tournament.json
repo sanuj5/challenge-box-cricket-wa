@@ -29,7 +29,7 @@
             "name": "form",
             "children": [
               {
-                "type": "RichText",
+                "type": "TextBody",
                 "text": "${data.tournament_details}"
               }
             ]
@@ -53,16 +53,6 @@
     {
       "id": "TOURNAMENT_TEAM_REGISTRATION",
       "title": "CBC Tournament Registration",
-      "data": {
-        "error_messages": {
-          "type": "string",
-          "__example__": ""
-        },
-        "show_error_message": {
-          "type": "boolean",
-          "__example__": true
-        }
-      },
       "layout": {
         "type": "SingleColumnLayout",
         "children": [

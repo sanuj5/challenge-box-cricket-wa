@@ -82,7 +82,8 @@ class PaymentProvider(enum.Enum):
 
 class Constants(enum.Enum):
     PAYMENT_CONFIGURATION = "cbc_razorpay_20240829"
-    TOURNAMENT_REGISTRATION_DETAILS = """
+    TOURNAMENT_REGISTRATION_DETAILS = "Challenge Cricket Academy"
+    TOURNAMENT_REGISTRATION_DETAILS2 = """
 # Tournament Details
 
 Tournament Start from *5 January 2025*
