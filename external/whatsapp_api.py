@@ -17,7 +17,6 @@ class WhatsappApi:
 
     def send_message_request(self, data, header: dict = None) -> None:
         headers = self.get_headers(header)
-        Logger.info(data)
         json_data = json.dumps(data, default=lambda o: o.__dict__)
         Logger.info(json_data)
         result = requests.post(url=f"{self.base_url}/messages",

@@ -165,7 +165,7 @@ _Enjoy the game!_
     def get_tournament_initial_screen_param(flow_id, flow_token, mode: str = "draft"):
         payload = dict()
         data = dict()
-        data["tournament_details"] = Constants.TOURNAMENT_REGISTRATION_DETAILS
+        data["tournament_details"] = Constants.TOURNAMENT_REGISTRATION_DETAILS2.value
         payload["screen"] = Screen.TOURNAMENT_DETAILS_AND_RULES.value
         payload["data"] = data
         parameter = ifm.Parameter()
