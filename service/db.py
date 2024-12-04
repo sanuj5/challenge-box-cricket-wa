@@ -244,9 +244,8 @@ class DBService:
         ).get()
         return user[0].to_dict().get("name") if user else None
 
-    def get_tournament_amount(self) -> int:
-        tournament = self.db.collection("tournaments").get()[0].to_dict()
-        return tournament.get("amount")
+    def get_tournament_details(self) -> dict:
+        return self.db.collection("tournaments").get()[0].to_dict()
 
     def create_tournament_registration(self, mobile, token, amount, team_name) -> None:
         _id = self.generate_id(mobile)

@@ -179,13 +179,18 @@ Slots: {", ".join([slot.get("title") for slot in sorted(
                 self.mbs.get_order_confirmation_message(
                     mobile=message.recipient_id,
                     token=message.payment.reference_id,
-                    message=f"""
+                    message=f"""Payment of *₹ {amount}/-* is successful.""")
+            )
 
-Congratulations *{name}*, You have successfully enrolled your team *{team_name}* for upcoming box cricket tournament. Total amount you paid: *₹ {amount}/-.*
+            self.notification_service.send_custom_notification_with_image(
+                mobile=message.recipient_id,
+                message=f"""
+
+Congratulations *{name}*, You have successfully enrolled your team *{team_name}* for upcoming box cricket tournament.
 
 Practice hard and go for the win.
-""")
-
+""",
+                image_url=self.db_service.get_tournament_details().get("image_url")
             )
             self.notification_service.send_tournament_registration_notification(
                 name,

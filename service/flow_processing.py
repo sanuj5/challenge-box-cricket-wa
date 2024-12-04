@@ -79,7 +79,7 @@ class TournamentRegistrationProcessor(BaseFlowRequestProcessor):
         if not team_name:
             response['error_messages'] = "Please provide team name"
             return response, Screen.TOURNAMENT_TEAM_REGISTRATION.value
-        amount = self.db_service.get_tournament_amount()
+        amount = self.db_service.get_tournament_details().get("amount")
         response['error_messages'] = ""
         response['show_error_message'] = False
         response['team_name'] = team_name

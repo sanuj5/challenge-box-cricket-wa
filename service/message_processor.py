@@ -412,7 +412,7 @@ class TournamentNfmMessageProcessor(BaseMessageProcessor):
         amount = re.findall(r'\d+', response.get("amount"))[0]
 
         team_name = response.get("team_name")
-        total_amount = self.db_service.get_tournament_amount()
+        total_amount = self.db_service.get_tournament_details().get("amount")
         Logger.info(f"Pending payment amount {total_amount}, actual amount {amount}")
         # Check amount received from user vs amount set for tournament
         if int(amount) != total_amount:

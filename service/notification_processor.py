@@ -122,3 +122,19 @@ class NotificationProcessor(BaseProcessor):
                     ]
                 )
             )
+
+    """
+    Send custom notification_with_image
+    """
+
+    def send_custom_notification_with_image(self, mobile, message, image_url):
+        self.api_service.send_message_request(
+            tb.build(
+                mobile=mobile,
+                template_name="custom_notification",
+                parameters=[
+                    tb.get_text_parameter(message)
+                ],
+                header=[tb.get_image_parameter(image_url)],
+            )
+        )
