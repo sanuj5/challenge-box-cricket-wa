@@ -14,6 +14,7 @@ class FlowFactory:
         self.date_screen_processor = DateScreenProcessor(db_service)
         self.slot_screen_processor = SlotScreenProcessor(db_service)
         self.booking_confirmation_processor = BookingConfirmationProcessor(db_service)
+        self.tournament_team_registration_processor = TournamentRegistrationProcessor(db_service)
 
     def process(self, message, screen: Screen):
         match screen:
@@ -23,6 +24,8 @@ class FlowFactory:
                 service = self.slot_screen_processor
             case Screen.BOOKING_CONFIRMATION:
                 service = self.booking_confirmation_processor
+            case Screen.TOURNAMENT_TEAM_REGISTRATION:
+                service = self.tournament_team_registration_processor
             case _:
                 raise ValueError("Invalid screen")
         return service.process_flow_request(message)
@@ -65,6 +68,25 @@ class DateScreenProcessor(BaseFlowRequestProcessor):
         response['show_error_message'] = False
         return FlowResponse(data=response, screen=Screen.SLOT_SELECTION.value)
 
+class TournamentRegistrationProcessor(BaseFlowRequestProcessor):
+
+    def __init__(self, db_service):
+        super().__init__(db_service)
+
+    def process_flow_request(self, message, *args, **kwargs):
+        team_name = message.data.get("team_name")
+        location = message.data.get("location")
+        response = dict()
+        if not team_name:
+            response['error_messages'] = "Please provide team name"
+            return response, Screen.TOURNAMENT_TEAM_REGISTRATION.value
+        amount = self.db_service.get_tournament_details().get("amount")
+        response['error_messages'] = ""
+        response['show_error_message'] = False
+        response['team_name'] = team_name
+        response['location'] = location
+        response['amount'] = f"₹ {amount}/-"
+        return FlowResponse(data=response, screen=Screen.TOURNAMENT_BOOKING_CONFIRMATION.value)
 
 class SlotScreenProcessor(BaseFlowRequestProcessor):
 

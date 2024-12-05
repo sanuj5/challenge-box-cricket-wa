@@ -243,3 +243,48 @@ class DBService:
             filter=FieldFilter("mobile", "==", mobile)
         ).get()
         return user[0].to_dict().get("name") if user else None
+
+    def get_tournament_details(self) -> dict:
+        return self.db.collection("tournaments").get()[0].to_dict()
+
+    def create_tournament_registration(self, mobile, token, amount, team_name, location) -> None:
+        _id = self.generate_id(mobile)
+        data = {
+            "id": _id,
+            "mobile": mobile,
+            "token": token,
+            "created_ts": datetime.datetime.now(),
+            "amount": float(amount),
+            "cancelled": False,
+            "team_name": team_name,
+            "location": location,
+            "payment_successful": False
+        }
+        self.db.collection("tournament_registrations").document(_id).set(data)
+
+    def confirm_tournament_payment(self, mobile, token, payment_response) -> None:
+        registration = self.get_tournament_registration(token)
+        self.db.collection("tournament_registrations").document(
+            registration.get("id")
+        ).update({
+            "payment_successful": True,
+            "payment_response": payment_response
+        })
+        Logger.info(f"New registration confirmed for {token}, {mobile}")
+
+    def get_tournament_registration(self, token=None, mobile=None, confirmed=False) -> dict:
+        collection = self.db.collection("tournament_registrations")
+        if token:
+            collection= collection.where(
+                filter=FieldFilter("token", "==", token)
+            )
+        if mobile:
+            collection = collection.where(
+                filter=FieldFilter("mobile", "==", mobile)
+            )
+        if confirmed:
+            collection = collection.where(
+                filter=FieldFilter("payment_successful", "==", True)
+            )
+        collection = collection.get()
+        return collection[0].to_dict() if collection and len(collection) > 0 else None

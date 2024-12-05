@@ -72,25 +72,7 @@ class PaymentProcessor(BaseProcessor):
         confirmed_booking = self.db_service.get_confirmed_booking_by_token(
             token=message.payment.reference_id
         )
-        success = False
-        if message.status == "captured":
-            if message.type == "payment_link":
-                success = True
-            else:
-                wa_payment_status = self.api_service.get_payment_status(
-                    message.payment.reference_id)
-                # razorpay_payment_status = self.payment_service.get_payment(
-                #     message.payment.reference_id)
-                if (
-                        wa_payment_status.get("payments")
-                        and wa_payment_status.get("payments")[0]
-                        and wa_payment_status.get("payments")[0].get("status") == "CAPTURED"
-                ):
-                    success = True
-                else:
-                    Logger.error(
-                        "Payment Status is invalid {} {}".format(wa_payment_status,
-                                                                 existing_booking))
+        success = self.is_payment_successful(message)
         if success:
             if not existing_booking:
                 # TODO refund the amount
@@ -173,3 +155,67 @@ Slots: {", ".join([slot.get("title") for slot in sorted(
             razorpay_payment_id=razorpay_payment_id,
             razorpay_signature=razorpay_signature
         )
+
+    def process_tournament_payment(self, message: PaymentStatus):
+        Logger.info(f"Payment Status {message}")
+        success = self.is_payment_successful(message)
+        if success:
+            self.db_service.confirm_tournament_payment(
+                mobile=message.recipient_id,
+                token=message.payment.reference_id,
+                payment_response=json.dumps(message,
+                                            default=lambda
+                                                o: o.__dict__
+                                            )
+            )
+            name = self.db_service.get_user_details(
+                mobile=message.recipient_id) or ""
+            registraion = self.db_service.get_tournament_registration(
+                message.payment.reference_id
+            )
+            amount = registraion.get("amount")
+            team_name = registraion.get("team_name")
+            self.api_service.send_message_request(
+                self.mbs.get_order_confirmation_message(
+                    mobile=message.recipient_id,
+                    token=message.payment.reference_id,
+                    message=f"""Payment of *₹ {amount}/-* is successful.""")
+            )
+
+            self.notification_service.send_tournament_successful_registration_notification_with_image(
+                name=name,
+                mobile=message.recipient_id,
+                team_name=team_name,
+                image_url=self.db_service.get_tournament_details().get("image_url")
+            )
+            self.notification_service.send_tournament_registration_notification(
+                name,
+                message.recipient_id,
+                team_name,
+                amount
+            )
+        else:
+            Logger.error("Payment Status is invalid {} {}".format(
+                message.payment.reference_id,
+                message.status))
+        return "", 200
+
+    def is_payment_successful(self, message):
+        success = False
+        if message.status == "captured":
+            if message.type == "payment_link":
+                success = True
+            else:
+                wa_payment_status = self.api_service.get_payment_status(
+                    message.payment.reference_id)
+                if (
+                        wa_payment_status.get("payments")
+                        and wa_payment_status.get("payments")[0]
+                        and wa_payment_status.get("payments")[0].get(
+                    "status") == "CAPTURED"
+                ):
+                    success = True
+                else:
+                    Logger.error(
+                        "Payment Status is invalid {}".format(wa_payment_status))
+        return success

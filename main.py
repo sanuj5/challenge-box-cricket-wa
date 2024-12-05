@@ -173,7 +173,14 @@ class BoxBooking:
                 parsed_message = BaseMessageProcessor.parse_message(messages,
                                                                     message_type)
                 if message_type == MessageType.PAYMENT:
-                    return self.payment_processor.validate_status(parsed_message)
+                    if (
+                            parsed_message.payment.reference_id
+                            and
+                            parsed_message.payment.reference_id.startswith("TT-")
+                    ):
+                        return self.payment_processor.process_tournament_payment(parsed_message)
+                    else:
+                        return self.payment_processor.validate_status(parsed_message)
                 else:
                     Logger.debug("Message type not yet handled")
             else:
