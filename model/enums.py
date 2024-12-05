@@ -98,18 +98,20 @@ class Constants(enum.Enum):
   
 *** Rules and Regulations ***
 
-** 1. Match format: **
+** 1. Match rules: **
 - 8 overs, 7 players a side
+- Team need to report 15 minutes before allotted time.
+- Minimum 6 players from each team need to be present to start the match.
 
 ** 2. Over per bowler limit: **
 - Only 2 bowler can bowl max 2 Overs, rest get to bowl only 1 over.
 
 ** 3. Bowling rules: **
 - Only standing throw bowling allowed
-- Bowling speed will be measured by speed gun. Bowling limit is *75 KMPH* and this limit is subject to change before match based on calibration of gun.
+- Bowling speed will be measured by tracking system. Bowling limit is *75 KMPH* and this limit is subject to change before match based on calibration of tracking system.
 - Any ball tracked with speed more than *75 KMPH* will be considered *NO* ball. No warnings will be given.
-- Speed Gun will be operated by committe member of tournament and results will be available to committe member only. In any circustance, tracking result or access to gun won't be provided to any team.
-- If gun is not available for speend tracking due to any technical reason, umpire decision will be considered final for speed limit.
+- Ball Tracking System will be operated by committee member of tournament and results will be available to committee member only. In any circumstances, tracking result or access to system won't be provided to any team.
+- If Tracking System is not available for speed tracking due to any technical reason, umpire decision will be considered final for speed limit.
 
 ** 4. Batting rules : **
 - Fours : Fly through net will be considered as boundary 4 runs
@@ -132,6 +134,14 @@ class Constants(enum.Enum):
 ** 9. Tie: **
 - In case of Tie, Super Over will be played
 
-** 10. Final Decision **
-- All decisions of the committee of the tournament shall be final and binding on all the participating members. The committee reserves the right to amend the rules at any point of time before/during the tournament in the spirit of the tournament.    
+** 10. Tournament Schedule: **
+- Tournament schedule will be finalized before start of tournament. 
+- No change in data or time will be possible once the fixure is confirmed. (If you are outside of Anand district, please let us know immediately after registration so we can accommodate your lot for your better convenience)
+- Team once gets knocked out of the tournament cannot re-enter.
+- A player can play from only one team.
+
+** 11. Final Decision **
+- All decisions of the committee of the tournament shall be final and binding on all the participating members. The committee reserves the right to amend the rules at any point of time before/during the tournament in the spirit of the tournament.
+
+** 12. Call +91 9998762618 for any query **    
 """

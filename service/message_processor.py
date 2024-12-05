@@ -412,6 +412,7 @@ class TournamentNfmMessageProcessor(BaseMessageProcessor):
         amount = re.findall(r'\d+', response.get("amount"))[0]
 
         team_name = response.get("team_name")
+        location = response.get("location")
         total_amount = self.db_service.get_tournament_details().get("amount")
         Logger.info(f"Pending payment amount {total_amount}, actual amount {amount}")
         # Check amount received from user vs amount set for tournament
@@ -424,7 +425,7 @@ class TournamentNfmMessageProcessor(BaseMessageProcessor):
             )
         else:
             self.db_service.create_tournament_registration(
-                mobile, token, total_amount, team_name
+                mobile, token, total_amount, team_name, location
             )
             if mobile and mobile in self.secrets.get("CBC_TEST_NUMBERS"):
                 Logger.info(f"Setting amount to {amount} for test number {mobile}")

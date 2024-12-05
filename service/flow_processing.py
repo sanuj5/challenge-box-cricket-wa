@@ -75,6 +75,7 @@ class TournamentRegistrationProcessor(BaseFlowRequestProcessor):
 
     def process_flow_request(self, message, *args, **kwargs):
         team_name = message.data.get("team_name")
+        location = message.data.get("location")
         response = dict()
         if not team_name:
             response['error_messages'] = "Please provide team name"
@@ -83,6 +84,7 @@ class TournamentRegistrationProcessor(BaseFlowRequestProcessor):
         response['error_messages'] = ""
         response['show_error_message'] = False
         response['team_name'] = team_name
+        response['location'] = location
         response['amount'] = f"₹ {amount}/-"
         return FlowResponse(data=response, screen=Screen.TOURNAMENT_BOOKING_CONFIRMATION.value)
 

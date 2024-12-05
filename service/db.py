@@ -247,7 +247,7 @@ class DBService:
     def get_tournament_details(self) -> dict:
         return self.db.collection("tournaments").get()[0].to_dict()
 
-    def create_tournament_registration(self, mobile, token, amount, team_name) -> None:
+    def create_tournament_registration(self, mobile, token, amount, team_name, location) -> None:
         _id = self.generate_id(mobile)
         data = {
             "id": _id,
@@ -257,6 +257,7 @@ class DBService:
             "amount": float(amount),
             "cancelled": False,
             "team_name": team_name,
+            "location": location,
             "payment_successful": False
         }
         self.db.collection("tournament_registrations").document(_id).set(data)
