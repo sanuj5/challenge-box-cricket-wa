@@ -182,9 +182,10 @@ Slots: {", ".join([slot.get("title") for slot in sorted(
                     message=f"""Payment of *₹ {amount}/-* is successful.""")
             )
 
-            self.notification_service.send_custom_notification_with_image(
+            self.notification_service.send_tournament_successful_registration_notification_with_image(
+                name=name,
                 mobile=message.recipient_id,
-                message=f"""Congratulations *{name}*, You have successfully enrolled your team *{team_name}* for upcoming box cricket tournament. Practice hard and go for the win.""",
+                team_name=team_name,
                 image_url=self.db_service.get_tournament_details().get("image_url")
             )
             self.notification_service.send_tournament_registration_notification(

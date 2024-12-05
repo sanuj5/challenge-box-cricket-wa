@@ -124,6 +124,24 @@ class NotificationProcessor(BaseProcessor):
             )
 
     """
+    Send tournament registration successful notification
+    """
+
+    def send_tournament_successful_registration_notification_with_image(
+            self, name, mobile, team_name, image_url):
+        self.api_service.send_message_request(
+            tb.build(
+                mobile=mobile,
+                template_name="tournament_successful_registration",
+                parameters=[
+                    tb.get_text_parameter(name),
+                    tb.get_text_parameter(team_name),
+                ],
+                header=[tb.get_image_parameter(image_url)],
+            )
+        )
+
+    """
     Send custom notification_with_image
     """
 
